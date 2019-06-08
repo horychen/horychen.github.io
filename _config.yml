@@ -119,7 +119,7 @@ author:
     - label: "Google Scholar"
       icon: "fas fa-fw fa-link"
       url: "https://scholar.google.com/citations?hl=en&user=A13oCMQAAAAJ"
-    - label: "Twitter"
+    - label: "My ORCID"
       icon: "fab fa-fw fa-orcid-square"
       url: "http://orcid.org/0000-0002-8927-5646" # "https://twitter.com/horychen"
     # - label: "Facebook"
