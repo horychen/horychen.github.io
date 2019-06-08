@@ -1,6 +1,7 @@
 I built this blog by following:
 https://zenglix.github.io/personal_website/
 
+----
 
 Support Math (LaTeX)
 https://stackoverflow.com/questions/26275645/how-to-support-latex-in-github-pages
