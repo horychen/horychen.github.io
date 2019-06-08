@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "ACMSimC: AC Machine Simulation Tool in C Language"
+title:  "ACMSimC: AC Machine Simulation Framework in C"
 date:   2019-05-04
 categories: tutorial
 ---
