@@ -1,118 +1,97 @@
 ---
 layout: single
-title:  "我眼中的常识"
+title:  "我眼中的常识（未编辑完成）"
 date:   2018-12-31 02:01:13 -0600
 categories: private
 ---
 
-不知道出了什么BUG，在知乎上修改这篇文章的时候，原来的内容都会消失不见了，无法继续更新。
+<!-- # add some archive and more
+http://joshualande.com/jekyll-github-pages-poole
+# learn basics 
+https://jekyllrb.com/docs/step-by-step/02-liquid/
+https://programminghistorian.org/en/lessons/building-static-sites-with-jekyll-github-pages -->
+
+<!-- > 不知道出了什么BUG，在知乎上修改这篇文章的时候，原来的内容都会消失不见了，无法继续更新。 -->
+> 由于此次出国交流，我发现人与人之间的文化差异的表现之一就是各自以为理所当然的东西可能对方全然不知。我觉得很有意思，故决定将我眼中视为最直接不过的事实写下来。实际上，再加上时间这道鸿沟，从未来回过头来看，应该别有一番风味吧。本文预计将不断更新（自上而下更新，即新的写在前面）
+<!-- 欢迎大家也加入这个活动，写完在评论里告诉我你的你眼中的常识的文章的地址。不觉得很符合知乎这个网站的初衷吗？ -->
+>——写着写着好像文章主旨现在跑偏了，那就这样吧，所以现在的写作目的改为记录生活工作中的小技巧。
 
 
-Sublime Text 配置
+
+### Sublime Text 配置
 https://www.youtube.com/watch?v=xFciV6Ew5r4
 ctrl + shift + p，输入select theme，建议选择第一个Adaptive
 
 
-
-How to exit git log or git diff? [duplicate]
+### How to exit git log or git diff? [duplicate]
 https://stackoverflow.com/questions/9483757/how-to-exit-git-log-or-git-diff
 
 
-# add some archive and more
-http://joshualande.com/jekyll-github-pages-poole
-# learn basics 
-https://jekyllrb.com/docs/step-by-step/02-liquid/
-https://programminghistorian.org/en/lessons/building-static-sites-with-jekyll-github-pages
-
-在给Python添加TrantUI库的时候，pip install Enable需要用到swig.exe，实际上你安装了swig.exe也于事无补，去找enable的whl文件进行安装。其次，如果遇到找不到wx.combo的情况，去下载wxpython的3.0版本安装即可，注意，如果用了pip install wxpython的，必须pip uninstall wxpython——参考下面的链接：
+### TraitsUI Install
+在给Python添加TraitsUI库的时候，pip install Enable需要用到swig.exe，实际上你安装了swig.exe也于事无补，去找enable的whl文件进行安装。其次，如果遇到找不到wx.combo的情况，去下载wxpython的3.0版本安装即可，注意，如果用了pip install wxpython的，必须pip uninstall wxpython——参考下面的链接：
 GUI Error -  ImportError: No module named combo · Issue #263 · MrS0m30n3/youtube-dl-gui
 
-
+### Xserver
 download xserver, launch xserver in fullscreen mode, "sudo apt-get install xfce4", "export DISPLAY=:0" "startxfce4"﻿
 https://www.youtube.com/watch?v=fib-YYW60E8
 
-pade approximate
+### pade approximate
 aka rational function fitting
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-【介绍】由于此次出国交流，我发现人与人之间的文化差异的表现之一就是各自以为理所当然的东西可能对方全然不知。我觉得很有意思，故决定将我眼中视为最直接不过的事实写下来。实际上，再加上时间这道鸿沟，从未来回过头来看，应该别有一番风味吧。本文预计将不断更新（自上而下更新，即新的写在前面）。欢迎大家也加入这个活动，写完在评论里告诉我你的你眼中的常识的文章的地址。不觉得很符合知乎这个网站的初衷吗？
-
-——写着写着好像文章主旨更偏向于生活中的小技巧了，不管了。
-
-
-
+###
 有限元跑多了，磁盘空间不够用了？可以用下面的脚本来分析一下哪些文件夹占了最大的空间：
 
+图片
 
 Python脚本分析文件夹大小
 
-
+###
 如果觉得分析4分之一FEA模型以后，（此处有一大段文字被公交车上的烂信号吞没了，美洲电信1美元第一个月的套餐，一开始随便用用还行，但是一些街道、室内是完全没有信号的，其他人都能打电话，我是NOTHING，NOT ONE BAR AT ALL）
 
-
-
+###
 回归（regression）的意思是look back into the histroy，也就是根据历史数据（Ljung 系统辨识）去预测的意思。所以，回归和拟合还是两个意思。
 
+###
 眼镜厚度和度数的关系。如果度数达到600至800度，你就必须做好镜片肉眼可见的厚的心理准备。可以选择eyebrow类型的镜框进行遮挡。当然最有效的方法还是选择适合小镜片的镜框，当然，一定要不惜代价选折射率1点67以上的昂贵镜片。参考：
 
+###
 1.67 VS 1.74 High Index Lenses
 ​
 www.vseyewear.com
 图标
 
+### 近视是一种残疾。
 
-近视是一种残疾。
+### 网上买眼镜，可以参考自己眼镜脚上刻的数据来选择镜框的宽度，鼻翼处宽度，以及脚的长度。
 
-网上买眼镜，可以参考自己眼镜脚上刻的数据来选择镜框的宽度，鼻翼处宽度，以及脚的长度。
+### 在美国眼镜店如果只验光，他们不提供测量瞳距的服务，巨坑。
 
-在美国眼镜店如果只验光，他们不提供测量瞳距的服务，巨坑。
+### UW的SHIP包含一年一次免费验光的机会。
 
-SHIP包含一年一次免费验光的机会。
+### 提取图形中的数据？关键词：Engauge
 
-提取图形中的数据？关键词：Engauge
+图片
+
+From figure to csv using Engauge
 
 
-From figure to csv via Engauge
-
-
-FEMM支持对导线的邻近效应和集肤效应进行近似计算。而JMAG也支持这件事，可以将矩形线圈二次建模为导线们。
+### FEMM支持对导线的邻近效应和集肤效应进行近似计算。而JMAG也支持这件事，可以将矩形线圈二次建模为导线们。
 
 http://www.femm.info/wiki/ProximityLoss
 ​
 www.femm.info
 
 
-说到ElmerFEM和感应电机，必须提到这个人：Pavel Ponomarev (ABB)。ElmerFEM具有对动态电路建模的能力——分析Pole-Specific Rotor Winding，这是FEMM做不到的。
+### 说到ElmerFEM和感应电机，必须提到这个人：Pavel Ponomarev (ABB)。ElmerFEM具有对动态电路建模的能力——分析Pole-Specific Rotor Winding，这是FEMM做不到的。
 
-拿到了Pavel给的模型以后，下面视频里的事情是可以免费做到的：
-
-
+### 拿到了Pavel给的模型以后，下面视频里的事情是可以免费做到的：
 
 
 
 
-Elmer FEM IM Example Video
+
+
+### Elmer FEM IM Example Video
 
 
 
@@ -120,18 +99,18 @@ Elmer FEM IM Example Video
 当然，JMAG也可以做到：
 
 
-JMAG的动态电路建模
+### JMAG的动态电路建模
 
 
-鼠笼端环电阻可以按下式进行估算：
+### 鼠笼端环电阻可以按下式进行估算：
 
 R_ring = end ring circumference / (electric conductivity x end ring cross-sectional area x number of bars)
 
 
 
-研究电机的学生，在刚刚接触有限元的时候，其实很多常识是不了解的，比如说我。这里举几个例子。
+### 研究电机的学生，在刚刚接触有限元的时候，其实很多常识是不了解的，比如说我。这里举几个例子。
 
-分不清 Nodal Force 和 Lorenz Force 应该用在什么场合。前者用于铁磁材料，比如铁芯；后者用于非铁磁材料，比如导体。
+### 分不清 Nodal Force 和 Lorenz Force 应该用在什么场合。前者用于铁磁材料，比如铁芯；后者用于非铁磁材料，比如导体。
 分不清 Nodal Force 算出来的转矩和用 band 算出来的转矩有什么区别。
 什么是 Weighted Stress Maxwell Tensor（应用在面上） 和传统的 Maxwell Stress Tensor 线积分有什么区别。简单来说，前者更准确，参考http://FEMM.info。
 不知道什么是 sliding mesh，不懂为什么空气需要多分几层（比如，径向7层和周向720层）。这是为了避免转子每次旋转都重新剖分而引入的剖分技术。为了达到足够的精度，周向的剖分必须足够多，不然 sliding mesh 准确性下降。
@@ -144,13 +123,13 @@ R_ring = end ring circumference / (electric conductivity x end ring cross-sectio
 搞不清楚对称边界条件和反对称边界条件用在哪里。简答来说，一对极的模型用对称，一极的模型用反对称。参考：http://www.femm.info/wiki/periodicboundaries
 不知道JMAG支持Python——自动化能力超强——见下方视频。
 
-JMAGxPython自动化建模能力展示
+### JMAGxPython自动化建模能力展示
 
 
 
 
 
-JMAGxPython生成初代个体
+### JMAGxPython生成初代个体
 
 
 
@@ -159,83 +138,84 @@ JMAGxPython生成初代个体
 
 
 
-铝的典型（室温）电导率大概在30 MS/m（20~40之间的数都有看到），单位是 兆 西门子 每 米。西门子就是欧姆分之一。且一般温度系数为正，即随着导体温度上升，其电阻增大。
+### 铝的典型（室温）电导率大概在30 MS/m（20~40之间的数都有看到），单位是 兆 西门子 每 米。西门子就是欧姆分之一。且一般温度系数为正，即随着导体温度上升，其电阻增大。
 
 
 维基百科（中文）
 
 
-For induction motors, in the case of P number of poles, Qs number of stator slots, and Qr number of rotor slots, the partial model's periodic angle A [deg] is the least common multiple (360/P, 360/Qs, 360/Qr). For example, P=4, Qs=24, Qr=36, then A = 90 deg; P=4, Qs=24, Qr=32, then A=90 deg. Because 90 deg is the least multiple of 90, 15, 11.25, 10.
+### For induction motors, in the case of P number of poles, Qs number of stator slots, and Qr number of rotor slots, the partial model's periodic angle A [deg] is the least common multiple (360/P, 360/Qs, 360/Qr). For example, P=4, Qs=24, Qr=36, then A = 90 deg; P=4, Qs=24, Qr=32, then A=90 deg. Because 90 deg is the least multiple of 90, 15, 11.25, 10.
 
 
 
-电机控制方向的研究生，其实完全可以不用simulink，我利用c语言编写rk4和dopri54仿真的允许速度可以达到simulink的20倍左右。我一直想把这部分代码的skeleton传到github。但是，我还不会用github。。。
+### 电机控制方向的研究生，其实完全可以不用simulink，我利用c语言编写rk4和dopri54仿真的允许速度可以达到simulink的20倍左右。我一直想把这部分代码的skeleton传到github。但是，我还不会用github。。。
 
 
 
-If you are interested in going over the great firewall, I can recommend you with a great ss based service from a Taiwan company, which costs 20 Canada dollar per year. I have obligation to not share the name of this service in public. Email me, then.
+<!-- ### If you are interested in going over the great firewall, I can recommend you with a great ss based service from a Taiwan company, which costs 20 Canada dollar per year. I have obligation to not share the name of this service in public. Email me, then. -->
 
 
 
-在对无轴承电机进行有限元分析的时候，不能用Partial Model，只能用整个模型。因为气隙中的磁密是不对称的，这样才能分析悬浮力的大小。注意，悬浮力的产生是由于气隙磁密的不对称导致的。
+### 在对无轴承电机进行有限元分析的时候，不能用Partial Model，只能用整个模型。因为气隙中的磁密是不对称的，这样才能分析悬浮力的大小。注意，悬浮力的产生是由于气隙磁密的不对称导致的。
 
 
 
-为了捕捉感应电机的槽效应导致的转矩脉动和电流谐波，实施瞬态场FEA的时候，每个定子激励频率的电周期内一般需要跑至少400个~600个点。以50Hz为例，0.02s的周期，要分成400步。
+### 为了捕捉感应电机的槽效应导致的转矩脉动和电流谐波，实施瞬态场FEA的时候，每个定子激励频率的电周期内一般需要跑至少400个~600个点。以50Hz为例，0.02s的周期，要分成400步。
 
 
 
-为了理解有限元的求解器的工作原理，基础中的基础是理解迭代的效果。比如，如何利用计算机求解任意正数的平方根？参看：
+### 为了理解有限元的求解器的工作原理，基础中的基础是理解迭代的效果。比如，如何利用计算机求解任意正数的平方根？参看：
 
-Why does newton's method of successive approximation to compute square roots work?
+### Why does newton's method of successive approximation to compute square roots work?
 ​
 math.stackexchange.com
 图标
 
 
-在走国家公派之前，一定仔细思考归国服务期两年这件事（公证协议书的时候你会看到的），浙大的同学如果是想继续走学术这条路的，还是走校派吧，方便达成海外工作经历2-3年等成就。
+### 在走国家公派之前，一定仔细思考归国服务期两年这件事（公证协议书的时候你会看到的），浙大的同学如果是想继续走学术这条路的，还是走校派吧，方便达成海外工作经历2-3年等成就。
 
 
 
-IronPython本来是有Numpy库的，后来失传了。。。
+### IronPython本来是有Numpy库的，后来失传了。。。
 
 
 
-你是不是想学Cython来加快你的python代码的运行速度？说实话，Cython有点麻烦的，要不先考虑一下支持.NET的IronPython？
+### 你是不是想学Cython来加快你的python代码的运行速度？说实话，Cython有点麻烦的，要不先考虑一下支持.NET的IronPython？
 
 
 
-JMAG Designer的python代码不是人写的，而是用SWIG从C++代码自动生成的。
+### JMAG Designer的python代码不是人写的，而是用SWIG从C++代码自动生成的。
 
 
 
-IronPython调用Elmersolver.exe的速度比python调用Elmersolver.exe的速度快多了——基本上就是C语言和Python的速度差别。
+### IronPython调用Elmersolver.exe的速度比python调用Elmersolver.exe的速度快多了——基本上就是C语言和Python的速度差别。
 
 
 
-JMAG的console不支持运行Python的Ppoen子进程，改为调用command调用python即可（如os.system("python some_script.py")）。比如，你想要在JMAG中调用5个PyFEMM同时求解静态场的5个不同位置，结果会发现你打开了5个JMAG，哈哈哈哈，很神奇。
+### JMAG的console不支持运行Python的Ppoen子进程，改为调用command调用python即可（如os.system("python some_script.py")）。比如，你想要在JMAG中调用5个PyFEMM同时求解静态场的5个不同位置，结果会发现你打开了5个JMAG，哈哈哈哈，很神奇。
 
 
 
-如果发现Sublime Text的ctrl+k, ctrl+2关不上了（Code Folding），可以用Atom打开按ctrl+k, ctrl+2，你就知道为什么了，原来是因为你采用了双重注释！# # some code，大概是这样的感觉：
+### 如果发现Sublime Text的ctrl+k, ctrl+2关不上了（Code Folding），可以用Atom打开按ctrl+k, ctrl+2，你就知道为什么了，原来是因为你采用了双重注释！# # some code，大概是这样的感觉：
 
 class some_class:
     def some_function:
         some codes
         # # some codes
-最棒的交通安全全面学习教科书来自Bilibili上的up主：交通事故video。
+
+### 最棒的交通安全全面学习教科书来自Bilibili上的up主：交通事故video。
 
 
 
-瞬态场FEA，其实是伪的？为什么这么说？你试试在定子和转子上加不同频率的电流就知道了，会报错的。
+### 瞬态场FEA，其实是伪的？为什么这么说？你试试在定子和转子上加不同频率的电流就知道了，会报错的。
 
 
 
-Windows X 登录界面出现的风景图（Windows Spotlight）是可以从系统文件夹中找到的，本文所用的封面就是这么拿到的（够高清吗？），但是只能保存最近的几张图片，遇到喜欢的话赶快去Google一下怎么保存吧！其他，可以去Unsplash上看看。
+### Windows X 登录界面出现的风景图（Windows Spotlight）是可以从系统文件夹中找到的，本文所用的封面就是这么拿到的（够高清吗？），但是只能保存最近的几张图片，遇到喜欢的话赶快去Google一下怎么保存吧！其他，可以去Unsplash上看看。
 
 
 
-逛逛这个网站可以学习一些日语语法
+### 逛逛这个网站可以学习一些日语语法
 
 ～わりには【JLPT N3 Grammar】
 ​
@@ -243,7 +223,7 @@ j-nihongo.com
 图标
 
 
-背日语单词，用Anki，然后下载Core 10K+Pics+Aud 这个包，只适合初学者。
+### 背日语单词，用Anki，然后下载Core 10K+Pics+Aud 这个包，只适合初学者。
 
 
 
@@ -251,115 +231,109 @@ j-nihongo.com
 
 
 
-感应电机的转速自适应观测器的设计曾经被认为是不可行的（Harnefors2007），但是通过坐标变换，其实是可以做到的哦（Marino08、Chen&Huang2018，没错后面这篇是我写的）。
+### 感应电机的转速自适应观测器的设计曾经被认为是不可行的（Harnefors2007），但是通过坐标变换，其实是可以做到的哦（Marino08、Chen&Huang2018，没错后面这篇是我写的）。
 
 
 
-我觉得360安全卫士真的挺好用的（但是界面确实不是很与时俱进啦），我不知道国外的windows用户都是怎么活下去的（花钱呗）。你听说过瑞星等其他国产杀毒软件吗？你知道为什么国内的杀毒软件你只知道360吗？因为它率先免费了，导致其他的都干不下去了。
+### 我觉得360安全卫士真的挺好用的（但是界面确实不是很与时俱进啦），我不知道国外的windows用户都是怎么活下去的（花钱呗）。你听说过瑞星等其他国产杀毒软件吗？你知道为什么国内的杀毒软件你只知道360吗？因为它率先免费了，导致其他的都干不下去了。
 
 
 
-你用过这些适合团队协作的21世纪产品吗：Slack、Trello、Google Drive、Overleaf。
+### 你用过这些适合团队协作的21世纪产品吗：Slack、Trello、Google Drive、Overleaf。
 
 
 
-你知道吗：To obtain a purely sinusoidal response when a system is driven with a sinusoidal input, the system must, by definition, be linear. 也就是说，在涡流场FEA中，考虑铁磁材料的非线性不是查表这么自然的事情，其实是很麻烦的一回事。见下图：
+### 你知道吗：To obtain a purely sinusoidal response when a system is driven with a sinusoidal input, the system must, by definition, be linear. 也就是说，在涡流场FEA中，考虑铁磁材料的非线性不是查表这么自然的事情，其实是很麻烦的一回事。见下图：
 
 
-我用Slack的Post功能编辑的一个关于nonlinear time harmonic solver的总结
+### 我用Slack的Post功能编辑的一个关于nonlinear time harmonic solver的总结
 
 
-在涡流场的有限元求解中，磁导率的虚部的含义根据具体的应用而有所区别，可能表示磁滞效应导致的落后角度，也可能表示各向异性的铁磁材料（如Grain Oriented Steel，径向方向上的磁导率和轴向的不同）。
+### 在涡流场的有限元求解中，磁导率的虚部的含义根据具体的应用而有所区别，可能表示磁滞效应导致的落后角度，也可能表示各向异性的铁磁材料（如Grain Oriented Steel，径向方向上的磁导率和轴向的不同）。
 
 
 
-FEMM的作者 David Meeker 提供了一个(Anti) Periodic Air Gap Boundary Condition Torque Benchmark。经过我的测试，以通过建模转动转子的结果为基准，该气隙边界条件的引入也能准确计算转矩脉动，但是，计算径向力的效果就差强人意了。
+### FEMM的作者 David Meeker 提供了一个(Anti) Periodic Air Gap Boundary Condition Torque Benchmark。经过我的测试，以通过建模转动转子的结果为基准，该气隙边界条件的引入也能准确计算转矩脉动，但是，计算径向力的效果就差强人意了。
 
 
 
-没有用过Office365以前，觉得这个东西真鸡肋，能有啥用。来了UW-Madison以后，Office365免费用，用过之后，真香。
+### 没有用过Office365以前，觉得这个东西真鸡肋，能有啥用。来了UW-Madison以后，Office365免费用，用过之后，真香。
 
 
 
-FEMM的接口非常丰富：Lua脚本，Mathematica，PyFEMM，Octave/Matlab FEMM，xFEMM。注意最后两个东西不是一回事，实际上最后一个和前面的都大不同。简单来说，xFEMM完全不依赖于GUI。
+### FEMM的接口非常丰富：Lua脚本，Mathematica，PyFEMM，Octave/Matlab FEMM，xFEMM。注意最后两个东西不是一回事，实际上最后一个和前面的都大不同。简单来说，xFEMM完全不依赖于GUI。
 
 
 
-ElmerFEM的并行运算功能在Windows上无效，至少我试过了是不行的，包括使用Open MPI或者Microsoft MPI，都不行，只会让求解的时间变得更长。这种事情在Linux上干却很轻松的样子。
+### ElmerFEM的并行运算功能在Windows上无效，至少我试过了是不行的，包括使用Open MPI或者Microsoft MPI，都不行，只会让求解的时间变得更长。这种事情在Linux上干却很轻松的样子。
 
 
 
-免费的FEA软件有：FEMM（Windows），ElmerFEM（适合高手）。
+### 免费的FEA软件有：FEMM（Windows），ElmerFEM（适合高手）。
 
 
 
-初次编译Latex文档，可能会觉得有点绝望。推荐下载Latexmk（添加到系统Path环境变量），然后安装StrawberryPerl（Perl语言），然后打开CMD，输入latexmk -pdf file_name。-pdf代表pdflatex，如果你想要.ps文件，就换成-pvs。区别：pdflatex支持png格式的图片，而后者必须转换成eps格式。有效转换eps格式的软件有Photoshop和Python的Image库。但是Python另存为eps时，如果图片太宽，会截断，目前还不知道如何解决。
+### 初次编译Latex文档，可能会觉得有点绝望。推荐下载Latexmk（添加到系统Path环境变量），然后安装StrawberryPerl（Perl语言），然后打开CMD，输入latexmk -pdf file_name。-pdf代表pdflatex，如果你想要.ps文件，就换成-pvs。区别：pdflatex支持png格式的图片，而后者必须转换成eps格式。有效转换eps格式的软件有Photoshop和Python的Image库。但是Python另存为eps时，如果图片太宽，会截断，目前还不知道如何解决。
 
 
 
-我常用的 LaTeX 编辑器是WinEdt，但是我最新发现 Overleaf 这个网站也很不错。LaTeX（TeX）起初只支持西文。中文请用XeLaTeX。然后，各大高校应该都有自己的学位论文模板的。比如，我的本科毕设用的是浙大数学系弄的一个模板，很棒——神奇的是，他不需要用到XeLaTeX，就能完美完美完美支持中文。要知道，我尝试过用LaTeX一些中文的库，真难用，就算成功了，出现忽粗忽细的中文字，那是家常便饭。
+### 我常用的 LaTeX 编辑器是WinEdt，但是我最新发现 Overleaf 这个网站也很不错。LaTeX（TeX）起初只支持西文。中文请用XeLaTeX。然后，各大高校应该都有自己的学位论文模板的。比如，我的本科毕设用的是浙大数学系弄的一个模板，很棒——神奇的是，他不需要用到XeLaTeX，就能完美完美完美支持中文。要知道，我尝试过用LaTeX一些中文的库，真难用，就算成功了，出现忽粗忽细的中文字，那是家常便饭。
 
 
 
-我认为，适合非码农的代码编辑软件有：Atom（免费），Sublime Text（广为人知，收费，但是可以不付钱使用），以及Visual Studio Code（可以调试python！UW的学生免费使用）。
+### 我认为，适合非码农的代码编辑软件有：Atom（免费），Sublime Text（广为人知，收费，但是可以不付钱使用），以及Visual Studio Code（可以调试python！UW的学生免费使用）。
 
 
 
-海外党，看不了B站的动漫，除了翻回去以外，请考虑一下动漫花园。此外，少用迅雷，而且用迅雷下种子是可能受到法规限制的。请用 uTorrent 等其他软件。
+### 海外党，看不了B站的动漫，除了翻回去以外，请考虑一下动漫花园。此外，少用迅雷，而且用迅雷下种子是可能受到法规限制的。请用 uTorrent 等其他软件。
 
-2018年，看日剧最好用的网站是N站，不接受反驳。不是Niconico啦。
+### 2018年，看日剧最好用的网站是N站，不接受反驳。不是Niconico啦。
 
 
 
-具备以下条件的：90后、惯用电脑、对学术还算喜爱的博士研究生所打过的中文字可能超过130万，这还不包括我输入过的英文字。（我的本科毕业设计就有8万字。）
+### 具备以下条件的：90后、惯用电脑、对学术还算喜爱的博士研究生所打过的中文字可能超过130万，这还不包括我输入过的英文字。（我的本科毕业设计就有8万字。）
 
 
-我的搜狗输入法的统计（自我有账号以来）
+### 我的搜狗输入法的统计（自我有账号以来）
 
 
 
 
-为访问学者开设的英语课程（ESL），由语言学的本科生上。而且，这些本科生本身家庭具有国际背景的概率很高。就我的经历而言，Melissa的祖上来自挪威和德国，而Udon（不是乌冬面啦）的家人则来自泰国和越南（战乱难民）。
+### 为访问学者开设的英语课程（ESL），由语言学的本科生上。而且，这些本科生本身家庭具有国际背景的概率很高。就我的经历而言，Melissa的祖上来自挪威和德国，而Udon（不是乌冬面啦）的家人则来自泰国和越南（战乱难民）。
 
 
 
-我唯一（？）花钱买过的英语课程有二。一个是新东方（雅思长期班，11天，3500元），爱开始的地方，我遇到了我老婆。第二个是阿飞口语（B站搜），让我意识到了嘴巴、口腔等组成部分的相对位置能够明显地影响发音的情况（口音）。
+### 我唯一（？）花钱买过的英语课程有二。一个是新东方（雅思长期班，11天，3500元），爱开始的地方，我遇到了我老婆。第二个是阿飞口语（B站搜），让我意识到了嘴巴、口腔等组成部分的相对位置能够明显地影响发音的情况（口音）。
 
 
 
-在美国下公交车后，可以用一句三克油表达对司机的感谢。注意th的发音，舌头伸向牙齿中间再发。
+### 在美国下公交车后，可以用一句三克油表达对司机的感谢。注意th的发音，舌头伸向牙齿中间再发。
 
 
 
-在美的中国人真特么多，我的导师几乎是我唯一联系口语的对象。
 
 
+### 出国以后，容易发现自己爱国，更喜欢国内的想法不断涌现，更喜欢听中文歌了。但也有听说过那种自高中起在海外读书的人，结果不承认自己是中国人的事迹。
 
-出国以后，容易发现自己爱国，更喜欢国内的想法不断涌现，更喜欢听中文歌了。但也有听说过那种自高中起在海外读书的人，结果不承认自己是中国人的事迹。
 
 
+### 番号去这里查：JAV Library，网址好像会变。
 
-番号去这里查：JAV Library，网址好像会变。
 
 
+### 最好的日语自学材料是 Kim Tae 写的 Introduction to Japanese grammar，不接受反驳。关键词：Free, Online, Intuitive。而且，他写的博客都非常具有阅读的价值。注意，最好不要看中文版的（标注的看得不是很清楚，而且中文和日文混在一起，很不清晰），而英文原汁原味，很有趣！第二好用的日语教材是一本叫——的书，大概是专门给自考的人写的书，鲜有人知，但是我忘了书名了，如果你感兴趣可以私信我，我回国以后看到书名了会回复你。感谢小明，这本书当初是小明给我的。
 
-最好的日语自学材料是 Kim Tae 写的 Introduction to Japanese grammar，不接受反驳。关键词：Free, Online, Intuitive。而且，他写的博客都非常具有阅读的价值。注意，最好不要看中文版的（标注的看得不是很清楚，而且中文和日文混在一起，很不清晰），而英文原汁原味，很有趣！第二好用的日语教材是一本叫——的书，大概是专门给自考的人写的书，鲜有人知，但是我忘了书名了，如果你感兴趣可以私信我，我回国以后看到书名了会回复你。感谢小明，这本书当初是小明给我的。
 
 
+### 最好用的种子网站是Kitty Torrent。
 
-最好用的种子网站是——。
+### 最好的电子书下载网站是 Library Genesis。
 
+### 免权限的科技文章下载网站是 Sci-hub。
 
 
-最好的电子书下载网站是——。
 
-
-
-免权限的科技文章下载网站是——。
-
-
-
-出国需要买保险，国家留学基金委推荐的保险是泰安（IMG）保险，但是，不少学校是不承认的，即必须买学校自己的保险。如何知道自己申请的学校是否能自己买（便宜的）校外保险呢？在这个网址查：
+### 出国需要买保险，国家留学基金委推荐的保险是泰安（IMG）保险，但是，不少学校是不承认的，即必须买学校自己的保险。如何知道自己申请的学校是否能自己买（便宜的）校外保险呢？在这个网址查：
 
 TaiAn Financial - International Medical Insurance
 ​
@@ -369,8 +343,8 @@ www.taianfinancial.com
 
 
 
-威斯康星大学麦迪逊分校（UW-Madison）的访问学者一年公交车的交通卡花费为46刀（2018年），而单次公交车费用为2刀。
+### 威斯康星大学麦迪逊分校（UW-Madison）的访问学者一年公交车的交通卡花费为46刀（2018年），而单次公交车费用为2刀。
 
 
 
-（文中，用破折号代替的地方，可能是我忘了，也可能是我选择不分享，但是为了以后方便我的儿子来问我要，我还是写上，自私了不好意思。）
+<!-- （文中，用破折号代替的地方，可能是我忘了，也可能是我选择不分享，但是为了以后方便我的儿子来问我要，我还是写上，自私了不好意思。） -->

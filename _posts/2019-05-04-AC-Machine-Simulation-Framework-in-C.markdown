@@ -9,7 +9,7 @@ categories: tutorial
 
 > 免责声明：做好将来你的拥有100台dSpace的合作者问你要Simuliink仿真结果你却没有的心理准备，然后我们开始吧。
 
-下文须配合视频食用：[哔哩哔哩传送门](https://www.bilibili.com/video/av51496015/)
+下文须配合视频食用：[哔哩哔哩传送门（右键新标签页打开）](https://www.bilibili.com/video/av51496015/)。
 
 **Please watch the video (in Chinese) in the link above.**  
 
