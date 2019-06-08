@@ -120,8 +120,8 @@ author:
       icon: "fas fa-fw fa-link"
       url: "https://scholar.google.com/citations?hl=en&user=A13oCMQAAAAJ"
     - label: "Twitter"
-      icon: "fab fa-fw fa-twitter-square"
-      # url: "https://twitter.com/horychen"
+      icon: "fab fa-fw fa-orcid-square"
+      url: "http://orcid.org/0000-0002-8927-5646" # "https://twitter.com/horychen"
     # - label: "Facebook"
     #   icon: "fab fa-fw fa-facebook-square"
       # url: "https://facebook.com/"
@@ -133,6 +133,9 @@ author:
       # url: "https://instagram.com/horychen8408"
     # - label: "Linkedin"
     #   icon: "fab fa-fw fa-linkedin-square"
+    # - label: "My ORCID"
+    #   icon: "fas fa-fw fa-link"
+    #   url: "http://orcid.org/0000-0002-8927-5646"
 
 # Site Footer
 footer:
