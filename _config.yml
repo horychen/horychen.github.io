@@ -106,7 +106,7 @@ analytics:
 
 # Site Author
 author:
-  name             : "Jiahao Chen |"
+  name             : "Jiahao Chen | 陈嘉豪"
   avatar           : "/assets/images/bio-photo.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
   bio              : "Visiting scholar at UW-Madison.\nPhD candidate at Zhejiang University.\nMajor in electrical engineering."
   location         : "USA"
@@ -115,7 +115,7 @@ author:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
       url: mailto:jiahao.chen@wisc.edu
-    - label: "Website"
+    - label: "Google Scholar"
       icon: "fas fa-fw fa-link"
       url: "https://scholar.google.com/citations?hl=en&user=A13oCMQAAAAJ"
     - label: "Twitter"
