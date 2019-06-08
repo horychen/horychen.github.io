@@ -9,6 +9,10 @@ categories: tutorial
 
 > 免责声明：做好将来你的拥有100台dSpace的合作者问你要Simuliink仿真结果你却没有的心理准备，然后我们开始吧。
 
+下文须配合视频食用：[哔哩哔哩传送门](https://www.bilibili.com/video/av51496015/)
+
+**Please watch the video (in Chinese) in the link above.**  
+
 ## 1. Prerequisite
 1. Compiler
     - MinGW (gcc)
@@ -107,6 +111,7 @@ Simulation procedure is as follows:
 * C语言电机仿真架构 / framework in C language (done)
 * 永磁电机的仿真
 * 电机设计的电路参数拟合
+* 变步长数值积分（DoPri54）
 * 电机参数自整定
 * 电流环系数设计
 * 转速环系数设计
@@ -123,4 +128,4 @@ Simulation procedure is as follows:
 * 无轴承感应电机建模
 * 基于扩展反电势模型的无传感器控制
 * 基于 Active Flux 模型的无传感器控制
-* 三维模型的绘制技
+* 三维模型的绘制技巧
