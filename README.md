@@ -44,9 +44,10 @@ Then send a test at the Google site.
 ----
 
 Add disqus (comments)
-Choose 
 
-folder \_layouts:
+Choose the code for Jekyll. Tutorial on Youtube will tell you to choose universal. Don't.
+
+Inside folder \_layouts:
 
 Add 
 ```html
@@ -84,3 +85,4 @@ s.setAttribute('data-timestamp', +new Date());
 ```
 to posts.html.
 
+Modify the \_config.yml file as mine. Search for keyword "disqus" and "comment".
