@@ -1,4 +1,9 @@
-
+---
+layout: single
+title:  "The Right Way To Add BH Curve"
+date:   2019-01-07
+categories: tech
+---
 # Extrapolation
 
 

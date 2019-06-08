@@ -25,6 +25,6 @@ This blog serves as a clean list for the video tutorial I make.
   {% endfor %}
 </ul>
 
-## Notebooks:
-- [**Python: assignment, function argument passing, views, and copies**](https://github.com/horychen/Notebooks/python_variable.ipynb)
+<!-- ## Notebooks:
+- [**Python: assignment, function argument passing, views, and copies**](https://github.com/horychen/Notebooks/python_variable.ipynb) -->
 

@@ -1,8 +1,8 @@
 ---
-layout: post
+layout: single
 title:  "我眼中的常识"
 date:   2018-12-31 02:01:13 -0600
-categories: jekyll update
+categories: private
 ---
 
 不知道出了什么BUG，在知乎上修改这篇文章的时候，原来的内容都会消失不见了，无法继续更新。
