@@ -295,8 +295,28 @@ defaults:
       type: posts
     values:
       layout: single
-      author_profile: true
+      author_profile: false
       read_time: true
       comments: true
       share: true
       related: true
+
+
+
+# If you want to get wide text range, add "classes: wide" to your post.
+  # https://mmistakes.github.io/minimal-mistakes/markup-text-readability-wide-page/
+
+# Bad idea:
+  # https://stackoverflow.com/questions/20338560/how-can-i-get-a-longer-automatic-excerpt-in-jekyll
+  # excerpt_separator: "<!-- more -->"
+
+# See also https://jekyllrb.com/docs/posts/
+  # ---
+  # excerpt_separator: <!--more-->
+  # ---
+
+  # Excerpt with multiple paragraphs
+
+  # Here's another paragraph in the excerpt.
+  # <!--more-->
+  # Out-of-excerpt

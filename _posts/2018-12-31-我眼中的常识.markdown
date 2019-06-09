@@ -17,6 +17,8 @@ https://programminghistorian.org/en/lessons/building-static-sites-with-jekyll-gi
 >——写着写着好像文章主旨现在跑偏了，那就这样吧，所以现在的写作目的改为记录生活工作中的小技巧。
 
 
+### When you do want to insert a <br /> break tag using Markdown, you end a line with two or more spaces, then type return.   
+From: https://daringfireball.net/projects/markdown/syntax#p
 
 ### Sublime Text 配置
 https://www.youtube.com/watch?v=xFciV6Ew5r4

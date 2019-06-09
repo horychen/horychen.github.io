@@ -14,6 +14,21 @@ layout: default
   {% endunless %}
 {% endif %}
 
+<!-- https://github.com/vfeskov/vanilla-back-to-top -->
+<script src="https://unpkg.com/vanilla-back-to-top@7.2.0/dist/vanilla-back-to-top.min.js"></script>
+<!-- <script>addBackToTop({
+  diameter: 56,
+  backgroundColor: 'rgb(255, 82, 82)',
+  textColor: '#fff' 
+})</script> --> 
+<script>addBackToTop({
+  backgroundColor: '#DA70D6',
+  innerHTML: '<svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>',
+  textColor: '#ffda0c'
+})</script>
+
+
+
 <div id="main" role="main">
   {% include sidebar.html %}
 
@@ -93,3 +108,6 @@ layout: default
     </div>
   {% endif %}
 </div>
+
+
+
