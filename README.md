@@ -86,3 +86,8 @@ s.setAttribute('data-timestamp', +new Date());
 to posts.html.
 
 Modify the \_config.yml file as mine. Search for keyword "disqus" and "comment".
+
+
+----
+Go back to top button.
+https://github.com/vfeskov/vanilla-back-to-top
