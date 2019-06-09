@@ -4,8 +4,8 @@ classes: wide
 title:  "ECCE 2019 Full Paper Bearingless Induction"
 date:   2019-06-08
 categories: tech
-# published: false
-visible: 0
+published: false
+# visible: 0
 ---
 
 <!-- # ECCE 2019 Full Paper Bearingless Induction -->
@@ -190,7 +190,7 @@ visible: 0
                     - Copper loss is $P_{\mathrm{Cu}}=\rho \mathrm{Vol}_{\mathrm{Cu}} J^{2}$
                     - where, 
                         - $\rho$ is the copper resistivity.
-                        - $\mathrm{Vol}_{\mathrm{Cu}}=S_{\mathrm{Cu}}\left(L_{t}+L_{\mathrm{ew}}\right) Q$
+                        - {% raw %} $\mathrm{Vol}_{\mathrm{Cu}}=S_{\mathrm{Cu}}\left(L_{t}+L_{\mathrm{ew}}\right) Q$ {% endraw %}
                             - $S_{\mathrm{Cu}} = k_\mathrm{fill}S_\mathrm{slot}$ is the are of copper. 
                             - $L_t$ is stack length.
                             - $L_{\mathrm{ew}}=\frac{\pi}{2} \frac{p_{s}^{\prime}+w_{t}}{2}+p_{s}^{\prime} k_{\mathrm{ov}}\left(y_{q}-1\right)$ is end winding length.

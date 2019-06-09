@@ -320,3 +320,6 @@ defaults:
   # Here's another paragraph in the excerpt.
   # <!--more-->
   # Out-of-excerpt
+
+# 定时发布！ 如果 future: false
+  # https://mycyberuniverse.com/jekyll-post-not-showing-up.html
