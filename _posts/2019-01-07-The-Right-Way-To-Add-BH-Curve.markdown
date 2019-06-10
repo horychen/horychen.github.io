@@ -3,6 +3,7 @@ layout: single
 title:  "The Right Way To Add BH Curve (Not-Finished)"
 date:   2019-01-07
 categories: tech
+published: false
 ---
 # Extrapolation
 

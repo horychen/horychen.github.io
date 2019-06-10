@@ -190,8 +190,8 @@ published: false
                     - Copper loss is $P_{\mathrm{Cu}}=\rho \mathrm{Vol}_{\mathrm{Cu}} J^{2}$
                     - where, 
                         - $\rho$ is the copper resistivity.
-                        - {% raw %} $\mathrm{Vol}_{\mathrm{Cu}}=S_{\mathrm{Cu}}\left(L_{t}+L_{\mathrm{ew}}\right) Q$ {% endraw %}
-                            - $S_{\mathrm{Cu}} = k_\mathrm{fill}S_\mathrm{slot}$ is the are of copper. 
+                        - {% raw %} $\mathrm{Vol}_ {\mathrm{Cu}} = S_{\mathrm{Cu}}\left(L_{t}+L_{\mathrm{ew}}\right) Q$ {% endraw %}
+                            - $S_{\mathrm{Cu}} = k_\mathrm{fill}S_\mathrm{slot}$ is the area of copper. 
                             - $L_t$ is stack length.
                             - $L_{\mathrm{ew}}=\frac{\pi}{2} \frac{p_{s}^{\prime}+w_{t}}{2}+p_{s}^{\prime} k_{\mathrm{ov}}\left(y_{q}-1\right)$ is end winding length.
                             - $w_t$ is the width of tooth.
@@ -255,7 +255,9 @@ published: false
     - $E_m<20\%$
     - $E_a<10~\text{deg}$
 - Geometry constraints:
-    - The slot area of a new IM design is the same with the IM design template (i.e., the candidate design).
+    - The slot area of a new-born IM design (i.e., the trial chromosome/individual in the population) is the same with the IM design template (i.e., the candidate design).
+        - Why? Answer: Slot area along with the free variable of tooth width derives the slot height of the IM design.
+        - How to get slot area value? Answer: The slot area is obtained from the motor current and the specified current density for the candidate design.
     - Rotor slot open width cannot be larger than rotor slot width. In other words, the rotor slot has to be at least half closed.
 
 ### Allowable variable ranges
@@ -266,22 +268,36 @@ published: false
     - ![](https://i.imgur.com/SH9k1b9.png)
     
 ### Details on Optimization process
+- Comparison between NSGA-II (Non-dominated sorting Genetic Algorithm II) and MOEA/D (Multi-Objective Evolutionary Algorithm based on Decomposition)
+    - Please note that **MOGA** is essentially one kind of NSGA.
+    - What is NSGA-II: http://oklahomaanalytics.com/data-science-techniques/nsga-ii-explained/
+    - What is MOEA/D: Qingfu Zhang and Hui Li - MOEA/D: A Multiobjective Evolutionary Algorithm Based on Decomposition (See also: https://sites.google.com/view/moead/)
+    - Which one is better? 
+        - It is reported in [37] that MOEA/D outperforms NSGA-II. 
+        - MOEA/D works well with large population size while convergence rate of NSGA-II is slowed with large population size [38].
+        - [37] Qingfu Zhang and Hui Li - MOEA/D: A Multiobjective Evolutionary Algorithm Based on Decomposition
+        - [38] R. Tanabe and H. Ishibuchi, “An analysis of control parameters of moea/d under two different optimization scenarios,” Applied Soft Computing, vol. 70, pp. 22–40, 2018.
+    - How about **DE**?
+        - MOEA/D has different variants. One is called MOEA/D-DE variant, which is what we are using. To me, MOEA/D-DE is the multi-objective implementation of DE.
 - MOEA/D-DE
-    - This literally means Multi-Objective Evolutionary Algorithm based on Decomposition,
-    - Decomposition means the multi-objective problem is decomposed into a series of single objective problem in a neighborhood.
-        - Weighted sum
+    - MOEA: Multi-Objective Evolutionary Algorithm.
+    - DE: The mutation oeprator is differential evolution (DE) alike.
+    - /D: Decomposition means the multi-objective problem is decomposed into a series of single objective problem in a neighborhood.
+    - There are 3 decomposition methods:
+        - 1\. Weighted sum
             - MOEA/D with the weighted sum function does not have an ability to handle MOPs with non-convex PFs.
                 - from Ryoji Tanabe, Hisao Ishibuchi - An Analysis of Control Parameters of MOEA/D Under Two Different Optimization Scenarios
-        - **Tchebycheff decomposition (We use this one!)**
-        - Boundary Interception method with Penalty constraint (PBI)
+        - 2\. **Tchebycheff decomposition (We use this one!)**
+        - 3\. Boundary Interception method with Penalty constraint (PBI)
     - The weights of the decomposition are automatically generated. There are different methods to generate weights:
-        - **Grid (We use this one!)**
-            - The weight generation method grid offers a uniform distribution of the decomposed weights, **but is limiting the population size as it only allows for certaing sizes** according to the number of objectives.
+        - **Grid method (We use this one!)**
+            - The weight generation method grid offers a uniform distribution of the decomposed weights, **but is limiting the population size as it only allows for certain sizes** according to the number of objectives.
         - Low discrepancy method
         - Random method
-    - The mutation oeprator is differential evolution (DE) alike.
 - Settings
-    - Pop size is **78**. It cannot be 80 or 77 because the weight generation technique we use is **grid**.
+    - Pop size is **78**. 
+        - It cannot be, e.g., 80 or 72 because the weight generation technique we use is **grid**.
+        - For exmaple, set pop size to 7, and then the software pygmo will report: _Population size of 72 is detected, but not supported by the 'grid' weight generation method selected. A size of 66 or 78 is possible._
 - Restart an interrupted run
     - Sort all the evaluated designs into different ranks of Pareto front.
     - For those designs that are inside the same rank of Pareto front, compute the crowding distance and sort them by crowding distance from up to 

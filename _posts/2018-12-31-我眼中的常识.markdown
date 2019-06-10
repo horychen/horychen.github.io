@@ -3,6 +3,7 @@ layout: single
 title:  "我眼中的常识（未编辑完成）"
 date:   2018-12-31 02:01:13 -0600
 categories: private
+published: false
 ---
 
 <!-- # add some archive and more
@@ -319,7 +320,7 @@ j-nihongo.com
 
 
 
-### 番号去这里查：JAV Library，网址好像会变。
+<!-- ### 番号去这里查：JAV Library，网址好像会变。 -->
 
 
 
@@ -327,11 +328,11 @@ j-nihongo.com
 
 
 
-### 最好用的种子网站是Kitty Torrent。
+### 最好用的种子网站是K i t t y T o r r e n t。
 
-### 最好的电子书下载网站是 Library Genesis。
+### 最好的电子书下载网站是 L i b r a r y G e n e s i s。
 
-### 免权限的科技文章下载网站是 Sci-hub。
+### 免权限的科技文章下载网站是 S c i - h u b。
 
 
 
