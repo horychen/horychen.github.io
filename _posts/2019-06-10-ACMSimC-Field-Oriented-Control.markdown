@@ -1,16 +1,16 @@
 ---
 layout: single
-title:  "ACMSimC: AC Machine Simulation Framework in C"
-date:   2019-05-04
+title:  "ACMSimC: Field Oriented Control"
+date:   2019-06-10
 categories: tutorial
+published: false
 ---
 
 <!-- # ACMSimC: AC Machine Simulation Tool in C Language -->
 
-> 免责声明：做好将来你的拥有100台dSpace的合作者问你要Simuliink仿真结果你却没有的心理准备，然后我们开始吧。
-
-下文须配合视频食用：[哔哩哔哩传送门（右键新标签页打开）](https://www.bilibili.com/video/av51496015/)。  
-Please watch the video (in Chinese, however) in the link above.
+> 本篇是本系列第二集，第一集请戳：[EP01](https://horychen.github.io/tutorial/AC-Machine-Simulation-Framework-in-C/)。
+> 下文须配合视频食用：[哔哩哔哩传送门（右键新标签页打开）](?)。
+> Please watch the video (in Chinese, however) in the link above.
 
 ## Table of Content
 * TOC
@@ -18,59 +18,7 @@ Please watch the video (in Chinese, however) in the link above.
 {:toc}
 
 ## 1. Prerequisite
-1. Compiler
-    - MinGW (gcc)
-    - Anaconda3 (python)
-    ```
-    D:\Users\horyc\Anaconda3\pkgs\openssl-1.1.1b-he774522_1\Library\bin
-    D:\Users\horyc\Anaconda3\Lib
-    D:\Users\horyc\Anaconda3\Library\bin
-    D:\Users\horyc\Anaconda3\Scripts
-    D:\Users\horyc\Anaconda3
-    ```
-2. Editor
-    - Sublime Text 3: the **shell command** is as follows:
-        ```json
-        {
-        "working_dir": "$file_path",
-        "cmd": "gcc -Wall $file_name -o $file_base_name",
-        "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
-        "selector": "source.c",
-        "variants": 
-            [
-                {   
-        "name": "Run",
-        "shell_cmd": "gcc $file controller.c observer.c -o $file_base_name && start cmd /c \"${file_path}/${file_base_name}\""
-                }
-            ]
-        }
-        ```
-3. Utility
-    * AutoHotkey (to close all figures at once)
-    ```
-    #NoEnv
-    #Warn
-    SendMode Input  
-    SetWorkingDir %A_ScriptDir%  
-    SetTitleMatchMode 2
-    #q:: closePythonPlot() 
-    closePythonPlot()
-    {
-        isExist = 1
-        while isExist
-        {
-            PostMessage, 0x112, 0xF060,,, Figure
-            IfWinNotExist, Figure
-            {
-                isExist = 0
-            }
-        }
-    }
-    ```
-    * MS Visual Studio Code (to properly read this readme.md file)
-    * Hyper (good-looking terminal)
-    * Windows Subsystem for Linux, a.k.a. WSL (for being cool?)
-    * Git in WSL or in DOS Cmd (for version control)
+1. Watched EP01 of the series, and installed all the softwares.
 
 ## 2. Machine Models
 ### 2.1. Model of Induction Machine
