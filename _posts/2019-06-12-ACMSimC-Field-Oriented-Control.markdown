@@ -1,9 +1,9 @@
 ---
 layout: single
 title:  "ACMSimC: Field Oriented Control"
-date:   2019-06-10
+date:   2019-06-12
 categories: tutorial
-published: true
+published: false
 ---
 
 > 本篇是本系列第二集，第一集请戳：[EP01](https://horychen.github.io/tutorial/AC-Machine-Simulation-Framework-in-C/)。

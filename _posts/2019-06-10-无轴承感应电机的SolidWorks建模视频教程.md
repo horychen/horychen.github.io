@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "ACMSimC: Field Oriented Control"
+title:  "无轴承感应电机SolidWorks建模视频教程"
 date:   2019-06-10
 categories: tutorial
 published: true
