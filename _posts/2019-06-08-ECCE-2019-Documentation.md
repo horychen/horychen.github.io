@@ -31,6 +31,7 @@ published: false
             - [23] D. Gerada, A. Mebarki, N. L. Brown, K. J. Bradley, and C. Gerada, "Design aspects of high-speed high-power-density laminated-rotor induction machines", IEEE Transactions on Industrial Electronics, vol. 58, no. 9, pp. 4039–4047, 2011.
 
 ### Structural assumptions
+
 - On the one hand, **We have to make sure the maximum stess due to centrifugal force on the rotor will not exceed the yield stress of the rotor material or it will fail.**
     - Stress depends on the rotor geometry and rotor speed. Rotor outer radius $r_{or}$ is determined by the tip speed.
     - Rotational speed is 30,000 rpm.
@@ -81,7 +82,8 @@ published: false
             $$V_r = \frac{T_\text{rated}}{2\sigma_{\tan}}$$
             where the tangential/shear stress $\sigma_{\tan}$ is assumed to be 12 kPa.
         - Finally, the stack length is
-            $$L_{stk} = \frac{V_r} {\pi r_{or}^2} = 92.6~\text{mm}$$~~(68 mm for 175 m/s)~~
+            $$L_{stk} = \frac{V_r} {\pi r_{or}^2} = 92.6~\text{mm}$$ 
+            ~~(68 mm for 175 m/s)~~
     - Validation
         - The maximum stack length that reaches first critical speed (banana bending mode) is caculated by:
             $$ l_{\max }^2 = {n^2}\frac{{{\pi ^2}}}{{k\Omega }}\sqrt {\frac{{EI}}{{\rho S}}}= 495.8~\text{mm} $$ ~~(536 mm for 175 m/s)~~
