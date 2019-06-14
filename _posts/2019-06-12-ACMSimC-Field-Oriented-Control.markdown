@@ -36,7 +36,7 @@ See [2017-Chen.Huang-Online](https://github.com/horychen/Publications/blob/maste
 
 ![](https://i.imgur.com/2MELGRx.png)
 
-## 3. Block Diagram for the Codes
+## 4. Codes
 
 Simulation procedure is as follows:
 
@@ -154,7 +154,7 @@ void control(double speed_cmd, double speed_cmd_dot){
 
 ```
 
-## 4. Future Topics
+## 5. Future Topics
 
 * C语言电机仿真架构 / framework in C language **(done in EP01)**
 * 系统控制参数的可视化与优化框架 / Visualization and optimization of system control parameters
