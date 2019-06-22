@@ -45,13 +45,21 @@ $$\Rightarrow\left\{ \begin{array}{l}
 
 The stator voltage equations on stationary $\alpha$-$\beta$ frame.
 
+{% raw %}
+
 $\left[\begin{array}{c}{v_{\alpha}} \\ {v_{\beta}}\end{array}\right]=\left[\begin{array}{cc}{R+p L_{\alpha}} & {p L_{\alpha \beta}} \\ {p L_{\alpha \beta}} & {R+p L_{\beta}}\end{array}\right]\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right]+\omega_{r e} K_{E}\left[\begin{array}{c}{-\sin \theta_{r e}} \\ {\cos \theta_{r e}}\end{array}\right]$
 
 $\Rightarrow\begin{aligned}\left[\begin{array}{c}{v_{\alpha}} \\ {v_{\beta}}\end{array}\right]=R\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right] &+p L_{0}\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right]+\omega_{r e} K_{E}\left[\begin{array}{c}{\sin \theta_{r e}} \\ {\cos \theta_{r e}}\end{array}\right] \\ &+p L_{1}\left[\begin{array}{cc}{\cos 2 \theta_{r e}} & {\sin 2 \theta_{r e}} \\ {\sin 2 \theta_{r e}} & {-\cos 2 \theta_{r e}}\end{array}\right]\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right] \end{aligned}$
 
+{% endraw %}
+
 where position dependent inductances are defined as follows
 
+{% raw %}
+
 $\begin{aligned} L_{\alpha} &=L_{0}+L_{1} \cos 2 \theta_{r e} \\ L_{\beta} &=L_{0}-L_{1} \cos 2 \theta_{r e} \\ L_{\alpha \beta} &=L_{1} \sin 2 \theta_{r e} \\ L_{0} &=\frac{\left(L_{d}+L_{q}\right)}{2} \\ L_{1} &=\frac{\left(L_{d}-L_{q}\right)}{2} \end{aligned}$
+
+{% endraw %}
 
 
 
