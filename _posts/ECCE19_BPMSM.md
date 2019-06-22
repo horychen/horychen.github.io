@@ -16,8 +16,10 @@
 
 4. Do transient FEA in JMAG
 
-    1. Do structural FEA in JMAG (optional)
-    2. 
+    - Do structural FEA in JMAG (I think this is optional)
+        - **Have you found any design that will explode?**
+        - Even you have some designs that will fail. We are not optimize the mechanical strength.
+        - Why not leave this as a post-process analysis.
 
 5. 
 

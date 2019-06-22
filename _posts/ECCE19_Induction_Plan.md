@@ -1,4 +1,4 @@
-# ECCE 
+# ECCE
 
 2019 paper
 
@@ -21,9 +21,9 @@
 
 
 
+High torque density design:
 
-
-
+![1560742243941](assets/1560742243941.png)
 
 
 
