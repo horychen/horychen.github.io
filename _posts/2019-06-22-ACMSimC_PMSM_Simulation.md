@@ -7,7 +7,7 @@ published: true
 ---
 
 > 本篇是本系列第三集，第一集请戳：[EP01](https://horychen.github.io/tutorial/AC-Machine-Simulation-Framework-in-C/)。
-> 下文暂时没有相应视频。
+> 本文暂时没有相应视频。
 
 ## ACMSimC: PMSM Control Simulation
 
@@ -47,9 +47,9 @@ The stator voltage equations on stationary $\alpha$-$\beta$ frame.
 
 {% raw %}
 
-$\left[\begin{array}{c}{v_{\alpha}} \\ {v_{\beta}}\end{array}\right]=\left[\begin{array}{cc}{R+p L_{\alpha}} & {p L_{\alpha \beta}} \\ {p L_{\alpha \beta}} & {R+p L_{\beta}}\end{array}\right]\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right]+\omega_{r e} K_{E}\left[\begin{array}{c}{-\sin \theta_{r e}} \\ {\cos \theta_{r e}}\end{array}\right]$
+$$\left[\begin{array}{c}{v_{\alpha}} \\ {v_{\beta}}\end{array}\right]=\left[\begin{array}{cc}{R+p L_{\alpha}} & {p L_{\alpha \beta}} \\ {p L_{\alpha \beta}} & {R+p L_{\beta}}\end{array}\right]\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right]+\omega_{r e} K_{E}\left[\begin{array}{c}{-\sin \theta_{r e}} \\ {\cos \theta_{r e}}\end{array}\right]$$
 
-$\Rightarrow\begin{aligned}\left[\begin{array}{c}{v_{\alpha}} \\ {v_{\beta}}\end{array}\right]=R\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right] &+p L_{0}\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right]+\omega_{r e} K_{E}\left[\begin{array}{c}{\sin \theta_{r e}} \\ {\cos \theta_{r e}}\end{array}\right] \\ &+p L_{1}\left[\begin{array}{cc}{\cos 2 \theta_{r e}} & {\sin 2 \theta_{r e}} \\ {\sin 2 \theta_{r e}} & {-\cos 2 \theta_{r e}}\end{array}\right]\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right] \end{aligned}$
+$$\Rightarrow\begin{aligned}\left[\begin{array}{c}{v_{\alpha}} \\ {v_{\beta}}\end{array}\right]=R\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right] &+p L_{0}\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right]+\omega_{r e} K_{E}\left[\begin{array}{c}{\sin \theta_{r e}} \\ {\cos \theta_{r e}}\end{array}\right] \\ &+p L_{1}\left[\begin{array}{cc}{\cos 2 \theta_{r e}} & {\sin 2 \theta_{r e}} \\ {\sin 2 \theta_{r e}} & {-\cos 2 \theta_{r e}}\end{array}\right]\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right] \end{aligned}$$
 
 {% endraw %}
 
@@ -57,7 +57,7 @@ where position dependent inductances are defined as follows
 
 {% raw %}
 
-$\begin{aligned} L_{\alpha} &=L_{0}+L_{1} \cos 2 \theta_{r e} \\ L_{\beta} &=L_{0}-L_{1} \cos 2 \theta_{r e} \\ L_{\alpha \beta} &=L_{1} \sin 2 \theta_{r e} \\ L_{0} &=\frac{\left(L_{d}+L_{q}\right)}{2} \\ L_{1} &=\frac{\left(L_{d}-L_{q}\right)}{2} \end{aligned}$
+$$\begin{aligned} L_{\alpha} &=L_{0}+L_{1} \cos 2 \theta_{r e} \\ L_{\beta} &=L_{0}-L_{1} \cos 2 \theta_{r e} \\ L_{\alpha \beta} &=L_{1} \sin 2 \theta_{r e} \\ L_{0} &=\frac{\left(L_{d}+L_{q}\right)}{2} \\ L_{1} &=\frac{\left(L_{d}-L_{q}\right)}{2} \end{aligned}$$
 
 {% endraw %}
 
@@ -112,7 +112,7 @@ This equation tells us even if KE is zero (i.e., no permanent magnet), there is 
 - 无轴承感应电机建模
 - 基于扩展反电势模型的无传感器控制
 - 基于 Active Flux 模型的无传感器控制
-- 三维模型的绘制技巧 / SolidWorks Modeling **(done in ![哔哩哔哩传送门之使用SolidWorks绘制无轴承感应电机三维模型（搞笑版）](https://www.bilibili.com/video/av55227896))**
+- 三维模型的绘制技巧 / SolidWorks Modeling **(done in ![哔哩哔哩传送门之使用SolidWorks绘制无轴承感应电机三维模型](https://www.bilibili.com/video/av55227896))**
 - 番外：使用免费有限元软件实现感应电机的设计与优化
 - 番外：使用旋转静态场有限元实现电机转矩脉动的超准确分析（嗯，堪比瞬态场）
 - 番外：Notched Rotor（介于表贴和内嵌之间的一种转子）永磁电机的设计
