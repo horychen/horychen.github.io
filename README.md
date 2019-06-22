@@ -87,6 +87,8 @@ to posts.html.
 
 Modify the \_config.yml file as mine. Search for keyword "disqus" and "comment".
 
+----
+Another comment system that supports Github users' comment: https://github.com/gitalk/gitalk
 
 ----
 Go back to top button.
