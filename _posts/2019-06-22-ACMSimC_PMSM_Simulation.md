@@ -11,6 +11,10 @@ published: true
 
 ## ACMSimC: PMSM Control Simulation
 
+### Table of Content
+
+* TOC
+{:toc}
 ### Background
 
 永磁电机作为一种因材料突破而得以普及的同步电机，不得不承认其如今在位置伺服领域的地位。此外，在轴向长度受到限制的场合，使用永磁电机的效果那是拔群的，比如电瓶车的轮毂电机等。~~但是，我最爱的还是优雅的感应电机。~~
@@ -45,29 +49,23 @@ $$\Rightarrow\left\{ \begin{array}{l}
 
 The stator voltage equations on stationary $\alpha$-$\beta$ frame.
 
-{% raw %}
-
 $$\left[\begin{array}{c}{v_{\alpha}} \\ {v_{\beta}}\end{array}\right]=\left[\begin{array}{cc}{R+p L_{\alpha}} & {p L_{\alpha \beta}} \\ {p L_{\alpha \beta}} & {R+p L_{\beta}}\end{array}\right]\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right]+\omega_{r e} K_{E}\left[\begin{array}{c}{-\sin \theta_{r e}} \\ {\cos \theta_{r e}}\end{array}\right]$$
 
 $$\Rightarrow\begin{aligned}\left[\begin{array}{c}{v_{\alpha}} \\ {v_{\beta}}\end{array}\right]=R\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right] &+p L_{0}\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right]+\omega_{r e} K_{E}\left[\begin{array}{c}{\sin \theta_{r e}} \\ {\cos \theta_{r e}}\end{array}\right] \\ &+p L_{1}\left[\begin{array}{cc}{\cos 2 \theta_{r e}} & {\sin 2 \theta_{r e}} \\ {\sin 2 \theta_{r e}} & {-\cos 2 \theta_{r e}}\end{array}\right]\left[\begin{array}{c}{i_{\alpha}} \\ {i_{\beta}}\end{array}\right] \end{aligned}$$
 
-{% endraw %}
+
 
 where position dependent inductances are defined as follows
 
-{% raw %}
-
 $$\begin{aligned} L_{\alpha} &=L_{0}+L_{1} \cos 2 \theta_{r e} \\ L_{\beta} &=L_{0}-L_{1} \cos 2 \theta_{r e} \\ L_{\alpha \beta} &=L_{1} \sin 2 \theta_{r e} \\ L_{0} &=\frac{\left(L_{d}+L_{q}\right)}{2} \\ L_{1} &=\frac{\left(L_{d}-L_{q}\right)}{2} \end{aligned}$$
 
-{% endraw %}
 
 
-
-**We will use the d-q model for simulation. I mean that it does not matter what reference frame your model is in. Just simulate it correctly and that’s all. **Oh, I almost forget. One more thing: the torque equation:
+**We will use the d-q model for simulation. I mean that it does not matter what reference frame your model is in. Just simulate it correctly and that’s all. ** Oh, I almost forget. One more thing: the torque equation:
 
 $$T_{em}=n_{pp}\left(\psi_{d} i_{q}-\psi_{q} i_{d}\right)=n_{pp}\left[K_E i_{q}+\left(L_{d}-L_{q}\right) i_{d} i_{q}\right]$$
 
-This equation tells us even if KE is zero (i.e., no permanent magnet), there is still torque, which give rise to a new type of synchronous machine called SynRM (Synchronous Reluctance Machine).
+This equation tells us even if $K_E$ is zero (i.e., no permanent magnet), there is still torque, which give rise to a new type of synchronous machine called SynRM (Synchronous Reluctance Machine).
 
 
 
@@ -77,7 +75,7 @@ This equation tells us even if KE is zero (i.e., no permanent magnet), there is 
 >
 > 其实，我一开始用 Python 做控制仿真的时候，就是直接对带阻尼绕组的同步电机进行建模的（见下图）。也就是说，一个模型包罗万象。但是缺点也很明显，这样做会让代码看起来复杂很多，多出很多不必要的状态变量。所以我不推崇大一统仿真，但是大一统理论依旧是很有意思的东西。
 
-![永磁感应大一统模型（摘自我的本科论文）](assets/1561239593187.png)
+![永磁感应大一统模型（摘自我的本科论文）](/assets/images/1561239593187.png)
 
 ## Future Topics (Updated)
 

@@ -12,9 +12,9 @@ published: true
 **今天的内容相当于为下一集铺垫一下，跑一遍这一版的代码，你会开始意识到，有很多系数或参数需要调节，不仅仅是电流环的PI、转速环的PI，还有观测器中的系数。当然，不断手动修改，然后重新编译、观察波形，肯定是可以的——实际上我一直以来都是这么做的。但是，我已经开始厌倦了这样子的生活了……**
 
 ## Table of Content
-
 * TOC
 {:toc}
+
 ## 1. Prerequisite
 
 Watched EP01 of the series, and installed all the softwares.
