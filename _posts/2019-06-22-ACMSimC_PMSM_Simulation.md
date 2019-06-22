@@ -1,3 +1,14 @@
+---
+layout: single
+title:  "ACMSimC: PMSM Control Simulation"
+date:   2019-06-22
+categories: tutorial
+published: true
+---
+
+> 本篇是本系列第三集，第一集请戳：[EP01](https://horychen.github.io/tutorial/AC-Machine-Simulation-Framework-in-C/)。
+> 下文暂时没有相应视频。
+
 ## ACMSimC: PMSM Control Simulation
 
 ### Background
@@ -5,6 +16,8 @@
 永磁电机作为一种因材料突破而得以普及的同步电机，不得不承认其如今在位置伺服领域的地位。此外，在轴向长度受到限制的场合，使用永磁电机的效果那是拔群的，比如电瓶车的轮毂电机等。~~但是，我最爱的还是优雅的感应电机。~~
 
 感应电机的”高级玩法“一般都是在转子上做文章，主要是实心转子的各种变种，这里@哈默尼克。永磁电机的”高级“玩法（表贴、内嵌、V型这些肯定就不算了哈）则可以从定子和转子两方面入手。比如可以把永磁体放到定子上形成开关磁链电机，可以疯狂减少定子槽数形成分数槽电机，可以把永磁体每隔一个极才放一个形成 Consequent Pole 电机，也可以把永磁体放置成辐条状且为 Consequent Pole 形式则称为游标电机，还可以烧钱玩 Halbach Array 减少轭部的钢的用量等。
+
+
 
 ### Prerequisite
 
@@ -58,7 +71,7 @@ This equation tells us even if KE is zero (i.e., no permanent magnet), there is 
 
 ![永磁感应大一统模型（摘自我的本科论文）](assets/1561239593187.png)
 
-## Future Topics
+## Future Topics (Updated)
 
 - C语言电机仿真架构 / framework in C language **(done in [EP01](https://horychen.github.io/tutorial/AC-Machine-Simulation-Framework-in-C/))**
 - 矢量控制 / Vector control **(done in [EP02](https://horychen.github.io/tutorial/ACMSimC-Field-Oriented-Control/))**
