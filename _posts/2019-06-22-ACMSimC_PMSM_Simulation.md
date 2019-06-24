@@ -7,7 +7,7 @@ published: true
 ---
 
 > 本篇是本系列第三集，第一集请戳：[EP01](https://horychen.github.io/tutorial/AC-Machine-Simulation-Framework-in-C/)。
-> 本文暂时没有相应视频。
+> 本文对应视频：[哔哩哔哩传送门](https://www.bilibili.com/video/av56647276/)。
 
 ## ACMSimC: PMSM Control Simulation
 

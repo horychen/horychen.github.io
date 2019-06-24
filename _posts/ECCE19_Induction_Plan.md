@@ -78,3 +78,17 @@ IM is difficult to model. Computational efficient method is desired. It is still
     - A sweeping of short pitch
 - **Stator skew. Will this generate axial disturbance force?**
 
+
+
+
+
+Pole pair number comparison paper
+
+Zongwei Liu, Akira Chiba 2018 Optimum Pole Number Combination for High-Speed High-Power BPM Bearingless Motor (C:\Users\horyc\Desktop\BLIM Review IEEE Trans 2018\ISMB)
+
+
+
+2 pole motor can use one end to be regular end ring.
+
+
+
