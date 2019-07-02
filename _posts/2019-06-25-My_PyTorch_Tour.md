@@ -8,7 +8,7 @@ published: true
 
 
 
->  This article contains records of my quick knowing PyTorch.
+>  This article contains records of me quickly knowing PyTorch.
 
 
 
@@ -54,19 +54,29 @@ published: true
 
     1. 去这：https://pytorch.org/tutorials/beginner/nn_tutorial.html#what-is-torch-nn-really
         1. 下载一个jupyter notebook，用jupyterlab打开![1561444414331](/assets/images/1561444414331.png)
-    2. 也可以去官方教程：
+        2. Autograd mechanism and no_grad context manager: 
+            1. https://pytorch.org/docs/stable/notes/autograd.html
+            2. https://pytorch.org/docs/stable/autograd.html#tensor-autograd-functions
+    2. 也可以去官方教程：（这个没有第一个好，太短了，太抽象了）
         1. https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html#sphx-glr-beginner-blitz-neural-networks-tutorial-py
     3. 这里有个比较简单的神经网络，不需要PyTorch。
         1. https://peterroelants.github.io/posts/neural-network-implementation-part01/
 
 5. 其他
 
-    1. Generative Adversarial Networks (GANs) in 50 lines of code (PyTorch)
-        1. https://medium.com/@devnag/generative-adversarial-networks-gans-in-50-lines-of-code-pytorch-e81b79659e3f
+    1. [Generative Adversarial Networks (GANs) in 50 lines of code (PyTorch)](https://medium.com/@devnag/generative-adversarial-networks-gans-in-50-lines-of-code-pytorch-e81b79659e3f)
+    2. Different loss function:
+        1. [Picking Loss Functions - A comparison between MSE, Cross Entropy, and Hinge Loss](https://rohanvarma.me/Loss-Functions/)
 
 
 
 
+
+
+
+Cheat sheet:
+
+![pytorch-cheat](assets/images/pytorch-cheat-1561532010762.jpg)
 
 
 

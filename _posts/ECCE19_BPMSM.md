@@ -7,10 +7,11 @@
     - VanGogh_BPMSM1
         - 
 
-2. Decide the materials
+2. Decide the materials and their prices
 
     1. PM: N40H
     2. Steel: M-19
+    3. Prices:![1561844711164](assets/images/1561844711164.png)
 
 3. Configure the windings and excitation.
 
@@ -45,15 +46,6 @@
 
 
 
-
-
-
-
-
-
-
-
-Acknowledgement: The first author is grateful for open source project eMach. The framework and codes are very helpful when implementing the python scripts used for this paper.
 
 
 

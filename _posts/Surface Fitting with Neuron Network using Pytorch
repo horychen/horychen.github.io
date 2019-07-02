@@ -1,0 +1,19 @@
+---
+layout: single
+title:  "Tutorial: Surface Fitting with Neuron Network using Pytorch"
+date:   2019-06-28
+categories: tutorial
+published: true
+---
+
+
+
+前几天我在知乎问了一个[问题](https://www.zhihu.com/question/331340639)：如何用神经网络拟合一个曲面。我问这个问题的初衷还是夹带着一丝想要顺便学习一下Pytorch的执念的，所以才有了这篇文章。
+
+
+
+
+
+曲面拟合和神经网络
+
+http://staff.ustc.edu.cn/~lgliu/Resources/DL/What_is_DeepLearning.html
