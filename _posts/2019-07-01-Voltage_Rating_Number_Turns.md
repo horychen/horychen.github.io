@@ -46,6 +46,8 @@ Please repeat after me. The correct name for $z_Q$ is the **number of conductors
 $$
 z_Q=\frac{2amN}{Q_s}=\frac{2\times 2 \times 3 \times 8}{24}=4
 $$
+
+
 The key take-away here lies in the name of $z_Q$. ~~If the name of $z_Q$ is the number of turns per slot, which is not, it will be independent on the number of parallel branch $a$.~~ With the correct definition, $z_Q$ is dependent on $a$, because $N$ has nothing to do with $a$ and $N$ is determined by the voltage we have. ~~It is easy to get confused if you consider that you can reduce the number of turns in series $N$ by increasing the number of parallel branch $a$.~~
 
 ### Okay, How to Configure Winding in Reality?
@@ -58,7 +60,7 @@ However, owing to the reduction in current rating, we now have a quite high numb
 
 To this end, we have to compute the are of stator slot first. [Here](https://www.mathopenref.com/coordpolygonarea.html) is a website showing you how to calculate the ares of a polygon. 
 
-![1562043675236](assets/images/1562043675236.png)
+![1562043675236](/assets/images/1562043675236.png)
 
 In case of 4 points, we have
 $$
@@ -74,7 +76,7 @@ The four points of our stator slot are respectively
 
 This gives an area of 152.2 mm^2.
 
-![1562043757081](assets/images/1562043757081.png)
+![1562043757081](/assets/images/1562043757081.png)
 
 According to [this site](https://www.engineeringtoolbox.com/awg-wire-gauge-d_731.html), a gauge 20 and 21 wire has a diameter of 0.81 mm and 0.72 mm, respectively. The corresponding area is 0.52 mm^2 and 0.42 mm^2. However, the actual space a wire takes in theory depends on the what **circular packing** strategy you are using. We should now make some conservative estimation/predictions, 
 
