@@ -22,9 +22,9 @@ Please note that anything we say about rating is line-to-line value and we are c
 
 ### Making Compromises
 
-Considering all these, we are going to derive a design with 400 Vrms and 20 Arms from the theoretical design. Some compromises are mde as follows.
+Considering all these, we are going to derive a design with 400 Vrms and 20 Arms from the theoretical design. Some compromises are made as follows.
 
-- The maximal operaating speed is reduced to 15,000 rpm. So the rated voltage is reduced to only half, i.e., 240 Vrms.
+- The maximal operating speed is reduced to 15,000 rpm. So the rated voltage is reduced to only half, i.e., 240 Vrms.
 - The actual stack length for prototype is only 50 mm rather than 281.2 mm. Recall that the magnetic flux depends on the area of air gap surface, and back emf is proportional to magnetic flux, so the actual voltage rating is reduced to $240\times \frac{50}{281.2}=42.7$ V.
 - The current rating and voltage rating are interchangeable. In order to reduce the current rating by a factor of 9 (from 180 Arms to 20 Arms) , the voltage rating is multiplied by 9, equal to $42.7\times 9=384$ Vrms, which sounds good to me.
 
@@ -33,19 +33,21 @@ Considering all these, we are going to derive a design with 400 Vrms and 20 Arms
 It is almost not possible that the motor design from the analytical design procedure meets the 480 Vrms requirement with zero mismatch.
 
 Okay, here is the part that is getting messy. Stay awake!
-$$
-N=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \hat{\Phi}_{m}}=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \alpha_{i} \hat{B}_{\delta} \tau_{p} l^{\prime}} \Rightarrow \hat{B}_{\delta}=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \alpha_{i} N \tau_{p} l^{\prime}}
-$$
-The number of turns in series $N$ is determined by the back emf $E_m$, stator angular speed $\omega$, winding factor $k_{w1}$ and flux $\hat\Phi_m$ (a hat stands for amplitude). _A quick detour: this equation is also used to re-determine the air gap flux density_ $\hat B_\delta$. We assmue the voltage loss at rated operation point is 0.05 such that $E_m=0.95 U=0.95\times \frac{480}{\sqrt{3}} V$ and $\hat B_\delta=0.8$ T, and this gives us an $N$ of 6.08588, which rounds up to 6. However, this is never this simple. You have to make sure $N$ is multiple of $pq=4$, where $p=1$ is pole pair number and $q=Q_s/(2pm)$ the number of slot per phase per pole with $m=3$ and $Q_s=24$ the stator slot number. Let’s assume we got plenty voltage, so $N=8$. We use this new value of $N$ to calculate the new value of $\hat B_\delta=0.59$ T, such that the rated back EMF $E_m$ is still $0.95\times \frac{480}{\sqrt{3}}$ V. This means by increasing the voltage rating (and the thickness of stator insulation), we can build a less saturated motor. You can consider this as a trade-off between electrical loading and magnetic loading as well, I guess.
+
+$$N=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \hat{\Phi}_{m}}=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \alpha_{i} \hat{B}_{\delta} \tau_{p} l^{\prime}} \Rightarrow \hat{B}_{\delta}=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \alpha_{i} N \tau_{p} l^{\prime}}$$
+
+where, the number of turns in series $N$ is determined by the back emf $E_m$, stator angular speed $\omega$, winding factor $k_{w1}$ and flux $\hat\Phi_m$ (a hat stands for amplitude). _A quick detour: this equation is also used to re-determine the air gap flux density_ $\hat B_\delta$. We assmue the voltage loss at rated operation point is 0.05 such that $E_m=0.95 U=0.95\times \frac{480}{\sqrt{3}} V$ and $\hat B_\delta=0.8$ T, and this gives us an $N$ of 6.08588, which rounds up to 6. 
+
+However, this is never this simple. You have to make sure $N$ is multiple of $pq=4$, where $p=1$ is pole pair number and $q=Q_s/(2pm)$ the number of slot per phase per pole with $m=3$ and $Q_s=24$ the stator slot number. Let’s assume we got plenty voltage, so $N=8$. We use this new value of $N$ to calculate the new value of $\hat B_\delta=0.59$ T, such that the rated back EMF $E_m$ is still $0.95\times \frac{480}{\sqrt{3}}$ V. This means by increasing the voltage rating (and the thickness of stator insulation), we can build a less saturated motor. You can consider this as a trade-off between electrical loading and magnetic loading as well, I guess.
 
 ### In FEA Modeling
 
 What we have analyzed from the last section “let’s face the fact” has nothing to do with the FEA modeling. During (current source) FEA modeling, we need only ~~**the number of turns per slot**~~ $z_Q$ and current rating (180 Arms). So, what is this $z_Q$?
 
 Please repeat after me. The correct name for $z_Q$ is the **number of conductors per slot**. The correct name for $z_Q$ is the **number of conductors per slot**. The correct name for $z_Q$ is the **number of conductors per slot**. It is not ~~**the number of turns per slot**~~!!! And it is computed as follows (with an $a$ the number of parallel branch!)
-$$
-z_Q=\frac{2amN}{Q_s}=\frac{2\times 2 \times 3 \times 8}{24}=4
-$$
+
+$$z_Q=\frac{2amN}{Q_s}=\frac{2\times 2 \times 3 \times 8}{24}=4$$
+
 
 
 The key take-away here lies in the name of $z_Q$. ~~If the name of $z_Q$ is the number of turns per slot, which is not, it will be independent on the number of parallel branch $a$.~~ With the correct definition, $z_Q$ is dependent on $a$, because $N$ has nothing to do with $a$ and $N$ is determined by the voltage we have. ~~It is easy to get confused if you consider that you can reduce the number of turns in series $N$ by increasing the number of parallel branch $a$.~~
@@ -58,14 +60,14 @@ In practice, we have to decide a wire gauge, e.g. gauge 20 or 21 (i.e., AWG 20 o
 
 However, owing to the reduction in current rating, we now have a quite high number of $N$ which gives a $z_Q=36$. This means that if we decide to use two strands in hand,  there will be $72$ strands in one slot (please do not be confused about the concepts between turns and strands). If that’s too many for gauge 20 wire, then we should use gauge 21 or higher gauge to fit in the slot.
 
-To this end, we have to compute the are of stator slot first. [Here](https://www.mathopenref.com/coordpolygonarea.html) is a website showing you how to calculate the ares of a polygon. 
+To this end, we have to compute the area of stator slot first. [Here](https://www.mathopenref.com/coordpolygonarea.html) is a website showing you how to calculate the area of a polygon. 
 
 ![1562043675236](/assets/images/1562043675236.png)
 
 In case of 4 points, we have
-$$
-{\rm Area}=\left|\frac{\left(x_{1} y_{2}-y_{1} x_2\right)+\left(x_{2} y_{3}-y_{2} x_3\right) + \left(x_{3} y_{4}-y_{3} x_{4}\right) + \left(x_{4} y_{1}-y_{4} x_{1}\right)}{2}\right|
-$$
+
+$${\rm Area}=\left|\frac{\left(x_{1} y_{2}-y_{1} x_2\right)+\left(x_{2} y_{3}-y_{2} x_3\right) + \left(x_{3} y_{4}-y_{3} x_{4}\right) + \left(x_{4} y_{1}-y_{4} x_{1}\right)}{2}\right|$$
+
 The four points of our stator slot are respectively
 
 - -38.372, 2.6937
@@ -74,16 +76,22 @@ The four points of our stator slot are respectively
 - -57.8252, 12.7074
 - -37.76, 7.3315
 
-This gives an area of 152.2 mm^2.
+This gives an area of 152.2 mm^2. Since we use a two layer short pitched (coil pitch is 75% of pole pitch) winding, the area for one phase conductors is only $\frac{152.2}{2}~{\rm mm^2}$. About short pitching, for a two pole motor, a coil pitch down to 70% can be used, as suggested by Prof. Pyrhonen in his book.
 
 ![1562043757081](/assets/images/1562043757081.png)
 
-According to [this site](https://www.engineeringtoolbox.com/awg-wire-gauge-d_731.html), a gauge 20 and 21 wire has a diameter of 0.81 mm and 0.72 mm, respectively. The corresponding area is 0.52 mm^2 and 0.42 mm^2. However, the actual space a wire takes in theory depends on the what **circular packing** strategy you are using. We should now make some conservative estimation/predictions, 
+According to [this site](https://www.engineeringtoolbox.com/awg-wire-gauge-d_731.html), a gauge 20 and 21 wire has a diameter of 0.81 mm and 0.72 mm, respectively. The corresponding area is 0.52 mm^2 and 0.42 mm^2. However, the actual space a wire occupies in theory depends on the what **circular packing** strategy you are using. We should now make some conservative estimation/predictions, 
 
-- using the fill factor, which gives $0.45 \times 152.2 {\rm~mm^2} / 0.52 {\rm~mm^2} = 68.5 {\rm~mm^2} / 0.52 {\rm~mm^2} \approx 132$. 
-- or assuming the wire takes space as a square wire of $0.656~{\rm mm^2}$, which gives $152.2/0.656=232$.
+- using the fill factor, which gives $0.45 \times \frac{152.2}{2} {\rm~mm^2} / 0.52 {\rm~mm^2} = 34.25 {\rm~mm^2} / 0.52 {\rm~mm^2} \approx 66$. 
+- or assuming the wire takes space as a square wire of $0.656~{\rm mm^2}$, which gives $\frac{152.2}{2}/0.656=116$.
 
-As a result, we will use 4 strands in hand, so that there will be $z_Q\times 4=144$ strands in one slot.
+As a result, we will use 2 strands in hand, so that there will be $z_Q\times 2=72$ strands in the upper/lower layer of one slot.
 
-Now I can wind the stator winding using the specifications, $z_Q=36$, 4 strands in hand, gauge 20 wire. There will be 4 coils (i.e., 8 terminals) for me to connect to the torque inverter and suspension inverter.
+
+
+Finally, I can wind the stator winding using the specifications, $z_Q=36$, 2 strands in hand, gauge 20 wire. There will be 4 coils (i.e., 8 terminals) for me to connect to the torque inverter and suspension inverter.
+
+
+
+Another take-away is about scaling. People say that the rotatory machine is easily scaled, compared to linear machine or axial flux machine. However, one thing these people do not tell you or even know is that you have to reconfigure your winding after you change your stack length. The reason is simple. By changing the stack length, your air gap surface area is changed and your flux linkage and back emf will also vary. As a result, $N$ and $z_Q$ must be changed accordingly.
 
