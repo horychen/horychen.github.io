@@ -33,19 +33,21 @@ Considering all these, we are going to derive a design with 400 Vrms and 20 Arms
 It is almost not possible that the motor design from the analytical design procedure meets the 480 Vrms requirement with zero mismatch.
 
 Okay, here is the part that is getting messy. Stay awake!
-$$
-N=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \hat{\Phi}_{m}}=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \alpha_{i} \hat{B}_{\delta} \tau_{p} l^{\prime}} \Rightarrow \hat{B}_{\delta}=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \alpha_{i} N \tau_{p} l^{\prime}}
-$$
-The number of turns in series $N$ is determined by the back emf $E_m$, stator angular speed $\omega$, winding factor $k_{w1}$ and flux $\hat\Phi_m$ (a hat stands for amplitude). _A quick detour: this equation is also used to re-determine the air gap flux density_ $\hat B_\delta$. We assmue the voltage loss at rated operation point is 0.05 such that $E_m=0.95 U=0.95\times \frac{480}{\sqrt{3}} V$ and $\hat B_\delta=0.8$ T, and this gives us an $N$ of 6.08588, which rounds up to 6. However, this is never this simple. You have to make sure $N$ is multiple of $pq=4$, where $p=1$ is pole pair number and $q=Q_s/(2pm)$ the number of slot per phase per pole with $m=3$ and $Q_s=24$ the stator slot number. Let’s assume we got plenty voltage, so $N=8$. We use this new value of $N$ to calculate the new value of $\hat B_\delta=0.59$ T, such that the rated back EMF $E_m$ is still $0.95\times \frac{480}{\sqrt{3}}$ V. This means by increasing the voltage rating (and the thickness of stator insulation), we can build a less saturated motor. You can consider this as a trade-off between electrical loading and magnetic loading as well, I guess.
+
+$$N=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \hat{\Phi}_{m}}=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \alpha_{i} \hat{B}_{\delta} \tau_{p} l^{\prime}} \Rightarrow \hat{B}_{\delta}=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \alpha_{i} N \tau_{p} l^{\prime}}$$
+
+where, the number of turns in series $N$ is determined by the back emf $E_m$, stator angular speed $\omega$, winding factor $k_{w1}$ and flux $\hat\Phi_m$ (a hat stands for amplitude). _A quick detour: this equation is also used to re-determine the air gap flux density_ $\hat B_\delta$. We assmue the voltage loss at rated operation point is 0.05 such that $E_m=0.95 U=0.95\times \frac{480}{\sqrt{3}} V$ and $\hat B_\delta=0.8$ T, and this gives us an $N$ of 6.08588, which rounds up to 6. 
+
+However, this is never this simple. You have to make sure $N$ is multiple of $pq=4$, where $p=1$ is pole pair number and $q=Q_s/(2pm)$ the number of slot per phase per pole with $m=3$ and $Q_s=24$ the stator slot number. Let’s assume we got plenty voltage, so $N=8$. We use this new value of $N$ to calculate the new value of $\hat B_\delta=0.59$ T, such that the rated back EMF $E_m$ is still $0.95\times \frac{480}{\sqrt{3}}$ V. This means by increasing the voltage rating (and the thickness of stator insulation), we can build a less saturated motor. You can consider this as a trade-off between electrical loading and magnetic loading as well, I guess.
 
 ### In FEA Modeling
 
 What we have analyzed from the last section “let’s face the fact” has nothing to do with the FEA modeling. During (current source) FEA modeling, we need only ~~**the number of turns per slot**~~ $z_Q$ and current rating (180 Arms). So, what is this $z_Q$?
 
 Please repeat after me. The correct name for $z_Q$ is the **number of conductors per slot**. The correct name for $z_Q$ is the **number of conductors per slot**. The correct name for $z_Q$ is the **number of conductors per slot**. It is not ~~**the number of turns per slot**~~!!! And it is computed as follows (with an $a$ the number of parallel branch!)
-$$
-z_Q=\frac{2amN}{Q_s}=\frac{2\times 2 \times 3 \times 8}{24}=4
-$$
+
+$$z_Q=\frac{2amN}{Q_s}=\frac{2\times 2 \times 3 \times 8}{24}=4$$
+
 
 
 The key take-away here lies in the name of $z_Q$. ~~If the name of $z_Q$ is the number of turns per slot, which is not, it will be independent on the number of parallel branch $a$.~~ With the correct definition, $z_Q$ is dependent on $a$, because $N$ has nothing to do with $a$ and $N$ is determined by the voltage we have. ~~It is easy to get confused if you consider that you can reduce the number of turns in series $N$ by increasing the number of parallel branch $a$.~~
@@ -63,9 +65,9 @@ To this end, we have to compute the are of stator slot first. [Here](https://www
 ![1562043675236](/assets/images/1562043675236.png)
 
 In case of 4 points, we have
-$$
-{\rm Area}=\left|\frac{\left(x_{1} y_{2}-y_{1} x_2\right)+\left(x_{2} y_{3}-y_{2} x_3\right) + \left(x_{3} y_{4}-y_{3} x_{4}\right) + \left(x_{4} y_{1}-y_{4} x_{1}\right)}{2}\right|
-$$
+
+$${\rm Area}=\left|\frac{\left(x_{1} y_{2}-y_{1} x_2\right)+\left(x_{2} y_{3}-y_{2} x_3\right) + \left(x_{3} y_{4}-y_{3} x_{4}\right) + \left(x_{4} y_{1}-y_{4} x_{1}\right)}{2}\right|$$
+
 The four points of our stator slot are respectively
 
 - -38.372, 2.6937
