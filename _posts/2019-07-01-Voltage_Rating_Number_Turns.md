@@ -3,7 +3,7 @@ layout: single
 title:  "About Voltage Rating, Number of Turns Per Slot, Stands in Hand, etc."
 date:   2019-07-01
 categories: tech
-published: true
+published: false
 ---
 
 * TOC
@@ -109,13 +109,13 @@ The theoretical designed prototype has a voltage rating of 480 Vrms by assuming 
 
 > Beginning of Detour.
 
-Okay, here, let’s make a mistake as an example. Take a look at the figure below, the turns of a coil is correctly set to $2=z_q/2$, where 2 means double layer. What will happen if we set this to $4=z_Q$? This is a common mistake I believe newbie may make.
+Okay, here, let’s make a mistake as an example. Take a look at the figure below, the turns of a coil is correctly set to $2=z_q/2$, where /2 means double layer. What will happen if we set this to $4=z_Q$? This is a common mistake I believe newbie may make.
 
 ![1562126531528](/assets/images/1562126531528.png)
 
 
 
-The consequence is that, according to the FEA analysis, this air gap flux density value is 0.85 T > 0.6 T. This is difficult to debug because newbie may think that the prototype design is suggested from the results of optimization, who is basically a bastard so its last name can be either Snow or Sand according to the birth place.
+The consequence is that, according to the FEA analysis, this air gap flux density value is 0.85 T > 0.6 T. This is difficult to debug because newbie may think that the prototype design is suggested from the results of optimization, who is basically a bastard so its last name can be either Snow or Sand according to the birth place. In other words, he believes it is normal that the air gap flux density can be different than 0.6 T.
 
 ![1562123144178](/assets/images/1562123144178.png)
 
@@ -129,10 +129,10 @@ Damn it!
 
 
 
-The thing is, the newbie cannot simply reduce $N$ because $N$ must be multiple of $pq$. So the only thing this poor newbie can do is to making compromises AGAIN. Re-design is not okay because the lamination of the prototype is already cut.
+~~The thing is, the newbie cannot simply reduce $N$ because $N$ must be multiple of $pq$. So the only thing this poor newbie can do is to making compromises AGAIN. Re-design is not okay because the lamination of the prototype is already cut.~~
 
 > End of Detour.
 
 
 
-Even if you make correct setting, you will not get exactly phase voltage of 480/1.732 Vrms. In our case, the phase voltage is 260 Vrms, which corresponds to 450 Vrms. Okay, that’s fine.
+Even if you make correct setting, you will not get exactly phase voltage of 480/1.732 Vrms. In our case, the phase voltage is 260 Vrms, which corresponds to line-to-line voltage of 450 Vrms. Okay, that’s fine.
