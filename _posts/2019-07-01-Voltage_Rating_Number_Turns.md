@@ -22,10 +22,10 @@ Please note that anything we say about rating is line-to-line value and we are c
 
 ### Making Compromises
 
-Considering all these, we are going to derive a design with 400 Vrms and 20 Arms from the theoretical design. Some compromises are made as follows.
+Considering all these, we are going to derive a design with (less than) 400 Vrms and 20 Arms from the theoretical design. Some compromises are made as follows.
 
 - The maximal operating speed is reduced to 15,000 rpm. So the rated voltage is reduced to only half, i.e., 240 Vrms.
-- The actual stack length for prototype is only 50 mm rather than 281.2 mm. Recall that the magnetic flux depends on the area of air gap surface, and back emf is proportional to magnetic flux, so the actual voltage rating is reduced to $240\times \frac{50}{281.2}=42.7$ V.
+- The actual stack length for prototype is only 50 mm rather than 281.2 mm. Recall that the magnetic flux depends on the area of air gap surface, and back emf is proportional to magnetic flux, so the actual voltage rating is reduced to $240\times \frac{50}{281.2}=42.7$ Vrms.
 - The current rating and voltage rating are interchangeable. In order to reduce the current rating by a factor of 9 (from 180 Arms to 20 Arms) , the voltage rating is multiplied by 9, equal to $42.7\times 9=384$ Vrms, which sounds good to me.
 
 ### Let’s Face The Fact
@@ -36,9 +36,13 @@ Okay, here is the part that is getting messy. Stay awake!
 
 $$N=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \hat{\Phi}_{m}}=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \alpha_{i} \hat{B}_{\delta} \tau_{p} l^{\prime}} \Rightarrow \hat{B}_{\delta}=\frac{\sqrt{2} E_{m}}{\omega k_{w 1} \alpha_{i} N \tau_{p} l^{\prime}}$$
 
-where, the number of turns in series $N$ is determined by the back emf $E_m$, stator angular speed $\omega$, winding factor $k_{w1}$ and flux $\hat\Phi_m$ (a hat stands for amplitude). _A quick detour: this equation is also used to re-determine the air gap flux density_ $\hat B_\delta$. We assmue the voltage loss at rated operation point is 0.05 such that $E_m=0.95 U=0.95\times \frac{480}{\sqrt{3}} V$ and $\hat B_\delta=0.8$ T, and this gives us an $N$ of 6.08588, which rounds up to 6. 
+where, the number of turns in series $N$ is determined by the back emf $E_m$, stator angular speed $\omega$, winding factor $k_{w1}$ and flux $\hat\Phi_m$ (a hat stands for amplitude). _A quick detour: this equation is also used to re-determine the air gap flux density_ $\hat B_\delta$. We assume the voltage loss at rated operation point is 0.05 such that $E_m=0.95 U=0.95\times \frac{480}{\sqrt{3}} V$ and $\hat B_\delta=0.8$ T, and this gives us an $N$ of 6.08588, which rounds up to 6. 
 
-However, this is never this simple. You have to make sure $N$ is multiple of $pq=4$, where $p=1$ is pole pair number and $q=Q_s/(2pm)$ the number of slot per phase per pole with $m=3$ and $Q_s=24$ the stator slot number. Let’s assume we got plenty voltage, so $N=8$. We use this new value of $N$ to calculate the new value of $\hat B_\delta=0.59$ T, such that the rated back EMF $E_m$ is still $0.95\times \frac{480}{\sqrt{3}}$ V. This means by increasing the voltage rating (and the thickness of stator insulation), we can build a less saturated motor. You can consider this as a trade-off between electrical loading and magnetic loading as well, I guess.
+However, it is never that simple. You have to make sure $N$ is multiple of $pq=4$, because number of conductors per slot is 
+
+$$z_Q=\frac{aN}{pq}$$
+
+where $p=1$ is pole pair number and $q=Q_s/(2pm)$ the number of slot per phase per pole with $m=3$ and $Q_s=24$ the stator slot number. Let’s assume we got plenty voltage, so $N=8$. We use this new value of $N$ to calculate the new value of $\hat B_\delta=0.59$ T, such that the rated back EMF $E_m$ is still $0.95\times \frac{480}{\sqrt{3}}$ V. This means by increasing the voltage rating (and the thickness of stator insulation), we can build a less saturated motor. You can consider this as a trade-off between electrical loading and magnetic loading as well, I guess.
 
 ### In FEA Modeling
 
@@ -47,6 +51,8 @@ What we have analyzed from the last section “let’s face the fact” has noth
 Please repeat after me. The correct name for $z_Q$ is the **number of conductors per slot**. The correct name for $z_Q$ is the **number of conductors per slot**. The correct name for $z_Q$ is the **number of conductors per slot**. It is not ~~**the number of turns per slot**~~!!! And it is computed as follows (with an $a$ the number of parallel branch!)
 
 $$z_Q=\frac{2amN}{Q_s}=\frac{2\times 2 \times 3 \times 8}{24}=4$$
+
+According to Pyrhonen’s book, $z_Q$ is an integer or an even integer for double layer winding. This statement implies that during FEA simulation of a no voltage combined winding, the right turn number you should set to your FEM coil component should be $z_Q/2$.
 
 
 
@@ -82,14 +88,14 @@ This gives an area of 152.2 mm^2. Since we use a two layer short pitched (coil p
 
 According to [this site](https://www.engineeringtoolbox.com/awg-wire-gauge-d_731.html), a gauge 20 and 21 wire has a diameter of 0.81 mm and 0.72 mm, respectively. The corresponding area is 0.52 mm^2 and 0.42 mm^2. However, the actual space a wire occupies in theory depends on the what **circular packing** strategy you are using. We should now make some conservative estimation/predictions, 
 
-- using the fill factor, which gives $0.45 \times \frac{152.2}{2} {\rm~mm^2} / 0.52 {\rm~mm^2} = 34.25 {\rm~mm^2} / 0.52 {\rm~mm^2} \approx 66$. 
-- or assuming the wire takes space as a square wire of $0.656~{\rm mm^2}$, which gives $\frac{152.2}{2}/0.656=116$.
+- using the fill factor, which gives $0.45 \times {152.2} {\rm~mm^2} / 0.52 {\rm~mm^2}  \approx 132$. 
+- or assuming the wire takes space as a square wire of $0.656~{\rm mm^2}$, which gives ${152.2}/0.656=232$.
 
-As a result, we will use 2 strands in hand, so that there will be $z_Q\times 2=72$ strands in the upper/lower layer of one slot.
+As a result, we will use 4 strands in hand, so that there will be $z_Q\times 4=144$ strands for both the upper and lower layer of one slot, which corresponds to a fill factor of $0.49 = 144 / (152.2/0.52)$. Note that when you do the winding, there will be only “$z_Q$ times 4 strands divided by 2 layers” ($=72$) strands in a slot for one phase winding.
 
 
 
-Finally, I can wind the stator winding using the specifications, $z_Q=36$, 2 strands in hand, gauge 20 wire. There will be 4 coils (i.e., 8 terminals) for me to connect to the torque inverter and suspension inverter.
+Finally, I can wind the stator winding using the specifications, $z_Q=36$, 4 strands in hand, gauge 20 wire. After connecting some coils, there will be 4 independent coils (i.e., 8 terminals) for me to connect to the torque inverter and suspension inverter.
 
 
 
@@ -99,11 +105,21 @@ Another take-away is about scaling. People say that the rotatory machine is easi
 
 ### This Whole Article is Wrong Because it is Based on a Wrong Premise
 
-The theoretical designed prototype has a voltage rating of 480 Vrms by assuming the air gap flux density to be 0.6 T. However, according to the FEA analysis, this value is larger than 0.8 T. 
+The theoretical designed prototype has a voltage rating of 480 Vrms by assuming the air gap flux density to be 0.6 T. What if the simulated air gap flux density is higher than 0.6 T?
 
-![1562123144178](assets/images/1562123144178.png)
+> Beginning of Detour.
 
-As a result, the induced voltage is way larger than 480 Vrms.
+Okay, here, let’s make a mistake as an example. Take a look at the figure below, the turns of a coil is correctly set to $2=z_q/2$, where 2 means double layer. What will happen if we set this to $4=z_Q$? This is a common mistake I believe newbie may make.
+
+![1562126531528](/assets/images/1562126531528.png)
+
+
+
+The consequence is that, according to the FEA analysis, this air gap flux density value is 0.85 T > 0.6 T. This is difficult to debug because newbie may think that the prototype design is suggested from the results of optimization, who is basically a bastard so its last name can be either Snow or Sand according to the birth place.
+
+![1562123144178](/assets/images/1562123144178.png)
+
+As a result, the induced voltage is way larger than 480/1.732 Vrms.
 
 ![1562123212599](/assets/images/1562123212599.png)
 
@@ -111,3 +127,12 @@ As a result, the induced voltage is way larger than 480 Vrms.
 
 Damn it!
 
+
+
+The thing is, the newbie cannot simply reduce $N$ because $N$ must be multiple of $pq$. So the only thing this poor newbie can do is to making compromises AGAIN. Re-design is not okay because the lamination of the prototype is already cut.
+
+> End of Detour.
+
+
+
+Even if you make correct setting, you will not get exactly phase voltage of 480/1.732 Vrms. In our case, the phase voltage is 260 Vrms, which corresponds to 450 Vrms. Okay, that’s fine.
