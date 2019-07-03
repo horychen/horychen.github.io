@@ -95,3 +95,19 @@ Finally, I can wind the stator winding using the specifications, $z_Q=36$, 2 str
 
 Another take-away is about scaling. People say that the rotatory machine is easily scaled, compared to linear machine or axial flux machine. However, one thing these people do not tell you or even know is that you have to reconfigure your winding after you change your stack length. The reason is simple. By changing the stack length, your air gap surface area is changed and your flux linkage and back emf will also vary. As a result, $N$ and $z_Q$ must be changed accordingly.
 
+
+
+### This Whole Article is Wrong Because it is Based on a Wrong Premise
+
+The theoretical designed prototype has a voltage rating of 480 Vrms by assuming the air gap flux density to be 0.6 T. However, according to the FEA analysis, this value is larger than 0.8 T. 
+
+![1562123144178](assets/images/1562123144178.png)
+
+As a result, the induced voltage is way larger than 480 Vrms.
+
+![1562123212599](assets/images/1562123212599.png)
+
+
+
+Damn it!
+
