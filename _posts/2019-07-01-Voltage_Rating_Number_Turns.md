@@ -105,7 +105,7 @@ The theoretical designed prototype has a voltage rating of 480 Vrms by assuming 
 
 As a result, the induced voltage is way larger than 480 Vrms.
 
-![1562123212599](assets/images/1562123212599.png)
+![1562123212599](/assets/images/1562123212599.png)
 
 
 
