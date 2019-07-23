@@ -70,7 +70,9 @@ published: true
 
 
 
+3Blue1Brown:
 
+https://www.youtube.com/watch?v=aircAruvnKk
 
 
 
@@ -80,3 +82,12 @@ Cheat sheet:
 
 
 
+Others:
+
+Torch basics: https://zhuanlan.zhihu.com/p/66543791
+
+
+
+ANN Basic:
+
+https://www.youtube.com/watch?v=aircAruvnKk

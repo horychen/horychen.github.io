@@ -10,11 +10,11 @@ published: false
 {:toc}
 ### Background
 
-I am goting to build a bearingles induction motor, and the next step is to wind the stator winding. I always found the winding the most iritating part during machine design. Therefore, this paper serves as a note  how I managed to alter the winding arrangement of a theoretical design to that for an actual prototype.
+I am going to build a bearingless induction motor, and the next step is to wind the stator winding. I always found the winding the most irritating part during machine design. Therefore, this paper serves as a note  how I managed to alter the winding arrangement of a theoretical design to that for an actual prototype.
 
 ### Specifications
 
-At the design stage, it is assumed that the voltage rating is 480 Vrms for this wye-connected 50 kW, 30,000 rpm motor. The parallel number of path/branch is 2 to enable a parallel no voltage combind stator winding setting [it requires more, e.g., on the number of slots $Q_s$ as multiple of 12 and the number of poles (cannot be 3)]. With a shear/tangential stress of 12 kPa, the rated stator current is 180.874 Arms. To ahieve the rated power, the motor should be axially scaled to 281.2 mm.
+At the design stage, it is assumed that the voltage rating is 480 Vrms for this wye-connected 50 kW, 30,000 rpm motor. The parallel number of path/branch is 2 to enable a parallel no voltage combined stator winding setting [it requires more, e.g., on the number of slots $Q_s$ as multiple of 12 and the number of poles (cannot be 3)]. With a shear/tangential stress of 12 kPa, the rated stator current is 180.874 Arms. To achieve the rated power, the motor should be axially scaled to 281.2 mm.
 
 The power stack (a nick name for inverter) we have is tested under 200 V dc bus voltage and 10 A ac or dc current. The Voltage rating for the switching device is 1200 V, which implies a highest output voltage somewhere below 600 V to make sure there is a safety factor for over-voltage (e.g., high dv/dt issue). 
 
@@ -91,9 +91,9 @@ According to [this site](https://www.engineeringtoolbox.com/awg-wire-gauge-d_731
 - using the fill factor, which gives $0.45 \times {152.2} {\rm~mm^2} / 0.52 {\rm~mm^2}  \approx 132$. 
 - or assuming the wire takes space as a square wire of $0.656~{\rm mm^2}$, which gives ${152.2}/0.656=232$.
 
-As a result, we will use 4 strands in hand, so that there will be $z_Q\times 4=144$ strands for both the upper and lower layer of one slot, which corresponds to a fill factor of $0.49 = 144 / (152.2/0.52)$. Note that when you do the winding, there will be only “$z_Q$ times 4 strands divided by 2 layers” ($=72$) strands in a slot for one phase winding.
+As a result, we will use 4 strands in hand, so that there will be $z_Q\times 4=144$ (close to $132$) strands for both the upper and lower layer of one slot, which corresponds to a fill factor of $0.49 = 144 / (152.2/0.52)$. Note that when you do the winding, there will be only “$z_Q$ times 4 strands divided by 2 layers” ($=72$) strands in a slot for one phase winding.
 
-
+> If the fill factor of $0.49 = 144 / (152.2/0.52)$ is too high. We can reduce $z_Q$ by increasing the current rating from 20 A to 22.5 A such that $z_Q=32$. 144 - 4*4 = 128, which gives a fill factor below 0.45 as 0.437. Each strand has 128 / 2 layer / 4 strand = 16 strand.
 
 Finally, I can wind the stator winding using the specifications, $z_Q=36$, 4 strands in hand, gauge 20 wire. After connecting some coils, there will be 4 independent coils (i.e., 8 terminals) for me to connect to the torque inverter and suspension inverter.
 
@@ -136,3 +136,16 @@ Damn it!
 
 
 Even if you make correct setting, you will not get exactly phase voltage of 480/1.732 Vrms. In our case, the phase voltage is 260 Vrms, which corresponds to line-to-line voltage of 450 Vrms. Okay, that’s fine.
+
+
+
+
+
+### Notes from Actual Doing It
+
+1. How to set up a lining paper
+    1. Video from Youtube: https://www.youtube.com/watch?v=yPwf3BwS4pg
+2. 
+
+
+

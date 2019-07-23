@@ -1,4 +1,23 @@
+## Measurement
 
+### The resistance
+
+- Rotor bar to end ring
+- Rotor bar to rotor iron core
+- One phase resistance
+- One strand coil resistance
+- Four strands coil resistance
+- 
+
+
+
+
+
+
+
+
+
+# Others Topics
 
 #### Number of turns per slot
 
@@ -83,5 +102,6 @@ The purpose of the items are explained as follows.
     2. It turns out that the uniformity of lamination cut by laser cutter is poor. It is extremely difficult to insert lamination from different cutting patch to the 6 installing shafts.
     3. One solution is to increase the hole size but this may lead to loose assembly and waste over 50 lamination.
     4. So Kyle and I decide to get a reamer (2822A44) to rescue this situation.
+
 
 
