@@ -20,10 +20,10 @@ published: true
 
 ### 这里就是一些推导，具体去看视频吧
 
-推导在这里，但是知乎你不能直接复制 LaTeX 代码，可以去我的博客相关页面邮件复制 TeX 代码。视频中的代码和这边的公式推导结果有一点点出入，虽然无伤大雅，但是还是有点难受的。我后来一想，一开始的方程就用错了，如果一开始用的是：$L_\sigma p i_s = u_s -r_s i_s + p\psi_s$（$\psi_s$是定子磁链）的话，就和代码一致了。
-$$
+推导在这里，但是知乎你不能直接复制 LaTeX 代码，可以去我的博客相关页面邮件复制 TeX 代码。视频中的代码和这边的公式推导结果有一点点出入，虽然无伤大雅，但是还是有点难受的。我后来一想，一开始的方程就用错了，如果一开始用的是：$L_\sigma p i_s = u_s -r_s i_s + p\psi_s$（$\psi_s$是定子磁链）的话，就和代码一致了。下面的Latex代码没法在Github上编译，呵呵了。
+
 \begin{array}{l}
-{L_\sigma }p{i_s} = {u_s} - \left( r_s + r_{req} \right){i_s} + \left( {\alpha I - \omega J} \right){\psi _\mu }\\
+{L_\sigma }p{i_s} = {u_s} - \left( {r_s} + r_{req} \right){i_s} + \left( {\alpha I - \omega J} \right){\psi _\mu }\\
 {i_s} = \left[ \begin{array}{l}
 {i_{\alpha s}}\\
 {i_{\beta s}}
@@ -32,7 +32,7 @@ T = \left[ {\begin{array}{*{20}{c}}
 {\cos {\theta _M}}&{\sin {\theta _M}}\\
 { - \sin {\theta _M}}&{\cos {\theta _M}}
 \end{array}} \right],\,p{\theta _M} = {\omega _\psi }\\
- \Rightarrow {L_\sigma }T\left( {p{i_s}} \right) = T{u_s} - \left( {{r_s} + {r_{req}}} \right)T{i_s} + \left( {\alpha I - \omega J} \right)T{\psi _\mu }\\
+ \Rightarrow {L_\sigma }T\left( {p{i_s}} \right) = T{u_s} - \left( {r_s} + {r_{req}} \right)T{i_s} + \left( {\alpha I - \omega J} \right)T{\psi _\mu }\\
  \Rightarrow {L_\sigma }T\left( {p{i_s}} \right) = u_s^{MT} - \left( {{r_s} + {r_{req}}} \right)i_s^{MT} + \left( {\alpha I - \omega J} \right)\psi _\mu ^{MT}\\
 p\left( {T{i_s}} \right) = \left( {pT} \right){i_s} + Tp{i_s} \Rightarrow Tp{i_s} = p\left( {T{i_s}} \right) - \left( {pT} \right){i_s}\\
  \Rightarrow p\left( {T{i_s}} \right) - \left( {pT} \right){i_s} = \frac{1}{{{L_\sigma }}}\left[ {u_s^{MT} - \left( {{r_s} + {r_{req}}} \right)i_s^{MT} + \left( {\alpha I - \omega J} \right)\psi _\mu ^{MT}} \right]\\
@@ -93,4 +93,3 @@ JT = \left[ {\begin{array}{*{20}{c}}
 \end{array} \right]\\
 There\,could\,be\,error\,in\,the\,results...
 \end{array}
-$$
