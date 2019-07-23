@@ -1,7 +1,7 @@
 ---
 layout: single
-title:  "Adaptive Observer for Induction Motors (Conventional) "
-date:   2019-07-19
+title:  "ACMFEM - Induction Motor Design and Fitting"
+date:   2019-07-27
 categories: tutorial
 published: false
 ---

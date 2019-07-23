@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "Voltage-Current Decoupling"
+title:  "ACMSimC: Voltage-Current Decoupling"
 date:   2019-07-22
 categories: tutorial
 published: true
