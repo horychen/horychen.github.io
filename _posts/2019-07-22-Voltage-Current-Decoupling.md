@@ -8,7 +8,7 @@ published: true
 
 * TOC
 {:toc}
-> 此文为本系列第四集，第一集请戳：[传送门](https://www.bilibili.com/video/av51496015)。
+> 此文为本系列[第四集](https://www.bilibili.com/video/av60367448/)，第一集请戳：[传送门](https://www.bilibili.com/video/av51496015)。
 
 ### 前言
 
