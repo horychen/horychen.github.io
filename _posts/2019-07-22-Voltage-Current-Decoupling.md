@@ -22,7 +22,7 @@ published: true
 
 推导在这里，但是知乎你不能直接复制 LaTeX 代码，可以去我的博客相关页面邮件复制 TeX 代码。视频中的代码和这边的公式推导结果有一点点出入，虽然无伤大雅，但是还是有点难受的。我后来一想，一开始的方程就用错了，如果一开始用的是：$L_\sigma p i_s = u_s -r_s i_s + p\psi_s$（$\psi_s$是定子磁链）的话，就和代码一致了。下面的Latex代码没法在Github上编译，呵呵了。
 
-\begin{array}{l}
+> \begin{array}{l}
 {L_\sigma }p{i_s} = {u_s} - \left( {r_s} + r_{req} \right){i_s} + \left( {\alpha I - \omega J} \right){\psi _\mu }\\
 {i_s} = \left[ \begin{array}{l}
 {i_{\alpha s}}\\
@@ -69,7 +69,7 @@ JT = \left[ {\begin{array}{*{20}{c}}
 {\psi _{M\mu }}\\
 {\psi _{T\mu }}
 \end{array} \right]} \right\} - {\omega _\psi }\left[ \begin{array}{l}
- - {i_{Ts}}\\
+{i_{Ts}}\\
 {i_{Ms}}
 \end{array} \right]\\
  \Rightarrow p\left[ \begin{array}{l}
@@ -85,11 +85,12 @@ JT = \left[ {\begin{array}{*{20}{c}}
 {L_\mu }{i_{Ms}}\\
 0
 \end{array} \right] - \omega \left[ \begin{array}{l}
- - 0\\
+0\\
 {L_\mu }{i_{Ms}}
 \end{array} \right]} \right)} \right\} - {\omega _\psi }\left[ \begin{array}{l}
- - {i_{Ts}}\\
+{i_{Ts}}\\
 {i_{Ms}}
 \end{array} \right]\\
 There\,could\,be\,error\,in\,the\,results...
 \end{array}
+
