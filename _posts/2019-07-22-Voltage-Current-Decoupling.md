@@ -36,8 +36,8 @@ T = \left[ {\begin{array}{*{20}{c} }
  \Rightarrow {L_\sigma }T\left( {p{i_s} } \right) = T{u_s} - \left( {r_s} + {r_{req} } \right)T{i_s} + \left( {\alpha I - \omega J} \right)T{\psi _\mu }\\
  \Rightarrow {L_\sigma }T\left( {p{i_s} } \right) = u_s^{MT} - \left( { {r_s} + {r_{req} }} \right)i_s^{MT} + \left( {\alpha I - \omega J} \right)\psi _\mu ^{MT}\\
 p\left( {T{i_s} } \right) = \left( {pT} \right){i_s} + Tp{i_s} \Rightarrow Tp{i_s} = p\left( {T{i_s} } \right) - \left( {pT} \right){i_s}\\
- \Rightarrow p\left( {T{i_s} } \right) - \left( {pT} \right){i_s} = \frac{1}{ {{L_\sigma } }}\left[ {u_s^{MT} - \left( { {r_s} + {r_{req} }} \right)i_s^{MT} + \left( {\alpha I - \omega J} \right)\psi _\mu ^{MT} } \right]\\
- \Rightarrow pi_s^{MT} - \left( {pT} \right){i_s} = \frac{1}{ {{L_\sigma } }}\left[ {u_s^{MT} - \left( { {r_s} + {r_{req} }} \right)i_s^{MT} + \left( {\alpha I - \omega J} \right)\psi _\mu ^{MT} } \right]\\
+ \Rightarrow p\left( {T{i_s} } \right) - \left( {pT} \right){i_s} = \frac{1}{ { {L_\sigma } }}\left[ {u_s^{MT} - \left( { {r_s} + {r_{req} }} \right)i_s^{MT} + \left( {\alpha I - \omega J} \right)\psi _\mu ^{MT} } \right]\\
+ \Rightarrow pi_s^{MT} - \left( {pT} \right){i_s} = \frac{1}{ { {L_\sigma } }}\left[ {u_s^{MT} - \left( { {r_s} + {r_{req} }} \right)i_s^{MT} + \left( {\alpha I - \omega J} \right)\psi _\mu ^{MT} } \right]\\
 pT = {\omega _\psi }\left[ {\begin{array}{*{20}{c} }
 { - \sin {\theta _M} }&{\cos {\theta _M} }\\
 { - \cos {\theta _M} }&{ - \sin {\theta _M} }
@@ -45,7 +45,7 @@ pT = {\omega _\psi }\left[ {\begin{array}{*{20}{c} }
  \Rightarrow pi_s^{MT} - {\omega _\psi }\left[ {\begin{array}{*{20}{c} }
 { - \sin {\theta _M} }&{\cos {\theta _M} }\\
 { - \cos {\theta _M} }&{ - \sin {\theta _M} }
-\end{array} } \right]{i_s} = \frac{1}{ {{L_\sigma } }}\left[ {u_s^{MT} - \left( { {r_s} + {r_{req} }} \right)i_s^{MT} + \left( {\alpha I - \omega J} \right)\psi _\mu ^{MT} } \right]\\
+\end{array} } \right]{i_s} = \frac{1}{ { {L_\sigma } }}\left[ {u_s^{MT} - \left( { {r_s} + {r_{req} }} \right)i_s^{MT} + \left( {\alpha I - \omega J} \right)\psi _\mu ^{MT} } \right]\\
 JT = \left[ {\begin{array}{*{20}{c} }
 0&{ - 1}\\
 1&0
@@ -56,11 +56,11 @@ JT = \left[ {\begin{array}{*{20}{c} }
 {\sin {\theta _M} }&{ - \cos {\theta _M} }\\
 {\cos {\theta _M} }&{\sin {\theta _M} }
 \end{array} } \right]\\
- \Rightarrow pi_s^{MT} = \frac{1}{ {{L_\sigma } }}\left[ {u_s^{MT} - \left( { {r_s} + {r_{req} }} \right)i_s^{MT} + \left( {\alpha I - \omega J} \right)\psi _\mu ^{MT} } \right] - {\omega _\psi }Ji_s^{MT}\\
+ \Rightarrow pi_s^{MT} = \frac{1}{ { {L_\sigma } }}\left[ {u_s^{MT} - \left( { {r_s} + {r_{req} }} \right)i_s^{MT} + \left( {\alpha I - \omega J} \right)\psi _\mu ^{MT} } \right] - {\omega _\psi }Ji_s^{MT}\\
  \Rightarrow p\left[ \begin{array}{l}
 {i_{Ms} }\\
 {i_{Ts} }
-\end{array} \right] = \frac{1}{ {{L_\sigma } }}\left\{ {\left[ \begin{array}{l}
+\end{array} \right] = \frac{1}{ { {L_\sigma } }}\left\{ {\left[ \begin{array}{l}
 {u_{Ms} }\\
 {u_{Ts} }
 \end{array} \right] - \left( { {r_s} + {r_{req} }} \right)\left[ \begin{array}{l}
@@ -76,7 +76,7 @@ JT = \left[ {\begin{array}{*{20}{c} }
  \Rightarrow p\left[ \begin{array}{l}
 {i_{Ms} }\\
 {i_{Ts} }
-\end{array} \right] = \frac{1}{ {{L_\sigma } }}\left\{ {\left[ \begin{array}{l}
+\end{array} \right] = \frac{1}{ { {L_\sigma } }}\left\{ {\left[ \begin{array}{l}
 {u_{Ms} }\\
 {u_{Ts} }
 \end{array} \right] - \left( { {r_s} + {r_{req} }} \right)\left[ \begin{array}{l}
@@ -92,6 +92,6 @@ JT = \left[ {\begin{array}{*{20}{c} }
 {i_{Ts} }\\
 {i_{Ms} }
 \end{array} \right]\\
-\text{There\,could\,be\,error\,in\,the\,results...}
+{\text{There\,could\,be\,error\,in\,the\,results...}}
 \end{array}
 $$
