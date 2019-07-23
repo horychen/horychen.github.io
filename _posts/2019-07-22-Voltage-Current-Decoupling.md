@@ -20,7 +20,7 @@ published: true
 
 ### 这里就是一些推导，具体去看视频吧
 
-推导在这里，但是知乎你不能直接复制 LaTeX 代码，可以去我的博客相关页面邮件复制 TeX 代码。视频中的代码和这边的公式推导结果有一点点出入，虽然无伤大雅，但是还是有点难受的。谁如果知道正确结果，请在评论里点出哦。
+推导在这里，但是知乎你不能直接复制 LaTeX 代码，可以去我的博客相关页面邮件复制 TeX 代码。视频中的代码和这边的公式推导结果有一点点出入，虽然无伤大雅，但是还是有点难受的。我后来一想，一开始的方程就用错了，如果一开始用的是：$L_\sigma p i_s = u_s -r_s i_s + p\psi_s$（$\psi_s$是定子磁链）的话，就和代码一致了。
 $$
 \begin{array}{l}
 {L_\sigma }p{i_s} = {u_s} - \left( {{r_s} + {r_{req}}} \right){i_s} + \left( {\alpha I - \omega J} \right){\psi _\mu }\\
@@ -40,7 +40,7 @@ p\left( {T{i_s}} \right) = \left( {pT} \right){i_s} + Tp{i_s} \Rightarrow Tp{i_s
 pT = {\omega _\psi }\left[ {\begin{array}{*{20}{c}}
 { - \sin {\theta _M}}&{\cos {\theta _M}}\\
 { - \cos {\theta _M}}&{ - \sin {\theta _M}}
-\end{array}} \right] = {\omega _\psi }JT,\,p{\theta _M} = {\omega _\psi }\\
+\end{array}} \right] = -{\omega _\psi }JT,\,p{\theta _M} = {\omega _\psi }\\
  \Rightarrow pi_s^{MT} - {\omega _\psi }\left[ {\begin{array}{*{20}{c}}
 { - \sin {\theta _M}}&{\cos {\theta _M}}\\
 { - \cos {\theta _M}}&{ - \sin {\theta _M}}
