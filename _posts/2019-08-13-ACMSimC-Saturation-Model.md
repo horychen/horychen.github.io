@@ -35,6 +35,8 @@ published: true
 ## 定、转子磁链解算（这一步是唯一的数值积分步）
 
 我就不绕弯了，文献是 Therrien et al. 2013，状态变量得选为定、转子磁链。
+
+{% raw %}
 $$
 \left\{ \begin{array}{l}
 p{\psi _{qs}} = {u_{qs}} - {r_s}{i_{qs}} - \omega {\psi _{ds}}\\
@@ -43,6 +45,8 @@ p{\psi _{qr}} =  - {r_r}{i_{qr}} - \left( {\omega  - {\omega _r}} \right){\psi _
 p{\psi _{dr}} =  - {r_r}{i_{dr}} + \left( {\omega  - {\omega _r}} \right){\psi _{qr}}
 \end{array} \right.
 $$
+{% endraw %}
+
 对上面这个动态方程（当然还要加上转子运动方程）进行仿真，你应该感到没有任何压力，因为电感压根没出现，但是电流从哪里来？
 
 > 强调一下，这边的 d-q 系是定子静止坐标系。本身在感应电机建模中讲 d-q 坐标系就很反常了，所以不应该出现误解。为什么原作者要这么做？因为他们要提出一个感应电机和同步电机通用的模型。
@@ -75,6 +79,8 @@ $$i_z=\sqrt{i_{zq}^2+i_{zd}^2}=i_m+\psi_m/L_{\Sigma l}$$
 ## 气隙磁链结算
 
 气隙磁链可以用你的表和z标电流进行求解：
+
+{% raw %}
 $$
 \left\{ \begin{array}{l}
 {\psi _{mq}} = {\psi _m}\frac{{{i_{zq}}}}{{{i_z}}} = G\left( {{i_z}} \right)\frac{{{i_{zq}}}}{{{i_z}}}\\
@@ -82,10 +88,13 @@ $$
 \end{array} \right.
 $$
 
+{% endraw %}
 
 ## 电流解算
 
 求电流就是先求漏磁链，除以漏电感就是了。
+
+{% raw %}
 $$
 \left\{ \begin{array}{l}
 {i_{qs}} = \frac{{{\psi _{qs}} - {\psi _{mq}}}}{{{L_{ls}}}}\\
@@ -94,6 +103,8 @@ $$
 {\psi _{dr}} = {L_{lr}}{i_{dr}} + {\psi _{md}}
 \end{array} \right.
 $$
+{% endraw %}
+
 这里已经全了——定转子的d、q轴电流——不要被形式所迷惑。这边求得的电流，带入到定、转子磁链结算那一步，你的数值积分求解器就能跑下去了。
 
 
@@ -101,6 +112,8 @@ $$
 ## m标电流解算（此步没有任何实际意义，请跳过）
 
 根据当前步的磁链状态导出以m为下标的电流。
+
+{% raw %}
 $$
 \left\{ \begin{array}{l}
 {i_{mq}} = \left( {\frac{{{\psi _{qs}}}}{{{L_{ls}}}} + \frac{{{\psi _{qr}}}}{{{L_{lr}}}}} \right) - \left( {\frac{{{\psi _{mq}}}}{{{L_{ls}}}} + \frac{{{\psi _{mq}}}}{{{L_{lr}}}}} \right)\\
@@ -108,6 +121,7 @@ $$
 \end{array} \right.
 $$
 
+{% endraw %}
 
 ## 代码实现
 
