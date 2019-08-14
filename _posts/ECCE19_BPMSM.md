@@ -1,5 +1,19 @@
 # ECCE 2019 BPMSM
 
+The purpose: which topology is the best combination (Cost). What is the cause to force ripple?
+
+Structural analysis can be optional: what about the sleeve length?
+
+Cannot use FEMM because JMAG gives more reliable results on loss (core loss and magnet loss).
+
+
+
+
+
+
+
+
+
 1. Draw the geometry
 
     - A VanGogh subclass that takes in parameters as pole, slot, segment numbers.
@@ -24,9 +38,9 @@
 
 5. 
 
+     
+
     
-   
-   
 
 **Make reasonable optimization problem definition. The problematic thing is the high dimension of the design space. I suggest we try our best to reduce the design space for the conference. I mean it does not hurt for me when I code for more geometry variables. But I has a strong feeling that a large design space means that the optimal design is not possible to be found.**
 

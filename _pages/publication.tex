@@ -1,0 +1,214 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
+\usepackage[unicode=true]{hyperref}
+\hypersetup{
+            pdftitle={Publications},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+
+\title{Publications}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{J. Chen} and E. L. Severson
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \href{https://github.com/horychen/Publications/blob/master/2019-Chen.Severson-Design.pdf}{\textbf{Design
+    and modeling of the bearingless induction motor}}
+  \item
+    2019 IEEE International Electric Machines and Drives Conference
+    (IEMDC),
+  \item
+    May 2019.
+  \end{itemize}
+\item
+  \textbf{J. Chen} and J. Huang
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \href{https://github.com/horychen/Publications/blob/master/2018-Chen.Huang-Globally\%20LyReg\%20-\%20Early\%20Access\%20Version.pdf}{\textbf{Globally
+    Stable Speed-Adaptive Observer with Auxiliary States for Sensorless
+    Induction Motor Drives}}
+  \item
+    IEEE Transactions on Power Electronics, vol.~34, no. 1,
+  \item
+    Jan 2019.
+  \end{itemize}
+\item
+  \textbf{J. Chen}, J. Huang and Y. Sun
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \href{https://github.com/horychen/Publications/blob/master/2018-Chen.Huang.ea-Resistances\%20-\%20Early\%20Access.pdf}{\textbf{Resistances
+    and Speed Estimation in Sensorless Induction Motor Drives Using a
+    Model with Known Regressors}}
+  \item
+    IEEE Transactions on Industrial Electronics, vol.~66, no. 4,
+  \item
+    April 2019.
+  \end{itemize}
+\item
+  \textbf{J. Chen} and J. Huang
+
+  \begin{itemize}
+  \item
+    \href{https://github.com/horychen/Publications/blob/master/2018-Chen.Huang-Application\%20EA\%2008454267.pdf}{\textbf{Application
+    of Adaptive Observer to Sensorless Induction Motor Via
+    Parameter-dependent Transformation}}
+  \item
+    IEEE Transactions on Control Systems Technology, doi:
+    10.1109/TCST.2018.2863668,
+  \item
+    \begin{enumerate}
+    \def\labelenumii{\arabic{enumii}.}
+    \setcounter{enumii}{2018}
+    \item
+    \end{enumerate}
+  \end{itemize}
+\item
+  \textbf{J. Chen} and J. Huang
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \href{https://github.com/horychen/Publications/blob/master/2017-Chen.Huang-Stable\%20EMFState\%20Early\%20Access\%20Version.pdf}{\textbf{Stable
+    Simultaneous Stator and Rotor Resistances Identification for Speed
+    Sensorless Induction Motor Drives: Review and New Results}}
+  \item
+    IEEE Transactions on Power Electronics, vol.~33, no. 10,
+    pp.~8695-8709,
+  \item
+    Oct 2018.
+  \end{itemize}
+\item
+  \textbf{J. Chen} and J. Huang
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \href{https://github.com/horychen/Publications/blob/master/2017-Chen.Huang-Online\%20EA.pdf}{\textbf{Online
+    Decoupled Stator and Rotor Resistances Adaptation for Speed
+    Sensorless Induction Motor Drives by a Time-division Approach}}
+  \item
+    IEEE Transactions on Power Electronics, vol.~32, no. 6,
+    pp.~4587-4599,
+  \item
+    June 2017.
+  \end{itemize}
+\item
+  \textbf{J. Chen}, J. Huang, and M. Ye
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \href{https://github.com/horychen/Publications/blob/master/2017-Chen.Huang.ea-Totally.pdf}{\textbf{Totally
+    Adaptive Observer for Speed Sensorless Induction Motor Drives:
+    Simply a Cost of Extra Energy Consumption}}
+  \item
+    IEEE International Electric Machines and Drives Conference (IEMDC).
+  \item
+    May 2017.
+  \end{itemize}
+\item
+  L. Zhao, J. Huang, \textbf{J. Chen}, and M. Ye
+
+  \begin{itemize}
+  \tightlist
+  \item
+    A Parallel Speed and Rotor Time Constant Identification Scheme for
+    Indirect Field Oriented Induction Motor Drives
+  \item
+    IEEE Transactions on Power Electronics, vol.~31, no. 9,
+    pp.~6494-6503,
+  \item
+    Sept 2016.
+  \end{itemize}
+\item
+  T. Wang, J. Huang, M. Ye, \textbf{J. Chen}, W. Kong, M. Kang, and M.
+  Yu
+
+  \begin{itemize}
+  \tightlist
+  \item
+    An EMF Observer for PMSM Sensorless Drives Adaptive to Stator
+    Resistance and Rotor Flux-Linkage
+  \item
+    IEEE Journal of Emerging and Selected Topics in Power Electronics,
+    doi: 10.1109/JESTPE.2018.2865862.
+  \item
+    2019
+  \end{itemize}
+\item
+  Wang, T., Huang, J., Lin, B., Kang, M., \textbf{Chen, J.}, \& Kong, W.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \href{https://github.com/horychen/Publications/blob/master/wt-2019-eccentricity.pdf}{\textbf{Eccentricity
+    detection of a six-phase induction motor with HFI}}
+  \item
+    IET Electric Power Applications.
+  \item
+    2019
+  \end{itemize}
+\end{enumerate}
+
+\end{document}

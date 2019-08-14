@@ -1,3 +1,40 @@
+## Test Plan
+
+Oscilloscope and current sensor are required for the first two test.
+
+Closed loop current control is required for self-commissioning.
+
+1. No-load test.
+    1. The magnetizing curve.
+2. Blocked-rotor test.
+    1. Torque capability.
+    2. The test-stand is not ready yet.
+3. Self-commissioning.
+    1. The leakage inductance.
+    2. The rotor resistance.
+    3. The magnetizing inductance.
+    4. The stator resistance and the inverter nonlinearity.
+
+
+
+## The Components
+
+- Lubrication-Free Swivel Joint (1)
+    - https://www.mcmaster.com/2995K34
+- Film (2)
+    - https://www.mcmaster.com/2271k72
+- 15mm ID bearing (2)
+    - https://www.mcmaster.com/5972k358
+- Universal Joint (Misumi)
+    - [https://us.misumi-ec.com/vona2/detail/221000591976/?CategorySpec=00000043651%3a%3ae%09unitType%3a%3a1%0900000043715%3a%3amig00000001448287&Inch=0](https://us.misumi-ec.com/vona2/detail/221000591976/?CategorySpec=00000043651%3a%3ae	unitType%3a%3a1	00000043715%3a%3amig00000001448287&Inch=0)
+- Shaft Collar for the sensor target
+    - Build it ourselves? 
+    - Must be aluminum.
+
+
+
+
+
 ## Measurement
 
 ### The resistance
