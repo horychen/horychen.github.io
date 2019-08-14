@@ -50,7 +50,7 @@ Note: must use “**4 Watt option**” of the resistance meter (see the video: �
 
 
 
-## High voltage (leakage current) test
+## High potential/voltage (leakage current) test
 
 The stator (with winding) passed the test for 400 Volts! See the picture below for detail.
 
