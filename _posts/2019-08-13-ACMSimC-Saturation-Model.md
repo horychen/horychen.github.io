@@ -127,9 +127,7 @@ $$
 
 为了第一次看到本文的读者，我啰嗦一下，代码在我的 Github 页面上，对于代码的解释，我倾向于使用视频教程的形式进行介绍，这样更符合二十一世纪的风格。
 
-哔哩哔哩传送门：
-
-【还没录好】
+哔哩哔哩传送门：https://www.bilibili.com/video/av63771498/
 
 
 
@@ -146,3 +144,46 @@ $$
 > 本文针对感应电机写作，实际上该饱和模型同样适用于同步电机，具体请参考 Therrien 2013。
 >
 > Therrien, F., Wang, L., Jatskevich, J., & Wasynczuk, O. (2013). Efficient explicit representation of AC machines main flux saturation in state-variable-based transient simulation packages. *IEEE Transactions on Energy Conversion*, *28*(2), 380-393.
+
+
+
+## **Future Topics (Updated)**
+
+- C语言电机仿真架构 / framework in C language **(done in EP01)**
+- 矢量控制 / Vector control **(done in EP02)**
+- 永磁电机的仿真 **(done in EP03)**
+- 为什么前向欧拉法是个大坑？
+- [永磁电机的滑模观测器](https://www.zhihu.com/question/323600165)
+- 系统控制参数的可视化与优化框架 / Visualization and optimization of system control parameters
+- 电机设计的电路参数拟合
+- 变步长数值积分 / DoPri54
+- 电机参数自整定
+- 电流环系数设计
+- 电压电流解耦电路 **(done in EP04)**
+- 转速环系数设计
+- 转动惯量辩识
+- 无速度传感器系统中的转动惯量辨识
+- 自抗扰控制
+- 基于带宽指标的自抗扰控制系数设计
+- 预测控制（预测电流控制，PCC）与优化目标
+- 全局稳定转速自适应观测器设计
+- 一种简单的自适应观测器（模型参考自适应系统，MRAS）设计及其存在的问题 **(done in EP05)**
+- 逆变器非线性建模 / inverter nonlinearity
+- SPWM建模
+- SVPWM建模
+- 饱和建模 / modeling of saturation **(done in this article as EP06)**
+- 结合场的建模策略（查表法）
+- 如何绘制任意控制策略的电机运行工况效率图？
+- 非理想电流测量环节建模（温飘与不对称）
+- 母线电容建模和无轴承电机的仿佛有UPS控制
+- 异步伺服（异步电机的位置控制媲美永磁电机的关键是？）
+- 低成本单母线电流传感器驱动的实现
+- 无轴承感应电机建模
+- 基于扩展反电势模型的无传感器控制
+- 基于 Active Flux 模型的无传感器控制
+- 三维模型的绘制技巧 / SolidWorks Modeling **(done)**
+- 番外：使用免费有限元软件实现感应电机的设计与优化 **(done 1/4)**
+- 番外：使用旋转静态场有限元实现电机转矩脉动的超准确分析（嗯，堪比瞬态场）
+- 番外：Notched Rotor（介于表贴和内嵌之间的一种转子）永磁电机的设计
+- 番外：高速实心转子的设计与优化
+- 番外：机器学习之电机建模竞赛
