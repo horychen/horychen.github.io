@@ -45,3 +45,7 @@ comments: true
     - [**Eccentricity detection of a six-phase induction motor with HFI**](https://github.com/horychen/Publications/blob/master/wt-2019-eccentricity.pdf)
     - IET Electric Power Applications.
     - 2019 
+9. C. Di, I. Petrov, J. Pyrhönen and **J. Chen**, 
+    - [**Accelerating the Time-Stepping Finite-Element Analysis of Induction Machines in Transient-Magnetic Solutions**](http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8819918&isnumber=6514899)
+    - IEEE Access (doi: 10.1109/ACCESS.2019.2938269)
+    - 2019 
