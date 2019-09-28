@@ -109,9 +109,9 @@ analytics:
 author:
   name             : "Jiahao Chen | 陈嘉豪"
   avatar           : "/assets/images/bio-photo.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "Visiting scholar at UW-Madison.\nPhD candidate at Zhejiang University.\nMajor in electrical engineering."
-  location         : "USA"
-  email            : "jiahao.chen@wisc.edu"
+  bio              : "PhD candidate at Zhejiang University."
+  location         : "China"
+  email            : "horychen@qq.com"
   links:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
