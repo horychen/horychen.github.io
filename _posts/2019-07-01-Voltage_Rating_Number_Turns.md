@@ -3,7 +3,7 @@ layout: single
 title:  "About Voltage Rating, Number of Turns Per Slot, Stands in Hand, etc."
 date:   2019-07-01
 categories: tech
-published: false
+published: true
 ---
 
 * TOC
