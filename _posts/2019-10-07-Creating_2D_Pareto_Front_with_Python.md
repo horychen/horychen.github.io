@@ -1,3 +1,15 @@
+---
+layout: single
+title:  "Creating 2D Pareto Front with Python"
+date:   2019-10-07
+categories: tech
+published: true
+---
+
+* TOC
+{:toc}
+
+
 # Creating 2D Pareto Front with Python
 
 Step by step:
