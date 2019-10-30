@@ -8,20 +8,26 @@ published: false
 
 <!-- # add some archive and more
 http://joshualande.com/jekyll-github-pages-poole
-# learn basics 
+# learn basics
+
 https://jekyllrb.com/docs/step-by-step/02-liquid/
 https://programminghistorian.org/en/lessons/building-static-sites-with-jekyll-github-pages -->
 
 <!-- > 不知道出了什么BUG，在知乎上修改这篇文章的时候，原来的内容都会消失不见了，无法继续更新。 -->
+
 > 由于此次出国交流，我发现人与人之间的文化差异的表现之一就是各自以为理所当然的东西可能对方全然不知。我觉得很有意思，故决定将我眼中视为最直接不过的事实写下来。实际上，再加上时间这道鸿沟，从未来回过头来看，应该别有一番风味吧。本文预计将不断更新（自上而下更新，即新的写在前面）
 <!-- 欢迎大家也加入这个活动，写完在评论里告诉我你的你眼中的常识的文章的地址。不觉得很符合知乎这个网站的初衷吗？ -->
 >——写着写着好像文章主旨现在跑偏了，那就这样吧，所以现在的写作目的改为记录生活工作中的小技巧。
 
+国际版的百度知道？Wiki how
 
-### When you do want to insert a <br /> break tag using Markdown, you end a line with two or more spaces, then type return.   
+
+### When you do want to insert a <br /> break tag using Markdown, you end a line with two or more spaces, then type return.
+
 From: https://daringfireball.net/projects/markdown/syntax#p
 
 ### Sublime Text 配置
+
 https://www.youtube.com/watch?v=xFciV6Ew5r4
 ctrl + shift + p，输入select theme，建议选择第一个Adaptive
 
@@ -29,8 +35,8 @@ ctrl + shift + p，输入select theme，建议选择第一个Adaptive
 ### How to exit git log or git diff? [duplicate]
 https://stackoverflow.com/questions/9483757/how-to-exit-git-log-or-git-diff
 
-
 ### TraitsUI Install
+
 在给Python添加TraitsUI库的时候，pip install Enable需要用到swig.exe，实际上你安装了swig.exe也于事无补，去找enable的whl文件进行安装。其次，如果遇到找不到wx.combo的情况，去下载wxpython的3.0版本安装即可，注意，如果用了pip install wxpython的，必须pip uninstall wxpython——参考下面的链接：
 GUI Error -  ImportError: No module named combo · Issue #263 · MrS0m30n3/youtube-dl-gui
 
@@ -170,7 +176,7 @@ R_ring = end ring circumference / (electric conductivity x end ring cross-sectio
 ### 为了理解有限元的求解器的工作原理，基础中的基础是理解迭代的效果。比如，如何利用计算机求解任意正数的平方根？参看：
 
 ### Why does newton's method of successive approximation to compute square roots work?
-​
+
 math.stackexchange.com
 图标
 
