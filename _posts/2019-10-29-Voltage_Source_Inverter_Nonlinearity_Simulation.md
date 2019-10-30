@@ -24,6 +24,8 @@ published: true
 
 
 
+# Smack It!
+
 新建一个文件叫 inverter.c，内容如下：
 
 ```c
@@ -62,6 +64,10 @@ void InverterNonlinearity_SKSul96(double ual, double ube, double ial, double ibe
 5. 逆变器非线性的存在，会使得实际的开关管导通的时间不同于你所期望的。比如我们有开通时间Ton、关断时Toff间、死区时间Tdead，和死区补偿时间Tcomp。注意，根据伏秒等效，这里的时间都等效于畸变电压。那为什么要除以六呢？大概是因为一个周期三相桥臂开关六次之类的原因（我不记得了），具体参考SK Sul教授的文章。
 6. 最后呢，就是只有电流流通的时候，上面提到的各个畸变电压才会作用，而且作用的方向和电流流通的方向相关，具体参考SK Sul教授的文章。
 7. 以上代码有一个优点就是不需要碰相电量（相电压和相电流以及Clarke变换）。
+
+
+
+> Github 代码地址在这里： https://github.com/horychen/ACMSIMC_TUT/tree/inverter_model 
 
 
 
@@ -108,7 +114,7 @@ void InverterNonlinearity_SKSul96(double ual, double ube, double ial, double ibe
 
 # 视频
 
-还没录。。。
+视频地址： https://www.bilibili.com/video/av73918209/ 
 
 
 
@@ -117,4 +123,4 @@ void InverterNonlinearity_SKSul96(double ual, double ube, double ial, double ibe
 - Tsuji-2001的逆变器非线性模型
 - 离线的死区补偿方法（Rasmussen-1996）
 - 在线的死区补偿方法（Park.Sul-2014）
-- VCO电压传感器（许扬的工作）
+- VCO电压传感器（许扬博士的工作）
