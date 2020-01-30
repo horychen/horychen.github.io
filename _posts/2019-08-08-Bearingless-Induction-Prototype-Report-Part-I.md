@@ -4,6 +4,7 @@ title:  "Bearingless Induction Motor Prototype Report--Part I"
 date:   2019-08-08
 categories: tech
 published: false
+classes: wide
 ---
 
 * TOC

@@ -3,6 +3,7 @@ layout: single
 title:  "ACMSimC: AC Machine Simulation Framework in C"
 date:   2019-05-04
 categories: tutorial
+classes: wide
 ---
 
 <!-- # ACMSimC: AC Machine Simulation Tool in C Language -->
@@ -97,17 +98,17 @@ $$\begin{array}{l}
 Simulation procedure is as follows:
 
     for loop begins{
-
+    
         time
-
+    
         machine_simulation(); // machine_dynamics, numeric_integration
-
+    
         measurement(); // speed, current
-
+    
         observation(); // observer 
-
+    
         control(); // speed_control, current_control
-
+    
         inverter_model(); // 
     }
 

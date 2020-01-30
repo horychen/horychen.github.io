@@ -109,8 +109,8 @@ analytics:
 author:
   name             : "Jiahao Chen | 陈嘉豪"
   avatar           : "/assets/images/bio-photo.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "PhD candidate at Zhejiang University."
-  location         : "China"
+  bio              : "Ph.D. from Zhejiang University."
+  location         : "Singapore/China"
   email            : "horychen@qq.com"
   links:
     - label: "Email"

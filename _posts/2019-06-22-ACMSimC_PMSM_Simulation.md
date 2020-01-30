@@ -4,6 +4,7 @@ title:  "ACMSimC: PMSM Control Simulation"
 date:   2019-06-22
 categories: tutorial
 published: true
+classes: wide
 ---
 
 > 本篇是本系列第三集，第一集请戳：[EP01](https://horychen.github.io/tutorial/AC-Machine-Simulation-Framework-in-C/)。

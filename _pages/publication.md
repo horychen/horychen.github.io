@@ -4,6 +4,7 @@ layout: archive
 permalink: /publication/
 author_profile: true
 comments: true
+classes: wide
 ---
 1. **J. Chen** and J. Huang
     - [**Alternative Solution Regarding Problems of Adaptive Observer Compensating Parameters Uncertainties for Sensorless Induction Motor Drives**](https://github.com/horychen/Publications/blob/master/2019-Chen.Huang-Alternative%20EA.pdf)

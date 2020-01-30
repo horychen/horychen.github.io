@@ -4,6 +4,7 @@ title:  "Voltage Source Inverter Nonlinearity"
 date:   2019-10-29
 categories: tutorial
 published: true
+classes: wide
 ---
 
 * TOC
@@ -63,7 +64,7 @@ void InverterNonlinearity_SKSul96(double ual, double ube, double ial, double ibe
 4. 一般认为母线电压Udc是恒定值，比如300 V，那如何输出一个无级调节的电压呢？就是在一个载波周期 TS 内，只在某些时候输出母线电压（即开关管导通），母线电压的作用时间除以载波周期就是占空比。如果想输出一个30V的电压，那么可以令占空比为10%。
 5. 逆变器非线性的存在，会使得实际的开关管导通的时间不同于你所期望的。比如我们有开通时间Ton、关断时Toff间、死区时间Tdead，和死区补偿时间Tcomp。注意，根据伏秒等效，这里的时间都等效于畸变电压。那为什么要除以六呢？大概是因为一个周期三相桥臂开关六次之类的原因（我不记得了），具体参考SK Sul教授的文章。
 6. 最后呢，就是只有电流流通的时候，上面提到的各个畸变电压才会作用，而且作用的方向和电流流通的方向相关，具体参考SK Sul教授的文章。
-7. 以上代码有一个优点就是不需要碰相电量（相电压和相电流以及Clarke变换）。
+7. 以上代码有一个优点就是不需要碰相电压。
 
 
 

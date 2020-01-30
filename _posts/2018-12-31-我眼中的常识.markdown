@@ -4,10 +4,35 @@ title:  "我眼中的常识（未编辑完成）"
 date:   2018-12-31 02:01:13 -0600
 categories: private
 published: false
+classes: wide
 ---
+
+
+
+转换pdf为eps（需要texlive）
+
+echo off
+set arg1=%1
+shift
+shift
+pdftops %arg1%.pdf %arg1%-temp.ps
+ps2eps %arg1%-temp.ps
+move %arg1%-temp.eps %arg1%.eps
+
+rem ref: https://stackoverflow.com/questions/26551/how-can-i-pass-arguments-to-a-batch-file
+
+rem inkscape TDDA_inner_block_cn.pdf --export-eps=TDDA_inner_block_cn.eps
+rem font will be lost
+
+
+
+
+
+
 
 <!-- # add some archive and more
 http://joshualande.com/jekyll-github-pages-poole
+
 # learn basics
 
 https://jekyllrb.com/docs/step-by-step/02-liquid/
@@ -18,6 +43,34 @@ https://programminghistorian.org/en/lessons/building-static-sites-with-jekyll-gi
 > 由于此次出国交流，我发现人与人之间的文化差异的表现之一就是各自以为理所当然的东西可能对方全然不知。我觉得很有意思，故决定将我眼中视为最直接不过的事实写下来。实际上，再加上时间这道鸿沟，从未来回过头来看，应该别有一番风味吧。本文预计将不断更新（自上而下更新，即新的写在前面）
 <!-- 欢迎大家也加入这个活动，写完在评论里告诉我你的你眼中的常识的文章的地址。不觉得很符合知乎这个网站的初衷吗？ -->
 >——写着写着好像文章主旨现在跑偏了，那就这样吧，所以现在的写作目的改为记录生活工作中的小技巧。
+
+
+
+Sublime Text 配置
+https://www.youtube.com/watch?v=xFciV6Ew5r4
+ctrl + shift + p，输入select theme，建议选择第一个Adaptive
+
+
+
+在给Python添加TrantUI库的时候，pip install Enable需要用到swig.exe，实际上你安装了swig.exe也于事无补，去找enable的whl文件进行安装。其次，如果遇到找不到wx.combo的情况，去下载wxpython的3.0版本安装即可，注意，如果用了pip install wxpython的，必须pip uninstall wxpython——参考下面的链接：
+GUI Error - ImportError: No module named combo · Issue #263 · MrS0m30n3/youtube-dl-gui
+
+
+
+How to exit git log or git diff? [duplicate]
+https://stackoverflow.com/questions/9483757/how-to-exit-git-log-or-git-diff
+
+
+
+让office word优先保存到本地再同步到onedrive：
+https://office365.uservoice.com/forums/264636-general/suggestions/15994462-option-to-save-office-files-to-local-drive-first
+Depending on whether you need 'real-time' collaboration, you have an option to disable this 'feature' from within the OneDrive client. If you launch 'OneDrive' app, then Settings, and go into the 'Office' Tab, and remove the checkmark for 'Use Office 2016 to sync Office files that I open', your system will default to saving the file locally. Once saved, OneDrive sync will upload to the server.
+
+
+
+如何绘制矢量图SVG？看 [Logos By Nick](https://www.youtube.com/channel/UCEQXp_fcqwPcqrzNtWJ1w9w)： https://www.youtube.com/watch?v=_yb-QWsJBjY 
+
+
 
 国际版的百度知道？Wiki how
 

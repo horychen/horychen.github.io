@@ -4,6 +4,7 @@ layout: archive
 permalink: /blog/
 author_profile: true
 comments: true
+classes: wide
 ---
 
 This blog serves as a clean list for the video tutorial I make.

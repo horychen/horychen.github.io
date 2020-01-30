@@ -4,6 +4,7 @@ title:  "The Right Way To Add BH Curve (Not-Finished)"
 date:   2019-01-07
 categories: tech
 published: false
+classes: wide
 ---
 # Extrapolation
 
@@ -17,8 +18,8 @@ You can use table for this. It works fine.
 ![useful image]({{ site.url }}/assets/image.png)
 
 
-| ![space-1.jpg]({{horychen.github.io}}/assets/Figure_7.png) | 
-|:--:| 
+| ![space-1.jpg]({{horychen.github.io}}/assets/Figure_7.png) |
+|:--:|
 | *Space* |
 
 

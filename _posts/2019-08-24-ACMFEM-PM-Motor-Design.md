@@ -4,6 +4,7 @@ title:  "ACMFEM - Simple (Surface Mounted) Permanent Magnet Motor Design"
 date:   2019-08-23
 categories: tutorial
 published: false
+classes: wide
 ---
 
 * TOC

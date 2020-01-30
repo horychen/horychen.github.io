@@ -6,6 +6,7 @@ date:   2019-06-08
 categories: tech
 published: false
 # visible: 0
+classes: wide
 ---
 
 <!-- # ECCE 2019 Full Paper Bearingless Induction -->

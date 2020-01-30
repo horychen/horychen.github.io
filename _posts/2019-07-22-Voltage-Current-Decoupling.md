@@ -4,6 +4,7 @@ title:  "ACMSimC: Voltage-Current Decoupling"
 date:   2019-07-22
 categories: tutorial
 published: true
+classes: wide
 ---
 
 * TOC

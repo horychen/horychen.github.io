@@ -4,6 +4,7 @@ title:  "ACMSimC: Modeling Saturation"
 date:   2019-08-13
 categories: tutorial
 published: true
+classes: wide
 ---
 
 * TOC

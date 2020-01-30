@@ -4,6 +4,7 @@ title:  "Adaptive Observer for Induction Motors (Conventional) "
 date:   2019-07-25
 categories: tutorial
 published: false
+classes: wide
 ---
 
 * TOC
