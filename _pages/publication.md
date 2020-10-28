@@ -7,16 +7,25 @@ comments: true
 classes: wide
 ---
 1. **J. Chen**, J. Zhu, and E. L. Severson
-	- Review of Bearingless Motor Technology for Significant Power Applications
-	- IEEE Transactions on Industrial Applications, DOI: 10.1109/TIA.2019.2963381.
+	- [**Review of Bearingless Motor Technology for Significant Power Applications**](https://github.com/horychen/Publications/blob/master/2019-chen.zhu.severson-Review.pdf)
+	- DOI: 10.1109/TIA.2019.2963381.
+	- IEEE Transactions on Industry Applications, Volume: 56, Issue: 2.
+	- March-April 2020
 3. **J. Chen** and J. Huang
     - [**Alternative Solution Regarding Problems of Adaptive Observer Compensating Parameters Uncertainties for Sensorless Induction Motor Drives**](https://github.com/horychen/Publications/blob/master/2019-Chen.Huang-Alternative%20EA.pdf)
-    - IEEE Transactions on Industrial Electronics, Early Access.
-4. **J. Chen** and E. L. Severson, “Optimal Design of the Bearingless Induction Motor for Industrial Applications,” *in Proc. of IEEE Energy Conversion Congress and Exposition (ECCE)*, September 2019, Baltimore, MD, USA.
-5. **J. Chen**, A. Farhan, and E. L. Severson, “Design of Bearingless Permanent Magnet Motors Using No Voltage Combined Windings,” *in Proc. of The 10th International Conference on Power Electronics, Machines and Drives*, April 2020, Nottingham, United Kingdom.
+    - IEEE Transactions on Industrial Electronics, Volume: 67, Issue: 7.
+    - July 2020.
+4. **J. Chen** and E. L. Severson
+    - [**Optimal Design of the Bearingless Induction Motor for Industrial Applications**](https://github.com/horychen/Publications/blob/master/2019-Chen.Severson-Optimal%20(ECCE%202019).pdf)
+    - *in Proc. of IEEE Energy Conversion Congress and Exposition (ECCE)*
+    - September 2019, Baltimore, MD, USA.
+5. **J. Chen**, A. Farhan, M. Johnson, and E. L. Severson
+	- Design of Bearingless Permanent Magnet Motors Using No Voltage Combined Windings
+	- *in Proc. of The 10th International Conference on Power Electronics, Machines and Drives*
+	- Apr. 2020, Nottingham, United Kingdom.
 6. **J. Chen** and E. L. Severson
     - [**Design and modeling of the bearingless induction motor**](https://github.com/horychen/Publications/blob/master/2019-Chen.Severson-Design.pdf)
-    - 2019 IEEE International Electric Machines and Drives Conference (IEMDC), 
+    - IEEE International Electric Machines and Drives Conference (IEMDC), 
     - May 2019, San Diego, CA, USA.
 7. **J. Chen** and J. Huang
     - [**Globally Stable Speed-Adaptive Observer with Auxiliary States for Sensorless Induction Motor Drives**](https://github.com/horychen/Publications/blob/master/2018-Chen.Huang-Globally%20LyReg%20-%20Early%20Access%20Version.pdf)
