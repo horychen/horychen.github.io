@@ -1,8 +1,11 @@
-1. **The idea of a surface current density.** Circumferential current density and linear current density: $A_c/r=A$, with $r$ the air gap radius.
+https://support.typora.io/Images/
+
+
+2. 1. **The idea of a surface current density.** Circumferential current density and linear current density: $A_c/r=A$, with $r$ the air gap radius.
    
-1. ![1572536218797](assets/images/1572536218797.png)
+1. ![1572536218797](./assets/images/1572536218797.png)
    
-2. Assume there is a **linear surface current density** on the inner bore of the stator: $A(\alpha) = \hat A \sin(n\alpha -\psi)$. The dimension of $A$ is $\rm A/m$. This is probably done with a winding (subscript $~_w$).
+2. Assume there is a **linear surface current density** on the inner bore of the stator: $A(\alpha) = \hat A \sin(n\alpha -\psi)$. The dimension of $A$ is $\rm A/m$. This is probably due to a winding (subscript $~_w$) trying to generate torque (the current in it is called torque current). $n$ is the number of pole pair or the order of the component in question. $\psi$ is the winding axis (i.e., the location of the $q$-axis).
     1. This linear surface current density can be due to a 3 phase winding.
         1. $A(\alpha)=A_u + A_v + A_w = \frac{\hat A_{\rm ph,n}}{i}i_u \sin(n\alpha) + \frac{\hat A_{\rm ph,n}}{i}i_v \sin(n\alpha-\frac{2\pi}{3}) + \frac{\hat A_{\rm ph,n}}{i}i_w \sin(n\alpha-\frac{4\pi}{3})$ 
         2. $A_u = \frac{\hat A_{\rm ph,n}}{i}i_u \sin(n\alpha)$ 
@@ -30,14 +33,14 @@
     1. the tangential H-field $H_{\tan,w} (\alpha) = - A(\alpha)=\hat A \sin(n\alpha -\psi)$.
     2. the tangential flux density $B_{\tan,w} (\alpha) = -\mu_0 A(\alpha) = -\mu_0\hat A \sin(n\alpha -\psi)$.
     
-5. Normal fields due to induction motor’s rotor current plus stator’s magnetizing current, pm motor’s magnets, wound rotor synchronous motor’s field winding, $B_{n,m}=\hat B_m \cos(p\alpha-\theta)$
+5. **Normal fields** due to induction motor’s ~~rotor current plus~~ stator’s magnetizing current, pm motor’s magnets, wound rotor synchronous motor’s field winding, $B_{n,m}=\hat B_m \cos(p\alpha-\theta)$
 
     1. We’d better call this field the d-axis normal field, because $\theta$ indicates the d-axis location (at d-axis $B_{n,m}(\alpha)$ has its maximum), which means this normal field is essentially different from the normal field built by the torque current, $B_{n,w}$, because the normal field is aligned with winding axis $\psi$.
     2. In a broader sense, the d-axis normal field can somehow be manipulated by us.
     3. To do this, we inject the motor with another set of 3 phase currents, denoted by subscript $~_2$, whose winding axis is aligned with d-axis ($\psi_2=\theta$) and pole pair number is $n_2=p$. This gives:
         1. the normal flux density as $B_{n,w,2}(\alpha)=\mu_0\frac{r\hat A_2}{\delta_e p}\cos(p\alpha -\theta)$.
         2. and the tangential flux density $B_{\tan,w,2} (\alpha) = -\mu_0\hat A_2 \sin(p\alpha -\theta)$.
-    4. The “2” normal field can be absorbed into $\hat B_m$, **while the “2” tangential field $B_{\tan,w,2} (\alpha)$ should be able to create torque with the $B_{n,w}(\alpha)$, right?**
+    4. The “2” normal field can be absorbed into $\hat B_m$, **while the “2” tangential field $B_{\tan,w,2} (\alpha)$ should be able to create torque with the $B_{n,w}(\alpha)$, right? (This is a hypothesis  which is wrong.）**
 
 6. Total fields in the air gap:
 
@@ -77,13 +80,17 @@
 
 
 
-The above is actually only valid for PM motor.
-
-Torque is calculated by $T = \psi_d i_q - \psi_q i_d$.
+The above conclusion from item 10 is actually only valid for PM motor, whose torque is calculated by $T = \psi_d i_q - \psi_q i_d$.
 
 For induction machine, $\psi_q$ is always null, so if you increase/decrease $\psi_d$, the torque will change accordingly.
 
 There will be no $B_{n,w}$ for induction machine because the induced $T$-axis rotor current will cancel the normal field at $T$-axis.
+
+
+
+In addition, the asynchronous torque in induction motor is another story, because the stator harmonic field will generate rotor harmonic currents of the same order, i.e., 5 or 7... which means there will be harmonic components for flux density $B_{n,m}$.
+
+![image-20200213194936695](./assets/images/image-20200213194936695.png)
 
 
 
@@ -94,6 +101,11 @@ Things left to do,
 1. re-visit the winding function generator,
 2. analyze the windings using Fourier series and get $A_{\rm ph, n}/i$ for real. Here $~_n$ means n-th harmonic component.
 3. armature effect and flux strengthening, why do they cancel each other?
+4. How to derive 6-order torque ripple? See 1998-Chung
+
+![image-20200213200743762](assets/images/image-20200213200743762.png)
+
+
 
 
 
@@ -102,4 +114,8 @@ Things left to do,
 1. 学习电机设计理论，比如电机常数这些，知道了如何改参数调整电机的性能。
 2. 设计电机实战，考虑到一些机械性能，得到一个符合设计目标的电机的“template”，可以进一步考虑优化。
 3. 推导电机设计理论，进一步考虑电机的散热。
+
+
+
+
 
