@@ -17,7 +17,7 @@ My short bio:
 >
 > Visiting scholar with WEMPEC, University of Wisconsin-Madison from 2018/09 to 2019/09.
 >
-> Post-doc researcher with Nanyang Technology University Since 2020/02.
+> Post-doc researcher with Nanyang Technology University Since 2020/12.
 
 This blog initially serves as a clean list for the video tutorials I make.
 
