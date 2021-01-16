@@ -1,7 +1,7 @@
 https://support.typora.io/Images/
 
 
-2. 1. **The idea of a surface current density.** Circumferential current density and linear current density: $A_c/r=A$, with $r$ the air gap radius.
+1. **The idea of a surface current density.** Circumferential current density and linear current density: $A_c/r=A$, with $r$ the air gap radius.
    
 1. ![1572536218797](./assets/images/1572536218797.png)
    
@@ -40,7 +40,7 @@ https://support.typora.io/Images/
     3. To do this, we inject the motor with another set of 3 phase currents, denoted by subscript $~_2$, whose winding axis is aligned with d-axis ($\psi_2=\theta$) and pole pair number is $n_2=p$. This gives:
         1. the normal flux density as $B_{n,w,2}(\alpha)=\mu_0\frac{r\hat A_2}{\delta_e p}\cos(p\alpha -\theta)$.
         2. and the tangential flux density $B_{\tan,w,2} (\alpha) = -\mu_0\hat A_2 \sin(p\alpha -\theta)$.
-    4. The “2” normal field can be absorbed into $\hat B_m$, **while the “2” tangential field $B_{\tan,w,2} (\alpha)$ should be able to create torque with the $B_{n,w}(\alpha)$, right? (This is a hypothesis  which is wrong.）**
+    4. The “2” normal field can be absorbed into $\hat B_m$, **while the “2” tangential field $B_{\tan,w,2} (\alpha)$ should be able to create torque with the $B_{n,w}(\alpha)$, right? (This is a hypothesis  which turns out to be wrong.）**
 
 6. Total fields in the air gap:
 

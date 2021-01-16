@@ -107,7 +107,7 @@ analytics:
 
 # Site Author
 author:
-  name             : "Jiahao Chen | 陈嘉豪"
+  name             : "Jiahao Chen"
   avatar           : "/assets/images/bio-photo.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
   bio              : "Ph.D. from Zhejiang University."
   location         : "Singapore/China"
@@ -116,6 +116,9 @@ author:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
       # url: mailto:jiahao.chen@wisc.edu
+    - label: "Bilibili"
+      icon: "fas fa-fw fa-link"
+      url: "https://space.bilibili.com/7132537"
     - label: "Google Scholar"
       icon: "fas fa-fw fa-link"
       url: "https://scholar.google.com/citations?hl=en&user=A13oCMQAAAAJ"
