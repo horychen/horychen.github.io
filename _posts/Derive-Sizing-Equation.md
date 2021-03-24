@@ -119,3 +119,6 @@ Things left to do,
 
 
 
+Seok-Hee Han 2010 Torque Ripple Reduction in Interior Permanent Magnet Synchronous Machines Using Stators With Odd Number of Slots Per Pole Pair
+
+"C:\Users\horyc\Desktop\没见过的转矩公式用磁密沿着磁动势的积分求的，转矩脉动最小化【来自金文博 北航】.pdf"

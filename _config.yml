@@ -117,7 +117,7 @@ author:
       icon: "fas fa-fw fa-envelope-square"
       # url: mailto:jiahao.chen@wisc.edu
     - label: "Bilibili"
-      icon: "fas fa-fw fa-link"
+      icon: "fab fa-fw fa-bilibili-square"
       url: "https://space.bilibili.com/7132537"
     - label: "Google Scholar"
       icon: "fas fa-fw fa-link"

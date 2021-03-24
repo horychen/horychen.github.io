@@ -24,3 +24,4 @@ Find equivalent circuit for control.
 
 
 
+[[latex-writing-snippets]]
