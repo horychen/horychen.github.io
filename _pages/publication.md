@@ -5,8 +5,15 @@ permalink: /publication/
 author_profile: true
 comments: true
 classes: wide
+
 ---
-1. **J. Chen**, J. Zhu, and E. L. Severson
+
+*See also my [Zotero page](https://www.zotero.org/horychen) at https://www.zotero.org/horychen
+
+
+1. **Jiahao Chen**; Jie Mei; Xin Yuan; Yuefei Zuo; Christopher H. T. Lee
+	- [**Natural Speed Observer for Nonsalient AC Motors**](https://github.com/horychen/Publications/blob/master/2021-Chen.Lee-NSOAF-EA.pdf)
+2. **J. Chen**, J. Zhu, and E. L. Severson
 	- [**Review of Bearingless Motor Technology for Significant Power Applications**](https://github.com/horychen/Publications/blob/master/2019-chen.zhu.severson-Review.pdf)
 	- IEEE Transactions on Industry Applications, Volume: 56, Issue: 2.
 	- March-April 2020. [10.1109/TIA.2019.2963381](doi.org/10.1109/TIA.2019.2963381).
