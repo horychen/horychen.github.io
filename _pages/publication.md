@@ -14,13 +14,11 @@ classes: wide
 	- IEEE Transactions on Power Electronics.
 	- [10.1109/TPEL.2021.3094583](doi.org/10.1109/TPEL.2021.3094583)
 2. **Jiahao Chen**, Martin Johnson, Ashad Farhan, Yusuke Fujii, and Eric L Severson
-
-  1. **Reduced Axial Length Pole-Specific Rotor for Bearingless Induction Machines**
-  2. IEEE PES Transactions on Energy Conversion.
+	- **Reduced Axial Length Pole-Specific Rotor for Bearingless Induction Machines**
+	- IEEE PES Transactions on Energy Conversion.
 3. **Jiahao Chen** and Eric L. Severson
-
-  1. **Analysis of DPNV Winding For Bearingless Induction Motors with Reduced Axial Length Pole Specific Rotor**
-  2. ISMB 2021, Rio, Virtual Conference.
+	- **Analysis of DPNV Winding For Bearingless Induction Motors with Reduced Axial Length Pole Specific Rotor**
+	- ISMB 2021, Rio, Virtual Conference.
 4. **J. Chen**, J. Zhu, and E. L. Severson
   - [**Review of Bearingless Motor Technology for Significant Power Applications**](https://github.com/horychen/Publications/blob/master/2019-chen.zhu.severson-Review.pdf)
   - IEEE Transactions on Industry Applications, Volume: 56, Issue: 2.
