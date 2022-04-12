@@ -10,7 +10,7 @@ classes: wide
 
 
 1. **J. Chen**, J. Mei, X. Yuan, Y. Zuo, J. Zhu, and C. H. T. Lee, 
-	- [**Online Adaptation of Two-Parameter Inverter Model in Sensorless Motor Drives**](https://github.com/horychen/Publications/blob/master/2022-Chen.Lee-Online.pdf)
+	- [**Online Adaptation of Two-Parameter Inverter Model in Sensorless Motor Drives**](https://github.com/horychen/Publications/blob/master/2022-Chen.Lee-OnlineInverter-EA.pdf)
 	- IEEE Transactions on Industrial Electronics, 2022
 	- [10.1109/TIE.2021.3139173](doi.org/10.1109/TIE.2021.3139173)
 2. **Jiahao Chen**, Jie Mei, Xin Yuan, Yuefei Zuo, and Christopher H. T. Lee

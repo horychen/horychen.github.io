@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "_pages/about.md",
+            "file": "_pages/publication.md",
             "mode": "source",
             "source": false
           }
@@ -69,7 +69,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "_pages/about.md",
+                "file": "_pages/publication.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -89,9 +89,9 @@
   },
   "active": "d9a9320c15004312",
   "lastOpenFiles": [
+    "_pages/publication.md",
     "_pages/about.md",
     "_pages/blog.md",
-    "_pages/publication.md",
     "doi.org/10.1109/TIE.2021.3139173.md",
     "Untitled 1.md",
     "Untitled.md",
