@@ -24,10 +24,10 @@ This blog initially serves as a clean list for the video tutorials I make.
 Jiahao
 2019/12/10
 
-By the way, here is [my complete cv](https://github.com/horychen/Publications/blob/master/jiahao%20chen%20-%20cv%20-%20Jan%2002%202020%20-%20internet%20version.pdf).
+By the way, here is [my complete cv](https://github.com/horychen/Publications/blob/master/Chen%20Jiahao%20CV%20-%20Mar%2004%202022%20-%20internet%20version.pdf).
 
 Jiahao
-2020/01/30
+2022/04/12
 
 <!-- ![my photo]({{ site.url }}/assets/foo.png) -->
 <!-- https://github.com/jekyll/jekyll/issues/1325 -->

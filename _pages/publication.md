@@ -9,15 +9,19 @@ classes: wide
 ---
 
 
-1. **Jiahao Chen**, Jie Mei, Xin Yuan, Yuefei Zuo, and Christopher H. T. Lee
+1. **J. Chen**, J. Mei, X. Yuan, Y. Zuo, J. Zhu, and C. H. T. Lee, 
+	- [**Online Adaptation of Two-Parameter Inverter Model in Sensorless Motor Drives**](https://github.com/horychen/Publications/blob/master/2022-Chen.Lee-Online.pdf)
+	- IEEE Transactions on Industrial Electronics, 2022
+	- [10.1109/TIE.2021.3139173](doi.org/10.1109/TIE.2021.3139173)
+2. **Jiahao Chen**, Jie Mei, Xin Yuan, Yuefei Zuo, and Christopher H. T. Lee
 	- [**Natural Speed Observer for Nonsalient AC Motors**](https://github.com/horychen/Publications/blob/master/2021-Chen.Lee-NSOAF-EA.pdf)
-	- IEEE Transactions on Power Electronics.
+	- IEEE Transactions on Power Electronics, 2022
 	- [10.1109/TPEL.2021.3094583](doi.org/10.1109/TPEL.2021.3094583)
 2. **Jiahao Chen**, Martin Johnson, Ashad Farhan, Yusuke Fujii, and Eric L Severson
 	- **Reduced Axial Length Pole-Specific Rotor for Bearingless Induction Machines**
 	- IEEE PES Transactions on Energy Conversion.
 3. **Jiahao Chen** and Eric L. Severson
-	- **Analysis of DPNV Winding For Bearingless Induction Motors with Reduced Axial Length Pole Specific Rotor**
+	- [**Analysis of DPNV Winding For Bearingless Induction Motors with Reduced Axial Length Pole Specific Rotor**](https://github.com/horychen/Publications/blob/master/2022-Chen.Severson-ISMB_17_paper_70.pdf)
 	- ISMB 2021, Rio, Virtual Conference.
 4. **J. Chen**, J. Zhu, and E. L. Severson
   - [**Review of Bearingless Motor Technology for Significant Power Applications**](https://github.com/horychen/Publications/blob/master/2019-chen.zhu.severson-Review.pdf)
@@ -85,4 +89,4 @@ classes: wide
        - 2019.
 
 
-See also my [Zotero page](https://www.zotero.org/horychen) at https://www.zotero.org/horychen
+%%%%%%%%See also my [Zotero page](https://www.zotero.org/horychen) at https://www.zotero.org/horychen

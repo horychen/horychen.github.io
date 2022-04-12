@@ -4,14 +4,14 @@
     "type": "split",
     "children": [
       {
-        "id": "6da20d91e369bbe5",
+        "id": "d9a9320c15004312",
         "type": "leaf",
-        "active": true,
         "state": {
           "type": "markdown",
           "state": {
-            "file": "Untitled 1.md",
-            "mode": "source"
+            "file": "_pages/about.md",
+            "mode": "source",
+            "source": false
           }
         }
       }
@@ -69,10 +69,12 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Untitled 1.md",
+                "file": "_pages/about.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
                 "backlinkCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -85,14 +87,17 @@
     "width": 300,
     "collapsed": true
   },
+  "active": "d9a9320c15004312",
   "lastOpenFiles": [
+    "_pages/about.md",
+    "_pages/blog.md",
+    "_pages/publication.md",
+    "doi.org/10.1109/TIE.2021.3139173.md",
     "Untitled 1.md",
     "Untitled.md",
     "_posts/ACM_One_Video.md",
     "_posts/Derive-Sizing-Equation.md",
     "_posts/ECCE19_Induction_Plan.md",
-    "_posts/ECCE19_BPMSM.md",
-    "_posts/EfficiencyMap.md",
-    "_posts/Derive-Sizing-Equation.assets/image-20200213194801965.png"
+    "_posts/ECCE19_BPMSM.md"
   ]
 }
