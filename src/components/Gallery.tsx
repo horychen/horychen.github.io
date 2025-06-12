@@ -7,7 +7,7 @@ export default function Gallery({ className = "" }: { className?: string }) {
   const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/gallery")
+    fetch("/gallery.json")
       .then(res => res.json())
       .then(setImages);
   }, []);

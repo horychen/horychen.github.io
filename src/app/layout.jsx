@@ -52,6 +52,7 @@ export default async function RootLayout({ children }) {
           docsRepositoryBase="https://github.com/shuding/nextra/blob/main/examples/docs"
           sidebar={{ defaultMenuCollapseLevel: 1 }}
           pageMap={pageMap}
+          darkMode={false}
         >
           {children}
         </Layout>

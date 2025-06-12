@@ -3,7 +3,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build:gallery": "node scripts/generate-gallery-json.js",
+    "build": "npm run build:gallery && next build",
+    "export": "next export",
     "dev": "next --turbopack",
     "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
     "start": "next start"
