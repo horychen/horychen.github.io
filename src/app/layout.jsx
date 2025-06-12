@@ -3,6 +3,11 @@ import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { Banner, Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import 'nextra-theme-docs/style.css'
+import "./globals.css";
+import 'katex/dist/katex.min.css';
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
+
 
 export const metadata = {
   metadataBase: new URL('https://nextra.site'),
@@ -16,7 +21,7 @@ export const metadata = {
     title: 'Nextra'
   },
   other: {
-    'msapplication-TileImage': '/ms-icon-144x144.png',
+    'msapplication-TileImage': '/icon.png',
     'msapplication-TileColor': '#fff'
   },
   twitter: {
@@ -29,24 +34,21 @@ export default async function RootLayout({ children }) {
     <Navbar
       logo={
         <div>
-          <b>Nextra</b>{' '}
-          <span style={{ opacity: '60%' }}>The Next Docs Builder</span>
+          <b>M&M Lab</b>
         </div>
       }
-      // Next.js discord server
-      chatLink="https://discord.gg/hEM84NMkRv"
     />
   )
   const pageMap = await getPageMap()
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
+    <html lang="en" dir="ltr" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <Head faviconGlyph="✦" />
       <body>
         <Layout
-          banner={<Banner storageKey="Nextra 2">Nextra 2 Alpha</Banner>}
           navbar={navbar}
-          footer={<Footer>MIT {new Date().getFullYear()} © Nextra.</Footer>}
-          editLink="Edit this page on GitHub"
+          footer={<Footer>{new Date().getFullYear()} © M&M Lab.</Footer>}
+          editLink={<></>}
+          feedback={{content: <></>, link: '', labels: ''}}
           docsRepositoryBase="https://github.com/shuding/nextra/blob/main/examples/docs"
           sidebar={{ defaultMenuCollapseLevel: 1 }}
           pageMap={pageMap}

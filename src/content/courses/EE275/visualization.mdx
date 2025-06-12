@@ -1,0 +1,25 @@
+# C3. Visualization with DearPyGUI
+
+
+## Prerequisite
+
+1. Learn how to do numerical integration/simulaiton
+
+## Coding
+
+We are going to visualize the state transtion of the Lorenz system with aid of **DearPyGUI**.
+
+[Lorenz System](https://en.wikipedia.org/wiki/Lorenz_system#:~:text=The%20Lorenz%20system%20is%20a,solutions%20of%20the%20Lorenz%20system.)
+
+
+## Quiz
+
+<details>
+<summary>Write Plotly code to render a bar chart</summary>
+```python
+import plotly.express as px
+data_canada = px.data.gapminder().query("country == 'Canada'")
+fig = px.bar(data_canada, x='year', y='pop')
+fig.show()
+```
+</details>

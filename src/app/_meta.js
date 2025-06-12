@@ -1,13 +1,18 @@
 export default {
   index: {
-    display: 'hidden'
+    type: 'page',
+    title: 'Home'
+  },
+  courses: {
+    type: 'page',
+    title: 'Courses'
   },
   docs: {
     type: 'page',
-    title: 'Documentation'
+    title: 'Docs'
   },
-  blog: {
+  alumni: {
     type: 'page',
-    title: 'Blog'
+    title: 'Alumni'
   }
 }
