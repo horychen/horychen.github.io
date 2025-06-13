@@ -5,18 +5,20 @@ import PIProfile from "../components/PIProfile";
 import Courses from "../components/Courses";
 import Gallery from "../components/Gallery";
 import Contact from "../components/Contact";
-import React, { useState } from "react";
+import React from "react";
 
 export default function Home() {
-
   return (
-      <div>
-        <Banner />
-        <SectionBannerScroll />
-        <PIProfile className="bg-white" />
-        <Courses className="bg-gray-50" />
-        <Gallery className="bg-white" />
-        <Contact className="bg-gray-50" />
-      </div>
+    <div className="min-h-screen">
+      <Banner />
+      <SectionBannerScroll />
+      <PIProfile />
+      <div className="w-full h-1 bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent my-8"></div>
+      <Courses />
+      <div className="w-full h-1 bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent my-8"></div>
+      <Gallery />
+      <div className="w-full h-1 bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent my-8"></div>
+      <Contact />
+    </div>
   );
 }

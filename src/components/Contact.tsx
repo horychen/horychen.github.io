@@ -5,9 +5,9 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
-export default function Contact({ className = "" }: { className?: string }) {
+export default function Contact() {
   return (
-    <section className={"w-full py-10 flex flex-col items-center pt-20 " + className} id="contact">
+    <section className={"w-full py-10 flex flex-col items-center pt-2"} id="contact">
       <div className="w-full max-w-7xl flex flex-col lg:flex-row gap-8 items-start">
         {/* 左侧标题 */}
         <div className="w-full lg:w-1/3 flex-shrink-0 flex items-start justify-center lg:justify-start mb-6 lg:mb-0">

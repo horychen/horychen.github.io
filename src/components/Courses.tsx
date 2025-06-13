@@ -45,11 +45,11 @@ const COURSES = [
   }
 ];
 
-export default function Courses({ className = "", singlePage = false }: { className?: string, singlePage?: boolean }) {
+export default function Courses({ singlePage = false }: { singlePage?: boolean }) {
   if (singlePage) {
     // 单页模式：新卡片样式微调
     return (
-      <section className={"w-full py-10 flex flex-col items-center pt-20 " + className} id="courses">
+      <section className={"w-full py-10 flex flex-col items-center pt-20"} id="courses">
         <div className="w-full max-w-4xl flex flex-col gap-8 items-start">
           <Typography variant="h2" className="font-bold mb-2">Courses Taught by PI</Typography>
           <Typography variant="subtitle1" className="mb-6">I am teaching graduate course EE275 in spring and undergraduate course EE160 in fall.</Typography>
@@ -95,7 +95,7 @@ export default function Courses({ className = "", singlePage = false }: { classN
   }
   // 非单页模式：保持原有左右分布、无图片、无日期
   return (
-    <section className={"w-full py-10 flex flex-col items-center " + className} id="courses">
+    <section className={"w-full py-10 flex flex-col items-center"} id="courses">
       <div className="w-full max-w-7xl flex flex-col lg:flex-row gap-8 items-start">
         <div className="w-full lg:w-1/3 flex-shrink-0 flex items-start justify-center lg:justify-start mb-6 lg:mb-0">
           <Typography variant="h2" className="font-bold">Courses</Typography>

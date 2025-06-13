@@ -1,9 +1,9 @@
 import React from "react";
 import { Button } from "@mui/material";
 
-export default function Banner({ className = "" }: { className?: string }) {
+export default function Banner() {
   return (
-    <section className={"relative flex flex-col items-center justify-center min-h-[650px] md:min-h-[700px] lg:min-h-[750px] xl:min-h-[800px] overflow-hidden " + className}>
+    <section className={"relative flex flex-col items-center justify-center min-h-[650px] md:min-h-[700px] lg:min-h-[750px] xl:min-h-[800px] overflow-hidden"}>
       {/* 顶部渐变和内容 */}
       <div className="absolute inset-0 w-full h-full" style={{ background: 'linear-gradient(90deg, #504ba0 0%, #1996d2 100%)' }} />
       <div className="relative z-10 flex flex-col md:flex-row w-full h-full max-w-7xl mx-auto px-6 pt-20 pb-10 items-center justify-between">

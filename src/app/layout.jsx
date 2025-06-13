@@ -2,31 +2,28 @@
 import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { Banner, Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
-import 'nextra-theme-docs/style.css'
 import "./globals.css";
 import 'katex/dist/katex.min.css';
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import 'nextra-theme-docs/style.css'
 
 
 export const metadata = {
   metadataBase: new URL('https://nextra.site'),
   title: {
-    template: '%s - Nextra'
+    template: '%s - m&m lab'
   },
-  description: 'Nextra: the Next.js site builder',
-  applicationName: 'Nextra',
+  description: 'm&m lab: motor and motion control lab',
+  applicationName: 'm&m lab',
   generator: 'Next.js',
   appleWebApp: {
-    title: 'Nextra'
+    title: 'm&m lab'
   },
   other: {
     'msapplication-TileImage': '/icon.png',
     'msapplication-TileColor': '#fff'
   },
-  twitter: {
-    site: 'https://nextra.site'
-  }
 }
 
 export default async function RootLayout({ children }) {
@@ -34,7 +31,7 @@ export default async function RootLayout({ children }) {
     <Navbar
       logo={
         <div>
-          <b>M&M Lab</b>
+          <b>m&m lab</b>
         </div>
       }
     />
@@ -46,13 +43,12 @@ export default async function RootLayout({ children }) {
       <body>
         <Layout
           navbar={navbar}
-          footer={<Footer>{new Date().getFullYear()} © M&M Lab.</Footer>}
+          footer={<Footer>{new Date().getFullYear()} © m&m lab.</Footer>}
           editLink={<></>}
-          feedback={{content: <></>, link: '', labels: ''}}
-          docsRepositoryBase="https://github.com/shuding/nextra/blob/main/examples/docs"
+          feedback={{ content: <></>, link: '', labels: '' }}
+          docsRepositoryBase="https://github.com/motor-and-motion-control-lab/mmlabsite"
           sidebar={{ defaultMenuCollapseLevel: 1 }}
           pageMap={pageMap}
-          darkMode={false}
         >
           {children}
         </Layout>

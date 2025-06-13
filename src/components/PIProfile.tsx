@@ -24,9 +24,9 @@ const EDUCATION = [
     { degree: "B.Sc. in Electrical Engineering, 2014", school: "Zhejiang University, China" },
 ];
 
-export default function PIProfile({ className = "" }: { className?: string }) {
+export default function PIProfile() {
     return (
-        <section className={"w-full py-30 flex flex-col items-center " + className} id="pi">
+        <section className={"w-full py-30 flex flex-col items-center"} id="pi">
             <div className="flex flex-col lg:flex-row w-full max-w-6xl gap-8 items-center lg:items-start">
                 {/* 左侧：头像+基本信息+社交 */}
                 <div className="flex flex-col items-center w-full lg:w-1/3">

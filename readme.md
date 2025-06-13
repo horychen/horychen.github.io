@@ -1,4 +1,4 @@
-# M&M Lab Website
+# m&m lab Website
 
 ## Environment
 

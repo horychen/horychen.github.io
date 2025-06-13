@@ -10,7 +10,7 @@ const PI = {
   website: 'https://chenjh.github.io/',
   google_scholar: 'https://scholar.google.com/citations?user=1234567890&hl=en',
   orcid: 'https://orcid.org/0000-0000-0000-0000',
-  description: "Dr. Chen is a professor at ShanghaiTech University. He is the principal investigator of the M&M Lab.",
+  description: "Dr. Chen is a professor at ShanghaiTech University. He is the principal investigator of the m&m lab.",
 }
 
 const students = [
@@ -91,7 +91,7 @@ const graduates = [
 
 export default function Alumni() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-scree py-12 px-4 sm:px-6 lg:px-8">
       <h1 className="text-4xl font-bold text-center mb-10">Alumni</h1>
       <div className="max-w-5xl mx-auto space-y-12">
         {/* PI */}
