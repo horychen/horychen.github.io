@@ -1,18 +1,6 @@
 import React from "react";
 import { PICard, StudentCard, GraduateCard } from "./PersonCard";
 
-const PI = {
-  name: "Dr. Chen",
-  avatar: "/alumni/chenjh.jpg",
-  email: 'chenjh2@shanghaitech.edu.c',
-  github: 'https://github.com/horychen',
-  linkedin: 'https://www.linkedin.com/in/chenjh/',
-  website: 'https://chenjh.github.io/',
-  google_scholar: 'https://scholar.google.com/citations?user=1234567890&hl=en',
-  orcid: 'https://orcid.org/0000-0000-0000-0000',
-  description: "Dr. Chen is a professor at ShanghaiTech University. He is the principal investigator of the m&m lab.",
-}
-
 const students = [
   {
     name: "Student 1",
@@ -94,13 +82,6 @@ export default function Alumni() {
     <div className="min-h-scree py-12 px-4 sm:px-6 lg:px-8">
       <h1 className="text-4xl font-bold text-center mb-10">Alumni</h1>
       <div className="max-w-5xl mx-auto space-y-12">
-        {/* PI */}
-        <section>
-          <h2 className="text-2xl font-bold mb-6">Principal Investigator</h2>
-          <div className="flex justify-center">
-            <PICard person={PI} />
-          </div>
-        </section>
         {/* Students */}
         <section>
           <h2 className="text-2xl font-bold mb-6">Current Students</h2>

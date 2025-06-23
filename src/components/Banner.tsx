@@ -9,7 +9,7 @@ export default function Banner() {
       <div className="relative z-10 flex flex-col md:flex-row w-full h-full max-w-7xl mx-auto px-6 pt-20 pb-10 items-center justify-between">
         {/* 左侧内容 */}
         <div className="flex-1 flex flex-col justify-center items-start text-white max-w-xl md:max-w-2xl lg:max-w-2xl xl:max-w-3xl">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 leading-tight">motor and motion-<br />control lab</h1>
+          {/* <h1 className="text-5xl md:text-6xl font-bold mb-4 leading-tight">motor and motion-<br />control lab</h1> */}
           <p className="text-2xl font-bold mb-4">At m&m lab, we are interested in electric machines, maglev drives and robotics.</p>
           <p className="mb-4 text-xl leading-relaxed">
             Lab members are encouraged to design and build things with the principal investigator (PI), covering electronic design, electromagnetic design, mechanical design, and observer/controller design.
