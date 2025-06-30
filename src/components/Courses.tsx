@@ -1,5 +1,4 @@
 import React from "react";
-import { Paper, Typography } from "@mui/material";
 import Link from "next/link";
 
 const COURSES = [
@@ -47,45 +46,38 @@ const COURSES = [
 
 export default function Courses({ singlePage = false }: { singlePage?: boolean }) {
   if (singlePage) {
-    // 单页模式：新卡片样式微调
+    // 单页模式：简约发光悬浮效果
     return (
       <section className={"w-full py-10 flex flex-col items-center pt-20"} id="courses">
         <div className="w-full max-w-4xl flex flex-col gap-8 items-start">
-          <Typography variant="h2" className="font-bold mb-2">Courses Taught by PI</Typography>
-          <Typography variant="subtitle1" className="mb-6">I am teaching graduate course EE275 in spring and undergraduate course EE160 in fall.</Typography>
+          <h2 className="text-3xl font-bold mb-2 dark:text-white">Courses Taught by PI</h2>
+          <p className="text-lg mb-6 text-gray-600 dark:text-gray-300">I am teaching graduate course EE275 in spring and undergraduate course EE160 in fall.</p>
           {COURSES.map((course) => (
-            <div className="w-full transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98]" key={course.code}>
+            <div className="w-full group" key={course.code}>
               <Link href={course.href} className="no-underline w-full">
-                <Paper
-                  elevation={2}
-                >
+                <div className="rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50 shadow-sm hover:shadow-2xl hover:shadow-blue-500/20 dark:hover:shadow-blue-400/20 transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] group-hover:border-blue-300/50 dark:group-hover:border-blue-400/50">
                   {/* 日期 */}
-                  <div className="pt-4 px-6 pb-2 text-xs text-gray-400">{course.date}</div>
+                  <div className="pt-4 px-6 pb-2 text-xs text-gray-500 dark:text-gray-400">{course.date}</div>
                   {/* 图片（可选） */}
                   {course.img && (
-                    <div className="overflow-hidden p-4">
+                    <div className="overflow-hidden px-4">
                       <img
                         src={course.img}
                         alt={course.title}
-                        className="w-full h-84 object-cover object-center rounded-t-md transition-transform duration-300 hover:scale-110"
-                        style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}
+                        className="w-full h-84 object-cover object-center rounded-lg transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>
                   )}
                   {/* 主体内容 */}
                   <div className="px-6 py-4">
-                    <Typography
-                      variant="h5"
-                      sx={{ fontSize: "2rem", fontWeight: "bold" }}
-                      className="font-bold mb-2 flex items-center leading-tight"
-                    >
+                    <h3 className="text-2xl font-bold mb-2 flex items-center leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 dark:text-white">
                       {course.title}
-                    </Typography>
-                    <Typography variant="body2" className="mb-1 text-gray-700 p-2">
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                       {course.desc}
-                    </Typography>
+                    </p>
                   </div>
-                </Paper>
+                </div>
               </Link>
             </div>
           ))}
@@ -93,22 +85,22 @@ export default function Courses({ singlePage = false }: { singlePage?: boolean }
       </section>
     );
   }
-  // 非单页模式：保持原有左右分布、无图片、无日期
+  // 非单页模式：简约发光悬浮效果
   return (
     <section className={"w-full py-10 flex flex-col items-center"} id="courses">
       <div className="w-full max-w-7xl flex flex-col lg:flex-row gap-8 items-start">
         <div className="w-full lg:w-1/3 flex-shrink-0 flex items-start justify-center lg:justify-start mb-6 lg:mb-0">
-          <Typography variant="h2" className="font-bold">Courses</Typography>
+          <h2 className="text-3xl font-bold dark:text-white">Courses</h2>
         </div>
         <div className="w-full lg:w-2/3 grid grid-cols-1 gap-8 p-8">
           {COURSES.map((course) => (
-            <div key={course.code} className="transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98]">
+            <div key={course.code} className="group">
               <Link href={course.href} className="no-underline">
-                <Paper elevation={3} className="p-8 w-full cursor-pointer h-full flex flex-col justify-between">
-                  <Typography variant="h5" className="font-bold mb-1 text-gray-700">{course.code} {course.title}</Typography>
-                  <Typography variant="subtitle1" className="mb-2 text-gray-500">{course.type} · {course.time}</Typography>
-                  <Typography variant="body1" className="text-black">{course.desc}</Typography>
-                </Paper>
+                <div className="rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50 shadow-sm hover:shadow-2xl hover:shadow-blue-500/20 dark:hover:shadow-blue-400/20 transition-all duration-500 ease-out hover:-translate-y-2 hover:scale-[1.02] group-hover:border-blue-300/50 dark:group-hover:border-blue-400/50 p-8 w-full cursor-pointer h-full flex flex-col justify-between">
+                  <h3 className="text-xl font-bold mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300 dark:text-white">{course.code} {course.title}</h3>
+                  <p className="text-base mb-2 text-gray-600 dark:text-gray-300">{course.type} · {course.time}</p>
+                  <p className="text-base text-gray-700 dark:text-gray-200 leading-relaxed">{course.desc}</p>
+                </div>
               </Link>
             </div>
           ))}
