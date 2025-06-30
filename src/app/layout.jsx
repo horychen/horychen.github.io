@@ -37,7 +37,6 @@ export default async function RootLayout({ children }) {
     />
   )
   const pageMap = await getPageMap()
-  console.log(pageMap)
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <Head faviconGlyph="✦" />
