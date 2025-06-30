@@ -40,7 +40,7 @@ export default function SectionBannerScroll() {
 
   return (
     <ParallaxProvider>
-      <section className="relative w-full z-20 overflow-hidden flex items-center justify-center h-[calc(100vh-64px)]">
+      <section className="relative w-full overflow-hidden flex items-center justify-center h-[calc(100vh-64px)]">
         {/* 单层背景图片，淡入淡出 */}
         <div
           className={`absolute inset-0 w-full h-full transition-opacity duration-700 pointer-events-none z-0 ${fade ? 'opacity-100' : 'opacity-0'}`}

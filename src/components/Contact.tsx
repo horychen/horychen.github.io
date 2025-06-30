@@ -14,13 +14,13 @@ export default function Contact() {
           <Typography variant="h2" className="font-bold">Contact</Typography>
         </div>
         {/* 右侧内容卡片 */}
-        <div className="w-full lg:w-2/3 p-8">
-          <Paper elevation={1} className="p-8 w-full flex flex-col gap-8">
+        <div className="w-full lg:w-2/3 p-4 sm:p-8">
+          <Paper elevation={1} className="p-4 sm:p-8 w-full flex flex-col gap-8">
             {/* info 区块 */}
             <Box className="border border-blue-400 bg-blue-50 rounded-md p-4 flex flex-row gap-3 items-start mb-2">
               <InfoIcon color="primary" className="mt-1" />
               <div className="text-blue-900 text-lg leading-relaxed">
-                <div className="mb-2">[Graduate] We have one vacancy for year 2025 academic master student candidate. Please fill out the questionnaire (<Link href="https://www.wjx.top/vm/PRrcaUS.aspx#" target="_blank" rel="noopener" color="primary" underline="hover">https://www.wjx.top/vm/PRrcaUS.aspx#</Link>) and send me an email if you are interested.</div>
+                <div className="mb-2">[Graduate] We have one vacancy for year 2025 academic master student candidate. Please fill out the questionnaire (<Link href="https://www.wjx.top/vm/PRrcaUS.aspx#" target="_blank" rel="noopener" color="primary" underline="hover" className="break-all">https://www.wjx.top/vm/PRrcaUS.aspx#</Link>) and send me an email if you are interested.</div>
                 <div>[Undergraduate] If you are a student on campus please feel free to shoot me an email if interested in m&m lab.</div>
               </div>
             </Box>
