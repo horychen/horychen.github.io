@@ -11,6 +11,8 @@ const withNextra = nextra({
 export default withNextra({
   reactStrictMode: true,
   output: 'export',
+  basePath: '/chenjh',
+  assetPrefix: '/chenjh',
   images: {
     unoptimized: true
   }
