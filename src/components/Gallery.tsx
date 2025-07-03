@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Dialog } from "@mui/material";
+import { withBasePath } from '../lib/utils';
 
 export default function Gallery() {
   const [images, setImages] = useState<string[]>([]);
@@ -8,7 +9,7 @@ export default function Gallery() {
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("/gallery.json")
+    fetch(withBasePath("/gallery.json"))
       .then(res => res.json())
       .then(setImages);
   }, []);
@@ -26,14 +27,14 @@ export default function Gallery() {
     if (currentIndex !== null && images.length > 0) {
       const prevIdx = (currentIndex - 1 + images.length) % images.length;
       setCurrentIndex(prevIdx);
-      setPreview(`/media/albums/gallery/${images[prevIdx]}`);
+      setPreview(withBasePath(`/media/albums/gallery/${images[prevIdx]}`));
     }
   };
   const handleNext = () => {
     if (currentIndex !== null && images.length > 0) {
       const nextIdx = (currentIndex + 1) % images.length;
       setCurrentIndex(nextIdx);
-      setPreview(`/media/albums/gallery/${images[nextIdx]}`);
+      setPreview(withBasePath(`/media/albums/gallery/${images[nextIdx]}`));
     }
   };
 
@@ -42,8 +43,8 @@ export default function Gallery() {
       <Typography variant="h2" className="mb-6 font-bold">Gallery (Research)</Typography>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full p-8" style={{ maxWidth: 1260 }}>
         {images.map((name, idx) => (
-          <div key={idx} className="aspect-square overflow-hidden rounded shadow cursor-pointer" onClick={() => handleOpen(`/media/albums/gallery/${name}`, idx)}>
-            <img src={`/media/albums/gallery/${name}`} alt={`gallery-${idx}`} className="object-cover w-full h-full transition-transform duration-200 hover:scale-105" />
+          <div key={idx} className="aspect-square overflow-hidden rounded shadow cursor-pointer" onClick={() => handleOpen(withBasePath(`/media/albums/gallery/${name}`), idx)}>
+            <img src={withBasePath(`/media/albums/gallery/${name}`)} alt={`gallery-${idx}`} className="object-cover w-full h-full transition-transform duration-200 hover:scale-105" />
           </div>
         ))}
       </div>

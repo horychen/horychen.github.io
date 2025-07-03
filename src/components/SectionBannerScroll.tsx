@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { ParallaxProvider } from "react-scroll-parallax";
+import { withBasePath } from '../lib/utils';
 
 // const FIRST_IMAGE = "/media/slice-motor-24slots-prototype.jpg";
 const INTERVAL = 6000; // 6秒
@@ -18,7 +19,7 @@ export default function SectionBannerScroll() {
       .then((imgs) => {
         setImages(imgs);
         if (imgs.length > 0) {
-          const randomImg = `/media/albums/gallery/${imgs[Math.floor(Math.random() * imgs.length)]}`;
+          const randomImg = withBasePath(`/media/albums/gallery/${imgs[Math.floor(Math.random() * imgs.length)]}`);
           setImgSrc(randomImg);
         }
       });
@@ -32,7 +33,7 @@ export default function SectionBannerScroll() {
         // 切换图片
         let next = imgSrc;
         while (images.length > 1 && next === imgSrc) {
-          next = `/media/albums/gallery/${images[Math.floor(Math.random() * images.length)]}`;
+          next = withBasePath(`/media/albums/gallery/${images[Math.floor(Math.random() * images.length)]}`);
         }
         setImgSrc(next);
         setFade(true); // 再淡入

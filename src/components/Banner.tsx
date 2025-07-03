@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "@mui/material";
+import { withBasePath } from '../lib/utils';
 
 export default function Banner() {
   return (
@@ -30,7 +31,7 @@ export default function Banner() {
         </div>
         {/* 右侧图片 */}
         <div className="flex-1 flex justify-center items-center w-full h-full max-h-[340px] md:max-h-[400px] lg:max-h-[440px] xl:max-h-[480px]">
-          <img src="/media/hero-academic.png" alt="hero academic" className="object-contain w-full h-full max-w-[400px] md:max-w-[440px] lg:max-w-[480px] xl:max-w-[520px]" />
+          <img src={withBasePath('/media/hero-academic.png')} alt="hero academic" className="object-contain w-full h-full max-w-[400px] md:max-w-[440px] lg:max-w-[480px] xl:max-w-[520px]" />
         </div>
       </div>
     </section>

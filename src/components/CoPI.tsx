@@ -7,6 +7,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import DownloadIcon from '@mui/icons-material/Download';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import { withBasePath } from '../lib/utils';
 
 
 const COPI_BIO = `
@@ -55,7 +56,7 @@ export default function CoPI() {
                     {/*  downloadicon Download his Curriculum Vitae . */}
                     <div className="flex flex-row gap-2 items-center">
                         <DownloadIcon fontSize="medium" color="primary" />
-                        <Link href="/HeZeqiangCV.pdf" target="_blank" rel="noopener" title="Download CV" className="text-xl font-medium">Download his Curriculum Vitae</Link>
+                        <Link href={withBasePath('/uploads/HeZeqiangCV.pdf')} target="_blank" rel="noopener" title="Download CV" className="text-xl font-medium">Download his Curriculum Vitae</Link>
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-8 mt-4">
