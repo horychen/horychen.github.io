@@ -1,5 +1,3 @@
-import { withBasePath } from '../lib/utils';
-
 export default {
   index: {
     type: 'page',
@@ -20,16 +18,16 @@ export default {
   pi: {
     title: 'PI',
     type: 'page',
-    href: withBasePath('#pi')
+    href: '#pi'
   },
   gallery: {
     type: 'page',
     title: 'Gallery',
-    href: withBasePath('#gallery')
+    href: '#gallery'
   },
   contact: {
     type: 'page',
     title: 'Contact',
-    href: withBasePath('#contact')
+    href: '#contact'
   }
 }

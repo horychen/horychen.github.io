@@ -12,7 +12,7 @@ export function cn(...inputs: ClassValue[]) {
  * @returns 加上 basePath 的完整路径
  */
 export function withBasePath(path: string): string {
-    // const basePath = '';
-    const basePath = 'https://faculty.sist.shanghaitech.edu.cn/chenjh';
+    const isProd = process.env.NODE_ENV === 'production';
+    const basePath = isProd ? 'https://faculty.sist.shanghaitech.edu.cn/chenjh' : '';
     return `${basePath}${path}`;
 }
