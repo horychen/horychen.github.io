@@ -57,7 +57,7 @@ export default function PIProfile() {
                     {/*  downloadicon Download his Curriculum Vitae . */}
                     <div className="flex flex-row gap-2 items-center">
                         <DownloadIcon fontSize="medium" color="primary" />
-                        <Link href={withBasePath('/uploads/ChenJiahaoCV.pdf')} target="_blank" rel="noopener" title="Download CV" className="text-xl font-medium">Download his Curriculum Vitae</Link>
+                        <Link href={withBasePath('/ChenJiahaoCV.pdf')} target="_blank" rel="noopener" title="Download CV" className="text-xl font-medium">Download his Curriculum Vitae</Link>
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-8 mt-4">

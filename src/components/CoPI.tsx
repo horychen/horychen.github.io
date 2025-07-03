@@ -32,7 +32,7 @@ export default function CoPI() {
             <div className="flex flex-col lg:flex-row w-full max-w-6xl gap-8 items-center lg:items-start">
                 {/* 左侧：头像+基本信息+社交 */}
                 <div className="flex flex-col items-center w-full lg:w-1/3">
-                    <Avatar src="/alumni/hzq.png" alt="Co-PI" sx={{ width: 270, height: 270 }} />
+                    <Avatar src={withBasePath('/alumni/hzq.png')} alt="Co-PI" sx={{ width: 270, height: 270 }} />
                     <div className="text-4xl font-normal mt-6">He, Zeqiang 何 泽强</div>
                     <div className="text-2xl font-normal mt-4 text-gray-500">Post-doc Research Fellow</div>
                     <div className="mt-4 text-xl font-medium">
@@ -56,7 +56,7 @@ export default function CoPI() {
                     {/*  downloadicon Download his Curriculum Vitae . */}
                     <div className="flex flex-row gap-2 items-center">
                         <DownloadIcon fontSize="medium" color="primary" />
-                        <Link href={withBasePath('/uploads/HeZeqiangCV.pdf')} target="_blank" rel="noopener" title="Download CV" className="text-xl font-medium">Download his Curriculum Vitae</Link>
+                        <Link href={withBasePath('/HeZeqiangCV.pdf')} target="_blank" rel="noopener" title="Download CV" className="text-xl font-medium">Download his Curriculum Vitae</Link>
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-8 mt-4">

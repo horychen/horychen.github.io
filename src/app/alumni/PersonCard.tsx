@@ -16,6 +16,8 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import { withBasePath } from '../../lib/utils';
+
 
 function LinkIcon({ href, children, title }: { href: string, children: React.ReactNode, title: string }) {
   if (!href) return null;
@@ -105,7 +107,7 @@ export function PICard({ person }: { person: any }) {
       >
         <div className="flex-shrink-0 p-4 md:p-6">
           <img
-            src={person.avatar}
+            src={withBasePath(person.avatar)}
             alt={person.name}
             className="w-32 h-32 md:w-40 md:h-40 lg:w-56 lg:h-56 rounded-full object-cover border-2 border-white/60 dark:border-neutral-300/40 shadow bg-white/30 dark:bg-neutral-700/30"
           />
@@ -137,7 +139,7 @@ export function StudentCard({ person }: { person: any }) {
       >
         <div className="flex-shrink-0 p-4 md:p-6">
           <img
-            src={person.avatar}
+            src={withBasePath(person.avatar)}
             alt={person.name}
             className="w-32 h-32 md:w-40 md:h-40 lg:w-56 lg:h-56 rounded-full object-cover border-2 border-white/60 dark:border-neutral-300/40 shadow bg-white/30 dark:bg-neutral-700/30"
           />
