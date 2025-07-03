@@ -8,24 +8,21 @@ import DownloadIcon from '@mui/icons-material/Download';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 
-const PI_BIO = `
-Since December 2022, Dr. Chen has been a tenure-track Assistant Professor with School of Information Science and Technology (SIST). He is the director of m&m lab and teaches undergraduate course **"Introduction to Control"** and graduate course **"Electric Motor and Motion Control"**. Before joining ShanghaiTech University, he has worked at University of Wisconsin-Madison, WI, USA during 2018–2019 and Nanyang Technological University, Singapore during 2020–2022. Dr. Chen has been sharing his codes for sensorless motor control simulation and bearingless motor optimization since 2019.
-`;
 
 const COPI_BIO = `
 He Zeqiang was born in Hangzhou City, Zhejiang Province, China in 1997. He received the B.S. degree in Electrical engineering from Zhejiang University, China, in 2020 and the M.S. degree in mechanical engineering from Tokyo Institute of Technology, Japan, in 2022. He is currently pursuing the Ph.D. degree in mechanical engineering at Tokyo Institute of Technology, Japan. His research interests include the bearingless motor, machine control and robotics.
 `;
 
 const INTERESTS = [
-    "Bipedal robot",
+    "Blood pump and artificial heart",
     "Maglev and bearingless motor",
-    "Direct drive technology",
-    "Nonlinear control system",
-    "Lightweight robot arm",
+    "Manipulation",
+    "Filtering and control",
 ];
 const EDUCATION = [
-    { degree: "Ph.D. in Electrical Engineering, 2019", school: "Zhejiang University, China" },
-    { degree: "B.Sc. in Electrical Engineering, 2014", school: "Zhejiang University, China" },
+    { degree: "Ph.D. in Mechanical Engineering, 2025", school: "Tokyo Institute of Technology, Japan" },
+    { degree: "M.Sc. in Mechanical Engineering, 2022", school: "Tokyo Institute of Technology, Japan" },
+    { degree: "B.Sc. in Electrical Engineering, 2020", school: "Zhejiang University, China" },
 ];
 
 export default function CoPI() {
