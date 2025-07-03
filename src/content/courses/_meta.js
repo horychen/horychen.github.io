@@ -4,4 +4,5 @@ export default {
   EE160: 'EE160',
   EE160P: 'EE160P',
   EE275: 'EE275',
+  CS290V: 'CS290V',
 }

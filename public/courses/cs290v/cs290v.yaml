@@ -1,0 +1,22 @@
+name: cs290v
+channels:
+- conda-forge
+- defaults
+dependencies:
+- python=3.11
+- numpy
+- pinocchio=3.1.0
+- meshcat-python
+- example-robot-data
+- jupyterlab
+- ipywidgets
+- matplotlib
+- scipy
+- qpsolvers
+- tqdm
+- imageio
+- rich
+- stable-baselines3
+- pip
+- cyipopt
+- mujoco
