@@ -1,21 +1,27 @@
 import React, { useEffect, useState, useRef } from "react";
 import { ParallaxProvider } from "react-scroll-parallax";
 
-const FIRST_IMAGE = "/media/slice-motor-24slots-prototype.jpg";
+// const FIRST_IMAGE = "/media/slice-motor-24slots-prototype.jpg";
 const INTERVAL = 6000; // 6秒
 const FADE_DURATION = 800; // ms
 
 export default function SectionBannerScroll() {
   const [images, setImages] = useState<string[]>([]);
-  const [imgSrc, setImgSrc] = useState<string>(FIRST_IMAGE);
+  const [imgSrc, setImgSrc] = useState<string>("");
   const [fade, setFade] = useState(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const fadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    fetch("/gallery.json")
+    fetch("/head.json")
       .then(res => res.json())
-      .then(setImages);
+      .then((imgs) => {
+        setImages(imgs);
+        if (imgs.length > 0) {
+          const randomImg = `/media/albums/gallery/${imgs[Math.floor(Math.random() * imgs.length)]}`;
+          setImgSrc(randomImg);
+        }
+      });
   }, []);
 
   useEffect(() => {
