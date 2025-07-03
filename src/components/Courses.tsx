@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { withBasePath } from '../lib/utils';
 
 const COURSES = [
   {
@@ -62,7 +63,7 @@ export default function Courses({ singlePage = false }: { singlePage?: boolean }
                   {course.img && (
                     <div className="overflow-hidden px-4">
                       <img
-                        src={course.img}
+                        src={withBasePath(course.img)}
                         alt={course.title}
                         className="w-full h-84 object-cover object-center rounded-lg transition-transform duration-500 group-hover:scale-105"
                       />

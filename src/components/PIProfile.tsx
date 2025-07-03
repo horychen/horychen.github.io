@@ -7,6 +7,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import DownloadIcon from '@mui/icons-material/Download';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import { withBasePath } from '../lib/utils';
 
 const PI_BIO = `
 Since December 2022, Dr. Chen has been a tenure-track Assistant Professor with School of Information Science and Technology (SIST). He is the director of m&m lab and teaches undergraduate course **"Introduction to Control"** and graduate course **"Electric Motor and Motion Control"**. Before joining ShanghaiTech University, he has worked at University of Wisconsin-Madison, WI, USA during 2018–2019 and Nanyang Technological University, Singapore during 2020–2022. Dr. Chen has been sharing his codes for sensorless motor control simulation and bearingless motor optimization since 2019.
@@ -30,7 +31,7 @@ export default function PIProfile() {
             <div className="flex flex-col lg:flex-row w-full max-w-6xl gap-8 items-center lg:items-start">
                 {/* 左侧：头像+基本信息+社交 */}
                 <div className="flex flex-col items-center w-full lg:w-1/3">
-                    <Avatar src="/alumni/chenjh.jpg" alt="PI" sx={{ width: 270, height: 270 }} />
+                    <Avatar src={withBasePath('/alumni/chenjh.jpg')} alt="PI" sx={{ width: 270, height: 270 }} />
                     <div className="text-4xl font-normal mt-6">Chen, Jiahao 陈 嘉豪</div>
                     <div className="text-2xl font-normal mt-4 text-gray-500">Assistant Professor</div>
                     <div className="mt-4 text-xl font-medium">
@@ -56,7 +57,7 @@ export default function PIProfile() {
                     {/*  downloadicon Download his Curriculum Vitae . */}
                     <div className="flex flex-row gap-2 items-center">
                         <DownloadIcon fontSize="medium" color="primary" />
-                        <Link href="/uploads/ChenJiahaoCV.pdf" target="_blank" rel="noopener" title="Download CV" className="text-xl font-medium">Download his Curriculum Vitae</Link>
+                        <Link href={withBasePath('/uploads/ChenJiahaoCV.pdf')} target="_blank" rel="noopener" title="Download CV" className="text-xl font-medium">Download his Curriculum Vitae</Link>
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-8 mt-4">
