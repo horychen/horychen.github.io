@@ -2,6 +2,7 @@
 import Banner from "../components/Banner";
 import SectionBannerScroll from "../components/SectionBannerScroll";
 import PIProfile from "../components/PIProfile";
+import CoPI from "../components/CoPI";
 import Courses from "../components/Courses";
 import Gallery from "../components/Gallery";
 import GalleryFun from "../components/GalleryFun";
@@ -14,6 +15,8 @@ export default function Home() {
       <SectionBannerScroll />
       <Banner />
       <PIProfile />
+      <div className="w-full h-1 bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent my-8"></div>
+      <CoPI />
       <div className="w-full h-1 bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent my-8"></div>
       <Courses />
       <div className="w-full h-1 bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent my-8"></div>
