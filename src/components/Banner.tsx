@@ -23,7 +23,7 @@ export default function Banner() {
               hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 hover:shadow-lg
               active:scale-95" 
             onClick={() => {
-              window.location.href = "/courses";
+              window.location.href = withBasePath("/courses");
             }}
           >
             See Courses
