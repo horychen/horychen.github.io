@@ -12,6 +12,10 @@ const PI_BIO = `
 Since December 2022, Dr. Chen has been a tenure-track Assistant Professor with School of Information Science and Technology (SIST). He is the director of m&m lab and teaches undergraduate course **"Introduction to Control"** and graduate course **"Electric Motor and Motion Control"**. Before joining ShanghaiTech University, he has worked at University of Wisconsin-Madison, WI, USA during 2018–2019 and Nanyang Technological University, Singapore during 2020–2022. Dr. Chen has been sharing his codes for sensorless motor control simulation and bearingless motor optimization since 2019.
 `;
 
+const COPI_BIO = `
+He Zeqiang was born in Hangzhou City, Zhejiang Province, China in 1997. He received the B.S. degree in Electrical engineering from Zhejiang University, China, in 2020 and the M.S. degree in mechanical engineering from Tokyo Institute of Technology, Japan, in 2022. He is currently pursuing the Ph.D. degree in mechanical engineering at Tokyo Institute of Technology, Japan. His research interests include the bearingless motor, machine control and robotics.
+`;
+
 const INTERESTS = [
     "Bipedal robot",
     "Maglev and bearingless motor",
@@ -30,33 +34,31 @@ export default function CoPI() {
             <div className="flex flex-col lg:flex-row w-full max-w-6xl gap-8 items-center lg:items-start">
                 {/* 左侧：头像+基本信息+社交 */}
                 <div className="flex flex-col items-center w-full lg:w-1/3">
-                    <Avatar src="/alumni/chenjh.jpg" alt="PI" sx={{ width: 270, height: 270 }} />
-                    <div className="text-4xl font-normal mt-6">Chen, Jiahao 陈 嘉豪</div>
-                    <div className="text-2xl font-normal mt-4 text-gray-500">Assistant Professor</div>
+                    <Avatar src="/alumni/hzq.png" alt="Co-PI" sx={{ width: 270, height: 270 }} />
+                    <div className="text-4xl font-normal mt-6">He, Zeqiang 何 泽强</div>
+                    <div className="text-2xl font-normal mt-4 text-gray-500">Post-doc Research Fellow</div>
                     <div className="mt-4 text-xl font-medium">
                         <Link href="https://sist.shanghaitech.edu.cn/" target="_blank" rel="noopener" underline="hover" color="primary">ShanghaiTech University</Link>
                     </div>
                     <Box className="flex gap-4 mt-4">
                         {/* google scholar */}
-                        <Link href="https://scholar.google.com/citations?hl=en&user=A13oCMQAAAAJ" target="_blank" rel="noopener" title="Google Scholar"><SchoolIcon fontSize="large" color="primary" /></Link>
+                        <Link href="https://scholar.google.com/citations?hl=en&user=OKeAMUEAAAAJ" target="_blank" rel="noopener" title="Google Scholar"><SchoolIcon fontSize="large" color="primary" /></Link>
                         {/* github */}
-                        <Link href="https://github.com/horychen" target="_blank" rel="noopener" title="GitHub"><GitHubIcon fontSize="large" color="primary" /></Link>
+                        <Link href="https://github.com/hezeqiang" target="_blank" rel="noopener" title="GitHub"><GitHubIcon fontSize="large" color="primary" /></Link>
                         {/* email */}
-                        <Link href="mailto:chenjh2@shanghaitech.edu.cn" title="Email"><EmailIcon fontSize="large" color="primary" /></Link>
-                        {/* youtu */}
-                        <Link href="https://www.youtube.com/@horychen1304" target="_blank" rel="noopener" title="YouTube"><YouTubeIcon fontSize="large" color="primary" /></Link>
+                        <Link href="mailto:shuishuidehentiexin@gmail.com" title="Email"><EmailIcon fontSize="large" color="primary" /></Link>
                     </Box>
                 </div>
                 {/* 右侧：Biography/Interests/Education */}
                 <div className="flex-1 w-full flex flex-col gap-6 lg:p-4 p-16">
-                    <div className="text-5xl font-normal mb-2 flex items-center">Biography of the PI</div>
+                    <div className="text-5xl font-normal mb-2 flex items-center">Biography of the Co-PI</div>
                     <div className="prose max-w-none text-justify leading-8 text-lg">
-                        <ReactMarkdown>{PI_BIO}</ReactMarkdown>
+                        <ReactMarkdown>{COPI_BIO}</ReactMarkdown>
                     </div>
                     {/*  downloadicon Download his Curriculum Vitae . */}
                     <div className="flex flex-row gap-2 items-center">
                         <DownloadIcon fontSize="medium" color="primary" />
-                        <Link href="/uploads/ChenJiahaoCV.pdf" target="_blank" rel="noopener" title="Download CV" className="text-xl font-medium">Download his Curriculum Vitae</Link>
+                        <Link href="/HeZeqiangCV.pdf" target="_blank" rel="noopener" title="Download CV" className="text-xl font-medium">Download his Curriculum Vitae</Link>
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-8 mt-4">
