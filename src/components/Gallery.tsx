@@ -39,7 +39,7 @@ export default function Gallery() {
 
   return (
     <section className={"w-full py-10 flex flex-col items-center pt-20"} id="gallery">
-      <Typography variant="h2" className="mb-6 font-bold">Gallery</Typography>
+      <Typography variant="h2" className="mb-6 font-bold">Gallery (Research)</Typography>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full p-8" style={{ maxWidth: 1260 }}>
         {images.map((name, idx) => (
           <div key={idx} className="aspect-square overflow-hidden rounded shadow cursor-pointer" onClick={() => handleOpen(`/media/albums/gallery/${name}`, idx)}>
