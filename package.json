@@ -3,11 +3,11 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build:gallery": "node scripts/generate-gallery-json.js",
+    "build:gallery": "node scripts/generate-gallery-json.js && node scripts/generate-galleryfun-json.js",
     "build": "npm run build:gallery && next build",
     "export": "next export",
     "dev": "next --turbopack",
-    "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
+    "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind && node scripts/html-to-dir.js && node scripts/dir-to-html.js",
     "start": "next start"
   },
   "dependencies": {

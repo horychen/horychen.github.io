@@ -19,7 +19,12 @@ export default function Contact() {
             <div className="border border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20 rounded-md p-4 flex flex-row gap-3 items-start mb-2">
               <InfoIcon className="mt-1 text-blue-600 dark:text-blue-400" />
               <div className="text-blue-900 dark:text-blue-100 text-lg leading-relaxed">
-                <div className="mb-2">[Graduate] We have one vacancy for year 2025 academic master student candidate. Please fill out the questionnaire (<a href="https://www.wjx.top/vm/PRrcaUS.aspx#" target="_blank" rel="noopener" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline break-all">https://www.wjx.top/vm/PRrcaUS.aspx#</a>) and send me an email if you are interested.</div>
+                <div className="mb-2">
+                [Graduate] For prospective master students of academic year 2026, we are currently receiving applications from candidates more than we need. Please only send email if you are really determined to join us. This will save both of us some time.
+                  {/* [Graduate] We have one vacancy for year 2025 academic master student candidate. Please fill out the questionnaire  */}
+                  {/* (<a href="https://www.wjx.top/vm/PRrcaUS.aspx#" target="_blank" rel="noopener" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline break-all">https://www.wjx.top/vm/PRrcaUS.aspx#</a>)  */}
+                  {/* and send me an email if you are interested. */}
+                  </div>
                 <div>[Undergraduate] If you are a student on campus please feel free to shoot me an email if interested in m&m lab.</div>
               </div>
             </div>
