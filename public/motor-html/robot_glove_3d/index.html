@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WUJI Glove 110 — 3D 数采手套运动学模型 (REP-155)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg: #f7f5f2;
+            --card: #ffffff;
+            --panel: #faf8f5;
+            --border: #e5e0d8;
+            --text: #2d2a26;
+            --dim: #8a847b;
+            --accent: #c46a48;
+            --accent-light: #f0e6df;
+            --font: 'Inter', system-ui, -apple-system, sans-serif;
+            --c-thumb: #c47272;
+            --c-index: #c49a6e;
+            --c-middle: #7ea86e;
+            --c-ring: #5e8bb0;
+            --c-pinky: #8a6aaa;
+            --c-wrist: #5ea8a8;
+            --c-tip: #b0a050;
+            --c-sensor: #d07878;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box }
+
+        body {
+            background: var(--bg); color: var(--text); font-family: var(--font);
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            -webkit-font-smoothing: antialiased
+        }
+
+        .header {
+            padding: 10px 20px; background: var(--card); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04)
+        }
+        .header h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.3px }
+        .header h1 span { color: var(--accent); font-weight: 700 }
+        .badge {
+            padding: 2px 8px; border-radius: 20px; font-size: 9px; font-weight: 600;
+            background: var(--accent-light); color: var(--accent)
+        }
+
+        .main { display: flex; flex: 1; overflow: hidden }
+
+        .cards-panel {
+            width: 380px; min-width: 300px; overflow-y: auto; overflow-x: hidden;
+            background: var(--panel); border-right: 1px solid var(--border);
+            padding: 8px; flex-shrink: 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent
+        }
+
+        .center-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); min-width: 0 }
+        .view-3d { flex: 1; position: relative; min-height: 200px }
+        #canvas3d { width: 100%; height: 100%; display: block }
+
+        .tree-section {
+            background: var(--card); border-top: 1px solid var(--border);
+            padding: 10px 16px; max-height: 280px; overflow-y: auto; flex-shrink: 0;
+            scrollbar-width: thin; scrollbar-color: var(--border) transparent
+        }
+
+        .ortho-col {
+            width: 220px; flex-shrink: 0; display: flex; flex-direction: column;
+            border-left: 1px solid var(--border); background: var(--bg)
+        }
+        .ortho-wrap { flex: 1; position: relative; border-bottom: 1px solid var(--border); background: var(--bg) }
+        .ortho-wrap:last-child { border-bottom: none }
+        .ortho-wrap canvas { width: 100%; height: 100%; display: block }
+        .ortho-label {
+            position: absolute; top: 4px; left: 8px; font-size: 9px; font-weight: 600;
+            color: var(--dim); z-index: 2; pointer-events: none
+        }
+        .tree-section h3 { font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--accent) }
+        .tree-pre {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 10px; line-height: 1.6; color: var(--text); white-space: pre; tab-size: 2
+        }
+        .tree-pre .sensor { color: var(--c-sensor); font-weight: 600 }
+        .tree-pre .joint { color: #6a8a50 }
+        .tree-pre .fixed { color: var(--dim) }
+
+        /* Cards */
+        .finger-section {
+            margin-bottom: 6px; border: 1px solid var(--border); border-radius: 8px;
+            overflow: hidden; background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,0.03)
+        }
+        .finger-header {
+            padding: 6px 10px; cursor: pointer; display: flex; align-items: center;
+            gap: 7px; font-size: 11px; font-weight: 600; user-select: none
+        }
+        .finger-header:hover { background: rgba(196,106,72,0.04) }
+        .finger-header .arrow { transition: transform .2s; font-size: 9px; color: var(--dim) }
+        .finger-header .arrow.open { transform: rotate(90deg) }
+        .finger-body { padding: 3px 6px 6px; display: none }
+        .finger-body.open { display: block }
+
+        .joint-card {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+            padding: 7px 9px; margin-bottom: 4px; font-size: 10px; transition: all .15s
+        }
+        .joint-card:hover { border-color: var(--accent); box-shadow: 0 1px 4px rgba(196,106,72,0.08) }
+
+        .jc-header { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; flex-wrap: wrap }
+        .jc-name { font-weight: 700; font-size: 11px }
+        .jc-cn { color: var(--dim); font-size: 9.5px }
+        .jc-badge { padding: 1px 6px; border-radius: 4px; font-size: 8px; font-weight: 600 }
+        .jc-sdk { color: var(--dim); font-size: 8px; margin-left: auto; font-style: italic; opacity: 0.6 }
+
+        .jc-row { display: flex; align-items: center; gap: 4px; margin-bottom: 3px }
+        .jc-label { color: var(--dim); font-weight: 500; width: 50px; flex-shrink: 0; font-size: 9px }
+
+        .jc-input {
+            background: var(--card); border: 1px solid var(--border); border-radius: 4px;
+            color: var(--text); font-family: var(--font); font-size: 9px; padding: 3px 5px;
+            width: 48px; text-align: right; font-variant-numeric: tabular-nums;
+            outline: none; transition: border .15s
+        }
+        .jc-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(196,106,72,0.12) }
+        .jc-unit { color: var(--dim); font-size: 8px; width: 50px }
+        .jc-sign { color: #6a8a50; font-size: 8px; margin-top: 1px }
+        .jc-slider { width: 68px; accent-color: var(--accent); height: 14px }
+        .jc-desc {
+            color: var(--dim); font-size: 8.5px; line-height: 1.4; margin-top: 3px;
+            padding: 4px 6px; background: rgba(0,0,0,0.015); border-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.03)
+        }
+
+        /* Matrix display */
+        .jc-matrix-wrap {
+            margin-top: 4px; padding: 4px 0;
+        }
+        .jc-matrix-toggle {
+            font-size: 8px; color: var(--accent); cursor: pointer; user-select: none;
+            font-weight: 600; margin-bottom: 3px; display: inline-block;
+        }
+        .jc-matrix-toggle:hover { text-decoration: underline }
+        .jc-matrix-body { display: none }
+        .jc-matrix-body.open { display: block }
+        .jc-matrix {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 8.5px; line-height: 1.5; color: var(--text);
+            background: var(--card); border: 1px solid var(--border); border-radius: 4px;
+            padding: 4px 6px; white-space: pre; overflow-x: auto;
+            margin-bottom: 3px;
+        }
+        .jc-spatial {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 8.5px; line-height: 1.4; color: var(--text);
+            background: rgba(94,139,176,0.06); border: 1px solid rgba(94,139,176,0.15);
+            border-radius: 4px; padding: 4px 6px; margin-top: 2px;
+        }
+        .jc-spatial .label { color: var(--dim); font-size: 7.5px }
+
+        .help-box {
+            margin: 4px 0 8px; padding: 8px 10px; background: var(--card);
+            border: 1px solid var(--border); border-radius: 6px; font-size: 9px;
+            line-height: 1.6; color: var(--dim); box-shadow: 0 1px 2px rgba(0,0,0,0.03)
+        }
+        .help-box strong { color: var(--text); font-size: 10px }
+
+        .coord-label {
+            position: absolute; top: 8px; left: 10px; font-size: 9px; color: var(--dim);
+            background: rgba(255,255,255,0.8); padding: 3px 8px; border-radius: 4px;
+            z-index: 5; backdrop-filter: blur(4px); border: 1px solid var(--border)
+        }
+        .hud-bottom {
+            position: absolute; bottom: 0; left: 0; right: 0; padding: 5px 12px;
+            background: linear-gradient(0deg, rgba(247,245,242,0.9), transparent);
+            font-size: 9px; color: var(--dim)
+        }
+
+        .link-len { color: #8a6a50; font-size: 8px; font-weight: 500 }
+
+        /* Click popup */
+        .node-popup {
+            position: fixed; z-index: 100; background: var(--card);
+            border: 1px solid var(--border); border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12); padding: 10px 12px;
+            max-width: 340px; min-width: 240px; font-size: 10px;
+            pointer-events: auto; display: none;
+        }
+        .node-popup.visible { display: block }
+        .node-popup .popup-close {
+            position: absolute; top: 4px; right: 8px; cursor: pointer;
+            font-size: 14px; color: var(--dim); line-height: 1
+        }
+        .node-popup .popup-close:hover { color: var(--accent) }
+        .node-popup .popup-title {
+            font-weight: 700; font-size: 12px; margin-bottom: 6px;
+            padding-right: 20px; color: var(--accent)
+        }
+        .node-popup .popup-row {
+            display: flex; gap: 4px; margin-bottom: 2px; align-items: baseline
+        }
+        .node-popup .popup-label {
+            color: var(--dim); font-size: 9px; font-weight: 500; width: 40px; flex-shrink: 0
+        }
+        .node-popup .popup-val {
+            font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 9px
+        }
+        .node-popup .popup-matrix {
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 8px; line-height: 1.5; white-space: pre;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 4px; padding: 4px 6px; margin: 4px 0
+        }
+        .node-popup .popup-spatial {
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 8px; background: rgba(94,139,176,0.06);
+            border: 1px solid rgba(94,139,176,0.15);
+            border-radius: 4px; padding: 4px 6px; margin: 2px 0
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1><span>WUJI</span> Glove 110 — 3D 运动学模型 (REP-155)</h1>
+        <span class="badge">Three.js</span>
+        <span class="badge">REP-155 Z=Proximal</span>
+        <span class="badge">21 DOF + 6 Sensors</span>
+        <button id="btnAnim" style="margin-left:auto;padding:3px 12px;border-radius:12px;border:1px solid var(--border);
+            background:var(--card);color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;
+            font-family:var(--font);transition:all .15s">
+            Play Spread+Grasp
+        </button>
+    </div>
+
+    <div class="main">
+        <div class="cards-panel" id="cardsPanel">
+            <div class="help-box">
+                <strong>WUJI Glove 110 REP-155</strong><br>
+                <strong style="color:#e44">+X</strong> Radial (桡侧/拇指方向) &middot;
+                <strong style="color:#4b4">+Y</strong> 右手系 (X&times;Z) &middot;
+                <strong style="color:#48e">+Z</strong> Proximal (近端/手腕方向)<br>
+                圆柱体 = 旋转关节（轴向=旋转轴）&middot; 单击3D节点弹出信息<br>
+                $T_{i+1} = T_i \cdot R(\hat{\omega}_i, \theta_i) \cdot \text{Trans}(d_x, d_y, d_z)$
+            </div>
+        </div>
+
+        <div class="center-col">
+            <div class="view-3d">
+                <canvas id="canvas3d"></canvas>
+                <div class="coord-label">
+                    <span style="color:#e44">+X</span> Radial &middot;
+                    <span style="color:#4b4">+Y</span> Right-hand &middot;
+                    <span style="color:#48e">+Z</span> Proximal
+                </div>
+                <div class="hud-bottom">左键旋转 &middot; 右键平移 &middot; 滚轮缩放 &middot; 单击节点弹出信息</div>
+            </div>
+            <div class="tree-section" id="treeSection">
+                <h3>Kinematic Tree</h3>
+                <div class="tree-pre" id="treeOutput"></div>
+            </div>
+        </div>
+
+        <div class="ortho-col">
+            <div class="ortho-wrap"><canvas id="cvFront"></canvas>
+                <div class="ortho-label">Front (X-Y)</div>
+            </div>
+            <div class="ortho-wrap"><canvas id="cvTop"></canvas>
+                <div class="ortho-label">Top (X-Z)</div>
+            </div>
+            <div class="ortho-wrap"><canvas id="cvSide"></canvas>
+                <div class="ortho-label">Side (Y-Z)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="node-popup" id="nodePopup">
+        <span class="popup-close" id="popupClose">&times;</span>
+        <div class="popup-title" id="popupTitle"></div>
+        <div id="popupContent"></div>
+    </div>
+
+    <script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+  }
+}
+</script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ══════════════════════════════════════════════════════
+        //  EMBEDDED CONFIG (Z-axis corrected for REP-155)
+        //  +Z = proximal (toward wrist), -Z = distal (toward fingertips)
+        // ══════════════════════════════════════════════════════
+        const CONFIG = {
+            metadata: {
+                name: "WUJI Glove 110",
+                hand: "right",
+                totalDOF: 21,
+                coordinateSystem: {
+                    standard: "REP-155",
+                    X: "radial (桡侧)",
+                    Y: "right-hand rule (X×Z)",
+                    Z: "proximal (近端)"
+                }
+            },
+            sensors: {
+                emfBase: {
+                    name: "EMF Sensor Base",
+                    parent: "wrist",
+                    offset_mm: [0, 12, 5],
+                    description: "EMF 磁传感器基站，固定在手腕手背侧上方"
+                },
+                coils: {
+                    thumb:  { name: "Coil 1", parent: "thumb_tip",  offset_mm: [0, 8, 0] },
+                    index:  { name: "Coil 2", parent: "index_tip",  offset_mm: [0, 8, 0] },
+                    middle: { name: "Coil 3", parent: "middle_tip", offset_mm: [0, 8, 0] },
+                    ring:   { name: "Coil 4", parent: "ring_tip",   offset_mm: [0, 8, 0] },
+                    pinky:  { name: "Coil 5", parent: "pinky_tip",  offset_mm: [0, 8, 0] }
+                }
+            },
+            colors: {
+                thumb: 0xc47272, index: 0xc49a6e, middle: 0x7ea86e,
+                ring: 0x5e8bb0, pinky: 0x8a6aaa,
+                wrist: 0x5ea8a8, tip: 0xb0a050, sensor: 0xd07878
+            },
+            fingers: {
+                thumb: {
+                    label: { en: "Thumb", zh: "拇指" },
+                    sdk: "thumb",
+                    color: 0xc47272,
+                    palmOffset: { position_mm: [33, 36, -24], rotationEulerDeg: [0, 65, 0] },
+                    joints: [
+                        { index: 0, name: "CMC Rot", nameCN: "腕掌关节 旋转", sdk: "cmc_rot",
+                          type: "revolute", axis: [0,0,1], defaultAngle_rad: 0.785,
+                          link_mm: [0,0,0], signConvention: "绕骨轴旋转 (URDF 初始 45°)" },
+                        { index: 1, name: "CMC Flex", nameCN: "腕掌关节 屈伸", sdk: "cmc_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲" },
+                        { index: 2, name: "CMC Abd", nameCN: "腕掌关节 外展", sdk: "cmc_abd",
+                          type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-40.7], signConvention: "0=展开, +=内收" },
+                        { index: 3, name: "MCP", nameCN: "掌指关节 屈伸", sdk: "mcp",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-34.6], signConvention: "0=伸直, +=弯曲" },
+                        { index: 4, name: "IP", nameCN: "指间关节 屈伸", sdk: "ip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-33.2], signConvention: "0=伸直, +=弯曲" }
+                    ]
+                },
+                index: {
+                    label: { en: "Index", zh: "食指" },
+                    sdk: "index_finger",
+                    color: 0xc49a6e,
+                    palmOffset: { position_mm: [32, 11, -88], rotationEulerDeg: [0,0,0] },
+                    joints: [
+                        { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                          type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收" },
+                        { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-38.7], signConvention: "0=伸直, +=弯曲" },
+                        { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-26.0], signConvention: "0=伸直, +=弯曲" },
+                        { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-24.1], signConvention: "0=伸直, +=弯曲" }
+                    ]
+                },
+                middle: {
+                    label: { en: "Middle", zh: "中指" },
+                    sdk: "middle_finger",
+                    color: 0x7ea86e,
+                    palmOffset: { position_mm: [14, 2, -95], rotationEulerDeg: [0,0,0] },
+                    joints: [
+                        { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                          type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收" },
+                        { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-42.5], signConvention: "0=伸直, +=弯曲" },
+                        { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-28.6], signConvention: "0=伸直, +=弯曲" },
+                        { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-25.9], signConvention: "0=伸直, +=弯曲" }
+                    ]
+                },
+                ring: {
+                    label: { en: "Ring", zh: "无名指" },
+                    sdk: "ring_finger",
+                    color: 0x5e8bb0,
+                    palmOffset: { position_mm: [-7, 5, -82], rotationEulerDeg: [0,0,0] },
+                    joints: [
+                        { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                          type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收" },
+                        { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-40.7], signConvention: "0=伸直, +=弯曲" },
+                        { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-27.3], signConvention: "0=伸直, +=弯曲" },
+                        { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-24.7], signConvention: "0=伸直, +=弯曲" }
+                    ]
+                },
+                pinky: {
+                    label: { en: "Pinky", zh: "小指" },
+                    sdk: "pinky",
+                    color: 0x8a6aaa,
+                    palmOffset: { position_mm: [-23, 21, -69], rotationEulerDeg: [0,0,0] },
+                    joints: [
+                        { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                          type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收" },
+                        { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-32.1], signConvention: "0=伸直, +=弯曲" },
+                        { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-21.5], signConvention: "0=伸直, +=弯曲" },
+                        { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-19.4], signConvention: "0=伸直, +=弯曲" }
+                    ]
+                }
+            }
+        };
+
+        // ══════════════════════════════════════════════════════
+        //  RUNTIME MODEL (mutable copy from CONFIG)
+        // ══════════════════════════════════════════════════════
+        const DEG = Math.PI / 180;
+        const FINGER_ORDER = ['thumb', 'index', 'middle', 'ring', 'pinky'];
+        const BG_COLOR = 0xf7f5f2;
+
+        // Deep clone config fingers into a mutable model with runtime angles
+        const model = {};
+        for (const fn of FINGER_ORDER) {
+            const src = CONFIG.fingers[fn];
+            model[fn] = {
+                color: src.color,
+                label: src.label,
+                sdk: src.sdk,
+                palmOffset: {
+                    pos: [...src.palmOffset.position_mm],
+                    rotDeg: [...src.palmOffset.rotationEulerDeg]
+                },
+                joints: src.joints.map(j => ({
+                    ...j,
+                    axis: [...j.axis],
+                    link: [...j.link_mm],
+                    angle: j.defaultAngle_rad
+                }))
+            };
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  MATRIX MATH UTILITIES
+        // ══════════════════════════════════════════════════════
+
+        // Build 4x4 homogeneous transform from axis-angle rotation + translation
+        // T = R(omega, theta) * Trans(d) = [R  R*d; 0 1]
+        // But in our scene graph, child.position = d is in the rotated frame,
+        // so T_local = [R d; 0 1] where d is the link in the rotated frame.
+        // Actually: pivot rotates, child translates in rotated frame:
+        // T = [R 0;0 1] * [I d;0 1] = [R R*d;0 1] ... no.
+        // Three.js: child world = parent * rotation * translation
+        // The 4x4 from parent to child frame origin is: [R d; 0 1]
+        // where d is child.position (in pivot's local=rotated frame).
+        // The position in parent frame: p = R * d (not d itself).
+        // For the matrix card we show T_local = [R  d_parent; 0 1]
+        // where d_parent = R * link (link in rotated frame → parent frame)
+
+        function rodrigues(omega, theta) {
+            // Returns 3x3 rotation matrix as flat array [row-major]
+            const c = Math.cos(theta), s = Math.sin(theta), t = 1 - c;
+            const [x, y, z] = omega;
+            return [
+                c + x*x*t,     x*y*t - z*s,   x*z*t + y*s,
+                y*x*t + z*s,   c + y*y*t,      y*z*t - x*s,
+                z*x*t - y*s,   z*y*t + x*s,    c + z*z*t
+            ];
+        }
+
+        function mat3mulVec(R, v) {
+            return [
+                R[0]*v[0] + R[1]*v[1] + R[2]*v[2],
+                R[3]*v[0] + R[4]*v[1] + R[5]*v[2],
+                R[6]*v[0] + R[7]*v[1] + R[8]*v[2]
+            ];
+        }
+
+        function buildLocalT(axis, angle, link) {
+            // axis: unit vector [3], angle: scalar, link: [3] in rotated frame
+            // Returns 4x4 row-major flat array
+            const R = rodrigues(axis, angle);
+            const p = mat3mulVec(R, link); // translate link from rotated→parent
+            return [
+                R[0], R[1], R[2], p[0],
+                R[3], R[4], R[5], p[1],
+                R[6], R[7], R[8], p[2],
+                0,    0,    0,    1
+            ];
+        }
+
+        // se(3) logarithm: extract 6-vector from 4x4 T = [R p; 0 1]
+        // Returns [omega_x*theta, omega_y*theta, omega_z*theta, v_x, v_y, v_z]
+        function se3Log(T) {
+            const R = [T[0], T[1], T[2], T[4], T[5], T[6], T[8], T[9], T[10]];
+            const p = [T[3], T[7], T[11]];
+
+            const tr = R[0] + R[4] + R[8];
+            const ct = Math.max(-1, Math.min(1, (tr - 1) / 2));
+
+            if (ct > 0.9999) {
+                // theta ~ 0, log is pure translation
+                return [0, 0, 0, p[0], p[1], p[2]];
+            }
+
+            const theta = Math.acos(ct);
+            const sth = Math.sin(theta);
+
+            // omega from skew(R - R^T) / (2 sin theta)
+            const w = [
+                (R[5] - R[7]) / (2 * sth),  // R[1][2] - R[2][1]
+                (R[6] - R[2]) / (2 * sth),  // R[2][0] - R[0][2]
+                (R[1] - R[3]) / (2 * sth)   // R[0][1] - R[1][0]
+            ];
+
+            // G^{-1} = I/theta - [w]x/2 + (1/theta - 1/(2*tan(theta/2))) [w]x^2
+            const a = 1 / theta;
+            const b = 1 / (2 * Math.tan(theta / 2));
+            const c = a - b;
+
+            // [w]x^2 = w*w^T - I  (since |w|=1)
+            const ww = [
+                w[0]*w[0]-1, w[0]*w[1],   w[0]*w[2],
+                w[1]*w[0],   w[1]*w[1]-1, w[1]*w[2],
+                w[2]*w[0],   w[2]*w[1],   w[2]*w[2]-1
+            ];
+
+            // G^{-1} = a*I + (-1/2)*[w]x + c*[w]x^2
+            // [w]x = [[0,-wz,wy],[wz,0,-wx],[-wy,wx,0]]
+            const Gi = [
+                a + c*ww[0],         w[2]/2 + c*ww[1],  -w[1]/2 + c*ww[2],
+                -w[2]/2 + c*ww[3],   a + c*ww[4],        w[0]/2 + c*ww[5],
+                w[1]/2 + c*ww[6],   -w[0]/2 + c*ww[7],   a + c*ww[8]
+            ];
+
+            const v = mat3mulVec(Gi, p);
+
+            return [w[0]*theta, w[1]*theta, w[2]*theta, v[0], v[1], v[2]];
+        }
+
+        function formatNum(n, w) {
+            const s = n.toFixed(3);
+            return s.padStart(w || 7);
+        }
+
+        function formatMatrix4x4(T) {
+            const rows = [];
+            for (let r = 0; r < 4; r++) {
+                const vals = [];
+                for (let c = 0; c < 4; c++) {
+                    vals.push(formatNum(T[r * 4 + c]));
+                }
+                rows.push(vals.join(' '));
+            }
+            return rows.join('\n');
+        }
+
+        function formatSpatialVec(sv) {
+            const ang = sv.slice(0, 3).map(v => v.toFixed(3)).join(', ');
+            const lin = sv.slice(3, 6).map(v => v.toFixed(3)).join(', ');
+            return `[${ang} | ${lin}]`;
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  THREE.JS SETUP
+        // ══════════════════════════════════════════════════════
+        const canvas = document.getElementById('canvas3d');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setClearColor(BG_COLOR);
+        renderer.shadowMap.enabled = true;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.4;
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(BG_COLOR);
+
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 2000);
+        camera.position.set(120, 100, 30);
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+        controls.target.set(0, 10, -60);
+
+        // Ortho views
+        const orthoRenderers = [];
+        const orthoCameras = [];
+        const orthoCanvasIds = ['cvFront', 'cvTop', 'cvSide'];
+        const orthoSize = 140;
+        const center3D = new THREE.Vector3(0, 10, -55);
+        // Front: look along +Z (from -Z side toward +Z, seeing X-Y plane)
+        // Top: look along -Y (from above, seeing X-Z plane)
+        // Side: look along +X (from -X side, seeing Y-Z plane)
+        const orthoViews = [
+            { dir: [0, 0, 1], up: [0, 1, 0] },   // Front X-Y, look along +Z (toward proximal)
+            { dir: [0, -1, 0], up: [0, 0, 1] },   // Top X-Z, look from above
+            { dir: [1, 0, 0], up: [0, 1, 0] }     // Side Y-Z, look along +X
+        ];
+        orthoCanvasIds.forEach((cid, i) => {
+            const cv = document.getElementById(cid);
+            const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
+            r.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            r.setClearColor(BG_COLOR);
+            orthoRenderers.push(r);
+            const cam = new THREE.OrthographicCamera(-orthoSize, orthoSize, orthoSize, -orthoSize, 0.1, 2000);
+            cam.position.copy(center3D.clone().add(new THREE.Vector3(...orthoViews[i].dir).multiplyScalar(400)));
+            cam.up.set(...orthoViews[i].up);
+            cam.lookAt(center3D);
+            orthoCameras.push(cam);
+        });
+
+        // Lighting
+        scene.add(new THREE.AmbientLight(0xf0ece4, 1.2));
+        const dl = new THREE.DirectionalLight(0xffeedd, 1.5);
+        dl.position.set(80, 150, 100); dl.castShadow = true; scene.add(dl);
+        scene.add(new THREE.DirectionalLight(0xddeeff, 0.7).translateX(-80).translateY(80));
+        scene.add(new THREE.HemisphereLight(0xf0ece4, 0xd0ccba, 0.5));
+
+        // Subtle grid
+        const grid = new THREE.GridHelper(300, 30, 0xe0dbd4, 0xeae5de);
+        grid.position.y = -1;
+        grid.material.opacity = 0.3;
+        grid.material.transparent = true;
+        scene.add(grid);
+
+        function metalMat(c, r) {
+            return new THREE.MeshStandardMaterial({ color: c, metalness: 0.4, roughness: r || 0.45 });
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  3D PRIMITIVES
+        // ══════════════════════════════════════════════════════
+        const JR = 3.5, JH = 9, LR = 1.8;
+
+        function createJointMesh(color, axis, fingerName, jointIdx) {
+            const g = new THREE.Group();
+            const cyl = new THREE.Mesh(new THREE.CylinderGeometry(JR, JR, JH, 20), metalMat(color, 0.35));
+            // Orient cylinder along rotation axis
+            const ax = Math.abs(axis[0]) > 0.5, ay = Math.abs(axis[1]) > 0.5;
+            if (ax) cyl.rotation.z = Math.PI / 2;
+            else if (!ay) cyl.rotation.x = Math.PI / 2; // Z axis
+            cyl.castShadow = true;
+            // Tag for raycasting
+            cyl.userData = { clickable: true, type: 'joint', finger: fingerName, jointIdx };
+            g.add(cyl);
+            // Center dot
+            const dot = new THREE.Mesh(new THREE.SphereGeometry(1.2, 10, 10),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.5 }));
+            dot.userData = { clickable: true, type: 'joint', finger: fingerName, jointIdx };
+            g.add(dot);
+            // Local axes helper (8mm)
+            g.add(new THREE.AxesHelper(8));
+            return g;
+        }
+
+        function createBone(lv, col) {
+            const len = lv.length();
+            if (len < 0.5) return null;
+            const m = new THREE.Mesh(new THREE.CylinderGeometry(LR, LR, len, 10), metalMat(col, 0.5));
+            m.castShadow = true;
+            m.position.copy(lv.clone().multiplyScalar(0.5));
+            const up = new THREE.Vector3(0, 1, 0), dir = lv.clone().normalize();
+            if (Math.abs(up.dot(dir)) < 0.999) m.quaternion.setFromUnitVectors(up, dir);
+            return m;
+        }
+
+        function createSensorBase() {
+            const g = new THREE.Group();
+            g.add(new THREE.Mesh(new THREE.BoxGeometry(20, 5, 14),
+                new THREE.MeshPhysicalMaterial({ color: 0xd07878, metalness: 0.3, roughness: 0.4, transparent: true, opacity: 0.85 })));
+            const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 8, 8),
+                new THREE.MeshStandardMaterial({ color: 0xaa5555, metalness: 0.5, roughness: 0.3 }));
+            ant.position.y = 6.5; g.add(ant);
+            g.add(new THREE.AxesHelper(4));
+            return g;
+        }
+
+        function createCoil() {
+            const g = new THREE.Group();
+            g.add(new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 2, 16),
+                new THREE.MeshPhysicalMaterial({ color: 0xd07878, metalness: 0.3, roughness: 0.4, transparent: true, opacity: 0.85 })));
+            g.add(new THREE.Mesh(new THREE.TorusGeometry(2, 0.4, 8, 16),
+                new THREE.MeshStandardMaterial({ color: 0xaa5555, metalness: 0.5, roughness: 0.3 })));
+            return g;
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  BUILD FINGER CHAINS
+        // ══════════════════════════════════════════════════════
+        const fingerObjects = {};
+        // Store local transforms for each joint (4x4 row-major)
+        const jointLocalT = {};
+        // Store spatial vectors for each joint
+        const jointSpatialVec = {};
+
+        function buildFingerChain(fname) {
+            const fdata = model[fname];
+            const group = new THREE.Group();
+            const po = fdata.palmOffset;
+            group.position.set(po.pos[0], po.pos[1], po.pos[2]);
+            if (po.rotDeg)
+                group.rotation.set(po.rotDeg[0] * DEG, po.rotDeg[1] * DEG, po.rotDeg[2] * DEG, 'XYZ');
+
+            const chainNodes = [];
+            let parentObj = group;
+
+            fdata.joints.forEach((j, ji) => {
+                const pivot = new THREE.Group();
+                parentObj.add(pivot);
+                pivot.add(createJointMesh(fdata.color, j.axis, fname, ji));
+
+                const child = new THREE.Group();
+                child.position.set(j.link[0], j.link[1], j.link[2]);
+                pivot.add(child);
+
+                const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
+                const bone = createBone(lv, fdata.color);
+                if (bone) pivot.add(bone);
+
+                chainNodes.push({ pivot, child, bone });
+                parentObj = child;
+            });
+
+            // Fingertip with nail
+            // Tip pad (slightly flattened sphere)
+            const tipMesh = new THREE.Mesh(
+                new THREE.SphereGeometry(2.5, 14, 14),
+                new THREE.MeshPhysicalMaterial({
+                    color: CONFIG.colors.tip, emissive: CONFIG.colors.tip, emissiveIntensity: 0.15,
+                    metalness: 0.3, roughness: 0.3
+                }));
+            tipMesh.scale.set(1, 0.7, 1); // flatten slightly in Y
+            tipMesh.userData = { clickable: true, type: 'tip', finger: fname };
+            parentObj.add(tipMesh);
+
+            // Fingernail: flat rounded plate on dorsal side (-Y for right hand)
+            // Nail sits on top of the fingertip pad, oriented along the bone (-Z distal)
+            const nailShape = new THREE.Shape();
+            const nw = 2.8, nl = 4.5, nr = 1.2;  // width, length, corner radius
+            nailShape.moveTo(-nw + nr, -nl);
+            nailShape.lineTo(nw - nr, -nl);
+            nailShape.quadraticCurveTo(nw, -nl, nw, -nl + nr);
+            nailShape.lineTo(nw, nl - nr);
+            nailShape.quadraticCurveTo(nw, nl, nw - nr, nl);
+            nailShape.lineTo(-nw + nr, nl);
+            nailShape.quadraticCurveTo(-nw, nl, -nw, nl - nr);
+            nailShape.lineTo(-nw, -nl + nr);
+            nailShape.quadraticCurveTo(-nw, -nl, -nw + nr, -nl);
+            const nailGeo = new THREE.ExtrudeGeometry(nailShape, { depth: 0.6, bevelEnabled: false });
+            const nailMesh = new THREE.Mesh(nailGeo,
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xf0d0c0, metalness: 0.1, roughness: 0.3,
+                    clearcoat: 0.8, clearcoatRoughness: 0.2
+                }));
+            // Position: on dorsal side (-Y), rotated to lie flat on fingertip
+            // Nail surface faces -Y (dorsal), nail extends along -Z (distal)
+            nailMesh.rotation.x = -Math.PI / 2;
+            nailMesh.position.set(0, -2, 0); // dorsal side
+            nailMesh.userData = { clickable: true, type: 'tip', finger: fname };
+            parentObj.add(nailMesh);
+
+            // Coil above the nail (further dorsal, i.e. more -Y)
+            const coil = createCoil();
+            coil.position.set(0, -5, 0); // above nail on dorsal side
+            coil.children.forEach(c => {
+                if (c.isMesh) c.userData = { clickable: true, type: 'coil', finger: fname };
+            });
+            parentObj.add(coil);
+
+            scene.add(group);
+            fingerObjects[fname] = { group, chainNodes, tipParent: parentObj };
+
+            // Initialize transform storage
+            jointLocalT[fname] = [];
+            jointSpatialVec[fname] = [];
+        }
+
+        function updateChain(fname) {
+            const fdata = model[fname];
+            const fobj = fingerObjects[fname];
+            if (!fobj) return;
+
+            const po = fdata.palmOffset;
+            fobj.group.position.set(po.pos[0], po.pos[1], po.pos[2]);
+
+            fdata.joints.forEach((j, ji) => {
+                const node = fobj.chainNodes[ji];
+                const axisVec = new THREE.Vector3(j.axis[0], j.axis[1], j.axis[2]).normalize();
+
+                node.pivot.setRotationFromQuaternion(
+                    new THREE.Quaternion().setFromAxisAngle(axisVec, j.angle));
+
+                node.child.position.set(j.link[0], j.link[1], j.link[2]);
+
+                // Update bone
+                if (node.bone) node.pivot.remove(node.bone);
+                const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
+                const nb = createBone(lv, fdata.color);
+                if (nb) { node.pivot.add(nb); node.bone = nb; }
+
+                // Compute local transform matrix
+                const normAxis = [axisVec.x, axisVec.y, axisVec.z];
+                const T = buildLocalT(normAxis, j.angle, j.link);
+                jointLocalT[fname][ji] = T;
+                jointSpatialVec[fname][ji] = se3Log(T);
+            });
+        }
+
+        // ── Wrist Root ──
+        const wristMesh = new THREE.Mesh(new THREE.SphereGeometry(4, 20, 20), metalMat(CONFIG.colors.wrist, 0.35));
+        wristMesh.userData = { clickable: true, type: 'wrist' };
+        scene.add(wristMesh);
+        scene.add(new THREE.AxesHelper(16));
+
+        // EMF Sensor Base — dorsal side of wrist (right hand: -Y = dorsal/手背)
+        const sensorBase = createSensorBase();
+        // Override config offset: place on dorsal side (-Y), slightly proximal (+Z)
+        sensorBase.position.set(0, -12, 5);
+        sensorBase.rotation.x = Math.PI; // flip so antenna points -Y (dorsal/away from palm)
+        sensorBase.children.forEach(c => {
+            if (c.isMesh) c.userData = { clickable: true, type: 'emfBase' };
+        });
+        scene.add(sensorBase);
+
+        // Black metacarpal links (wrist → each finger root)
+        const metacarpalMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.2, roughness: 0.6 });
+        FINGER_ORDER.forEach(fname => {
+            const po = model[fname].palmOffset;
+            const target = new THREE.Vector3(po.pos[0], po.pos[1], po.pos[2]);
+            const len = target.length();
+            if (len < 0.5) return;
+            const bone = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, len, 8), metacarpalMat);
+            bone.position.copy(target.clone().multiplyScalar(0.5));
+            const up = new THREE.Vector3(0, 1, 0), dir = target.clone().normalize();
+            if (Math.abs(up.dot(dir)) < 0.999) bone.quaternion.setFromUnitVectors(up, dir);
+            bone.castShadow = true;
+            scene.add(bone);
+        });
+
+        // ══════════════════════════════════════════════════════
+        //  CARDS UI
+        // ══════════════════════════════════════════════════════
+        const cardsPanel = document.getElementById('cardsPanel');
+
+        // Map of matrix display elements for live update
+        const matrixDisplays = {};
+        const spatialDisplays = {};
+
+        function buildCards() {
+            FINGER_ORDER.forEach(fname => {
+                const fdata = model[fname];
+                const ch = '#' + fdata.color.toString(16).padStart(6, '0');
+                const sec = document.createElement('div');
+                sec.className = 'finger-section';
+
+                const hdr = document.createElement('div');
+                hdr.className = 'finger-header';
+                hdr.innerHTML = `<span class="arrow open">\u25B6</span>
+                    <span style="color:${ch};font-weight:700">${fdata.label.zh} ${fdata.label.en}</span>
+                    <span style="color:var(--dim);font-size:9px;margin-left:auto">${fdata.joints.length} DOF</span>`;
+
+                const body = document.createElement('div');
+                body.className = 'finger-body open';
+                hdr.addEventListener('click', () => {
+                    body.classList.toggle('open');
+                    hdr.querySelector('.arrow').classList.toggle('open');
+                });
+
+                // Palm offset card
+                const po = fdata.palmOffset;
+                const poc = document.createElement('div');
+                poc.className = 'joint-card';
+                poc.style.borderLeft = `3px solid ${ch}40`;
+                poc.innerHTML = `
+                    <div class="jc-header"><span class="jc-name" style="color:${ch}">Metacarpal</span>
+                        <span class="jc-badge" style="background:${ch}15;color:${ch}">fixed</span></div>
+                    <div class="jc-row"><span class="jc-label">pos</span>
+                        <input class="jc-input" value="${po.pos[0]}" data-f="${fname}" data-palm="px">
+                        <input class="jc-input" value="${po.pos[1]}" data-f="${fname}" data-palm="py">
+                        <input class="jc-input" value="${po.pos[2]}" data-f="${fname}" data-palm="pz">
+                        <span class="jc-unit">[x,y,z] mm</span></div>
+                    <div class="jc-desc">wrist → 指根固定偏移 (REP-155: -Z=distal)</div>`;
+                body.appendChild(poc);
+
+                // Joint cards
+                matrixDisplays[fname] = [];
+                spatialDisplays[fname] = [];
+
+                fdata.joints.forEach((j, ji) => {
+                    const ax = Math.abs(j.axis[0]) > 0.5, ay = Math.abs(j.axis[1]) > 0.5, az = Math.abs(j.axis[2]) > 0.5;
+                    let bc, bt, ad;
+                    if (az) { bc = '#b0a050'; bt = 'twist/Z'; ad = 'Z'; }
+                    else if (ay) { bc = '#7ea86e'; bt = 'abd/Y'; ad = 'Y'; }
+                    else { bc = '#5e8bb0'; bt = 'flex/X'; ad = 'X'; }
+
+                    const linkLen = Math.sqrt(j.link[0]**2 + j.link[1]**2 + j.link[2]**2);
+
+                    const c = document.createElement('div');
+                    c.className = 'joint-card';
+                    c.style.borderLeft = `3px solid ${ch}30`;
+
+                    const matId = `mat_${fname}_${ji}`;
+                    const svId = `sv_${fname}_${ji}`;
+                    const matBodyId = `matbody_${fname}_${ji}`;
+
+                    c.innerHTML = `
+                        <div class="jc-header">
+                            <span class="jc-name">J${ji + 1} ${j.name}</span>
+                            <span class="jc-cn">${j.nameCN}</span>
+                            <span class="jc-badge" style="background:${bc}18;color:${bc}">${bt}</span>
+                            <span class="jc-sdk">${fdata.sdk}_${j.sdk}</span>
+                        </div>
+                        <div class="jc-row"><span class="jc-label">axis \u03C9</span>
+                            <input class="jc-input" value="${j.axis[0]}" data-f="${fname}" data-j="${ji}" data-field="ax">
+                            <input class="jc-input" value="${j.axis[1]}" data-f="${fname}" data-j="${ji}" data-field="ay">
+                            <input class="jc-input" value="${j.axis[2]}" data-f="${fname}" data-j="${ji}" data-field="az">
+                            <span class="jc-unit">\u03C9 \u2208 {X,Y,Z}</span></div>
+                        <div class="jc-row"><span class="jc-label">\u03B8</span>
+                            <input type="range" class="jc-slider" min="-1.57" max="1.57" step="0.01" value="${j.angle}"
+                                data-f="${fname}" data-j="${ji}" data-field="angle">
+                            <input class="jc-input" value="${j.angle.toFixed(3)}" data-f="${fname}" data-j="${ji}" data-field="angle-num">
+                            <span class="jc-unit">rad</span></div>
+                        <div class="jc-row"><span class="jc-label">link</span>
+                            <input class="jc-input" value="${j.link[0]}" data-f="${fname}" data-j="${ji}" data-field="lx">
+                            <input class="jc-input" value="${j.link[1]}" data-f="${fname}" data-j="${ji}" data-field="ly">
+                            <input class="jc-input" value="${j.link[2]}" data-f="${fname}" data-j="${ji}" data-field="lz">
+                            <span class="jc-unit">[x,y,z] mm</span></div>
+                        <div class="jc-row">
+                            <span class="jc-label"></span>
+                            <span class="link-len">|link| = ${linkLen.toFixed(1)} mm</span>
+                        </div>
+                        <div class="jc-sign">\u21B3 ${j.signConvention}</div>
+                        <div class="jc-matrix-wrap">
+                            <span class="jc-matrix-toggle" data-target="${matBodyId}">\u25B6 T\u2096 (4\u00D74) + \u03BE (6-vec)</span>
+                            <div class="jc-matrix-body" id="${matBodyId}">
+                                <div class="jc-matrix" id="${matId}">loading...</div>
+                                <div class="jc-spatial" id="${svId}">
+                                    <span class="label">\u03BE = [\u03C9\u03B8 | v]  (se(3) exponential coordinates)</span><br>
+                                    <span class="sv-val">loading...</span>
+                                </div>
+                            </div>
+                        </div>`;
+
+                    body.appendChild(c);
+                    // Store element references after append
+                    setTimeout(() => {
+                        matrixDisplays[fname][ji] = document.getElementById(matId);
+                        spatialDisplays[fname][ji] = document.getElementById(svId);
+                    }, 0);
+                });
+
+                // Coil card
+                const coilData = CONFIG.sensors.coils[fname];
+                const cc = document.createElement('div');
+                cc.className = 'joint-card';
+                cc.style.borderLeft = '3px solid #d0787840';
+                cc.innerHTML = `
+                    <div class="jc-header"><span class="jc-name" style="color:#d07878">${coilData.name}</span>
+                        <span class="jc-badge" style="background:#d0787818;color:#d07878">sensor</span></div>
+                    <div class="jc-desc">EMF \u78C1\u4F20\u611F\u5668\u63A5\u6536\u7EBF\u5708\uFF0C\u56FA\u5B9A\u5728\u6307\u7532\u4E0A\u65B9 [${coilData.offset_mm}] mm</div>`;
+                body.appendChild(cc);
+
+                sec.appendChild(hdr);
+                sec.appendChild(body);
+                cardsPanel.appendChild(sec);
+            });
+
+            // EMF Sensor Base card
+            const sbs = document.createElement('div');
+            sbs.className = 'finger-section';
+            sbs.innerHTML = `
+                <div class="finger-header" style="background:rgba(208,120,120,0.04)">
+                    <span style="color:#d07878;font-weight:700;font-size:11px">EMF Sensor Base</span>
+                    <span style="color:var(--dim);font-size:9px;margin-left:auto">\u78C1\u4F20\u611F\u5668\u57FA\u7AD9</span>
+                </div>
+                <div class="finger-body open">
+                    <div class="joint-card" style="border-left:3px solid #d0787840">
+                        <div class="jc-desc">${CONFIG.sensors.emfBase.description}<br>offset: [${CONFIG.sensors.emfBase.offset_mm}] mm (REP-155)</div>
+                    </div>
+                </div>`;
+            cardsPanel.appendChild(sbs);
+
+            // Event handlers for inputs
+            cardsPanel.querySelectorAll('.jc-input').forEach(inp => {
+                inp.addEventListener('change', handleInput);
+                inp.addEventListener('input', handleInput);
+            });
+            cardsPanel.querySelectorAll('.jc-slider').forEach(s => {
+                s.addEventListener('input', handleSlider);
+            });
+            // Matrix toggle handlers
+            cardsPanel.querySelectorAll('.jc-matrix-toggle').forEach(t => {
+                t.addEventListener('click', () => {
+                    const target = document.getElementById(t.dataset.target);
+                    if (target) {
+                        const isOpen = target.classList.toggle('open');
+                        t.textContent = (isOpen ? '\u25BC' : '\u25B6') + t.textContent.slice(1);
+                    }
+                });
+            });
+        }
+
+        function handleInput(e) {
+            const el = e.target, fname = el.dataset.f;
+            if (!fname) return;
+            if (el.dataset.palm) {
+                const po = model[fname].palmOffset;
+                const v = parseFloat(el.value) || 0;
+                if (el.dataset.palm === 'px') po.pos[0] = v;
+                else if (el.dataset.palm === 'py') po.pos[1] = v;
+                else if (el.dataset.palm === 'pz') po.pos[2] = v;
+                updateChain(fname);
+                updateMatrixDisplays(fname);
+                return;
+            }
+            const ji = parseInt(el.dataset.j);
+            const j = model[fname].joints[ji];
+            const v = parseFloat(el.value) || 0, f = el.dataset.field;
+            if (f === 'ax') j.axis[0] = v;
+            else if (f === 'ay') j.axis[1] = v;
+            else if (f === 'az') j.axis[2] = v;
+            else if (f === 'lx') j.link[0] = v;
+            else if (f === 'ly') j.link[1] = v;
+            else if (f === 'lz') j.link[2] = v;
+            else if (f === 'angle-num') {
+                j.angle = v;
+                const s = cardsPanel.querySelector(`input[type=range][data-f="${fname}"][data-j="${ji}"]`);
+                if (s) s.value = v;
+            }
+            updateChain(fname);
+            updateMatrixDisplays(fname);
+        }
+
+        function handleSlider(e) {
+            const el = e.target, fname = el.dataset.f, ji = parseInt(el.dataset.j);
+            const v = parseFloat(el.value);
+            model[fname].joints[ji].angle = v;
+            const ni = cardsPanel.querySelector(`input[data-f="${fname}"][data-j="${ji}"][data-field="angle-num"]`);
+            if (ni) ni.value = v.toFixed(3);
+            updateChain(fname);
+            updateMatrixDisplays(fname);
+        }
+
+        function updateMatrixDisplays(fname) {
+            const fdata = model[fname];
+            fdata.joints.forEach((j, ji) => {
+                const matEl = matrixDisplays[fname]?.[ji];
+                const svEl = spatialDisplays[fname]?.[ji];
+                if (!matEl || !svEl) return;
+
+                const T = jointLocalT[fname][ji];
+                if (!T) return;
+
+                matEl.textContent = formatMatrix4x4(T);
+
+                const sv = jointSpatialVec[fname][ji];
+                if (!sv) return;
+
+                const angStr = sv.slice(0, 3).map(v => v.toFixed(4)).join(', ');
+                const linStr = sv.slice(3, 6).map(v => v.toFixed(4)).join(', ');
+                svEl.innerHTML = `<span class="label">\u03BE = [\u03C9\u03B8 | v]  se(3) exponential coordinates</span><br>` +
+                    `<b>\u03C9\u03B8</b> = [${angStr}] <span class="label">rad</span><br>` +
+                    `<b>v</b>&nbsp;&nbsp; = [${linStr}] <span class="label">mm</span>`;
+            });
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  KINEMATIC TREE TEXT
+        // ══════════════════════════════════════════════════════
+        function buildTreeText() {
+            const lines = [];
+            lines.push('<span class="fixed">wrist</span> (root)');
+            lines.push('\u251C\u2500\u2500 <span class="sensor">emf_sensor_base</span> [fixed, offset: (' +
+                CONFIG.sensors.emfBase.offset_mm.join(', ') + ') mm]');
+
+            const fingerLabels = {
+                thumb: '\u62C7\u6307', index: '\u98DF\u6307', middle: '\u4E2D\u6307',
+                ring: '\u65E0\u540D\u6307', pinky: '\u5C0F\u6307'
+            };
+            const lastFinger = FINGER_ORDER[FINGER_ORDER.length - 1];
+
+            FINGER_ORDER.forEach(fname => {
+                const fdata = model[fname];
+                const isLast = fname === lastFinger;
+                const prefix = isLast ? '\u2514\u2500\u2500 ' : '\u251C\u2500\u2500 ';
+                const sub = isLast ? '    ' : '\u2502   ';
+                const po = fdata.palmOffset;
+                lines.push(`${prefix}<span class="fixed">${fname}_metacarpal</span> [fixed, pos: (${po.pos.join(', ')}) mm] ${fingerLabels[fname]}`);
+
+                fdata.joints.forEach((j, ji) => {
+                    const isLastJ = ji === fdata.joints.length - 1;
+                    const jp = isLastJ ? '\u2514\u2500\u2500 ' : '\u251C\u2500\u2500 ';
+                    const jt = Math.abs(j.axis[2]) > 0.5 ? 'Z' : (Math.abs(j.axis[1]) > 0.5 ? 'Y' : 'X');
+                    const linkStr = j.link.some(v => v !== 0) ? `, link: (${j.link.join(', ')}) mm` : ', co-located';
+                    lines.push(`${sub}${jp}<span class="joint">${fdata.sdk}_${j.sdk}</span> [revolute, axis: ${jt}${linkStr}]`);
+                    if (isLastJ) {
+                        lines.push(`${sub}    \u2514\u2500\u2500 <span class="fixed">${fname}_tip</span> [fixed]`);
+                        const coilOff = CONFIG.sensors.coils[fname].offset_mm;
+                        lines.push(`${sub}        \u2514\u2500\u2500 <span class="sensor">${CONFIG.sensors.coils[fname].name}</span> [fixed, offset: (${coilOff.join(', ')}) mm]`);
+                    }
+                });
+            });
+
+            document.getElementById('treeOutput').innerHTML = lines.join('\n');
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  INIT & ANIMATE
+        // ══════════════════════════════════════════════════════
+        buildCards();
+        FINGER_ORDER.forEach(fname => {
+            buildFingerChain(fname);
+            updateChain(fname);
+        });
+        // Defer matrix display update to after DOM elements are ready
+        setTimeout(() => {
+            FINGER_ORDER.forEach(fname => updateMatrixDisplays(fname));
+        }, 50);
+        buildTreeText();
+
+        // ══════════════════════════════════════════════════════
+        //  CLICK-TO-POPUP (Raycasting)
+        // ══════════════════════════════════════════════════════
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const popup = document.getElementById('nodePopup');
+        const popupTitle = document.getElementById('popupTitle');
+        const popupContent = document.getElementById('popupContent');
+        let popupDragState = null;
+
+        document.getElementById('popupClose').addEventListener('click', () => {
+            popup.classList.remove('visible');
+        });
+
+        // Make popup draggable by title
+        popup.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('popup-close')) return;
+            popupDragState = {
+                startX: e.clientX, startY: e.clientY,
+                origLeft: popup.offsetLeft, origTop: popup.offsetTop
+            };
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (!popupDragState) return;
+            popup.style.left = (popupDragState.origLeft + e.clientX - popupDragState.startX) + 'px';
+            popup.style.top = (popupDragState.origTop + e.clientY - popupDragState.startY) + 'px';
+        });
+        document.addEventListener('mouseup', () => { popupDragState = null; });
+
+        // Detect click (not drag) on the 3D canvas
+        let mouseDownPos = null;
+        canvas.addEventListener('mousedown', (e) => {
+            mouseDownPos = { x: e.clientX, y: e.clientY };
+        });
+        canvas.addEventListener('mouseup', (e) => {
+            if (!mouseDownPos) return;
+            const dx = e.clientX - mouseDownPos.x;
+            const dy = e.clientY - mouseDownPos.y;
+            if (dx * dx + dy * dy > 16) return; // was a drag, not a click
+
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            let hit = null;
+            for (const isect of intersects) {
+                let obj = isect.object;
+                while (obj) {
+                    if (obj.userData && obj.userData.clickable) { hit = obj.userData; break; }
+                    obj = obj.parent;
+                }
+                if (hit) break;
+            }
+
+            if (hit) {
+                showPopup(hit, e.clientX, e.clientY);
+            } else {
+                popup.classList.remove('visible');
+            }
+        });
+
+        function showPopup(data, cx, cy) {
+            let title = '';
+            let html = '';
+
+            if (data.type === 'joint') {
+                const fdata = model[data.finger];
+                const j = fdata.joints[data.jointIdx];
+                const ch = '#' + fdata.color.toString(16).padStart(6, '0');
+                title = `${fdata.label.zh} ${fdata.label.en} — J${data.jointIdx + 1} ${j.name}`;
+
+                const axLabel = Math.abs(j.axis[2]) > 0.5 ? 'Z (twist)' :
+                    Math.abs(j.axis[1]) > 0.5 ? 'Y (abd)' : 'X (flex)';
+                const linkLen = Math.sqrt(j.link[0]**2 + j.link[1]**2 + j.link[2]**2);
+
+                html = `
+                    <div class="popup-row"><span class="popup-label">SDK</span>
+                        <span class="popup-val" style="color:var(--dim);font-style:italic">${fdata.sdk}_${j.sdk}</span></div>
+                    <div class="popup-row"><span class="popup-label">\u03C9</span>
+                        <span class="popup-val">[${j.axis.join(', ')}] — ${axLabel}</span></div>
+                    <div class="popup-row"><span class="popup-label">\u03B8</span>
+                        <span class="popup-val" style="color:${ch};font-weight:600">${j.angle.toFixed(4)} rad (${(j.angle * 180 / Math.PI).toFixed(1)}\u00B0)</span></div>
+                    <div class="popup-row"><span class="popup-label">link</span>
+                        <span class="popup-val">[${j.link.map(v=>v.toFixed(1)).join(', ')}] mm  |link|=${linkLen.toFixed(1)}</span></div>
+                    <div class="popup-row"><span class="popup-label">sign</span>
+                        <span class="popup-val" style="color:#6a8a50">${j.signConvention}</span></div>`;
+
+                const T = jointLocalT[data.finger]?.[data.jointIdx];
+                if (T) {
+                    html += `<div class="popup-matrix">${formatMatrix4x4(T)}</div>`;
+                }
+                const sv = jointSpatialVec[data.finger]?.[data.jointIdx];
+                if (sv) {
+                    const angStr = sv.slice(0, 3).map(v => v.toFixed(4)).join(', ');
+                    const linStr = sv.slice(3, 6).map(v => v.toFixed(4)).join(', ');
+                    html += `<div class="popup-spatial">
+                        <b>\u03C9\u03B8</b> = [${angStr}] rad<br>
+                        <b>v</b>&nbsp;&nbsp; = [${linStr}] mm</div>`;
+                }
+            } else if (data.type === 'tip') {
+                const fdata = model[data.finger];
+                title = `${fdata.label.zh} ${fdata.label.en} — Tip`;
+                html = `<div class="popup-row"><span class="popup-val">\u6307\u5C16\u8282\u70B9 (fixed)</span></div>`;
+            } else if (data.type === 'coil') {
+                const fdata = model[data.finger];
+                const coilData = CONFIG.sensors.coils[data.finger];
+                title = `${coilData.name} — ${fdata.label.zh}`;
+                html = `<div class="popup-row"><span class="popup-val">EMF \u78C1\u63A5\u6536\u7EBF\u5708\uFF0Coffset: [${coilData.offset_mm}] mm</span></div>`;
+            } else if (data.type === 'wrist') {
+                title = 'Wrist (Root)';
+                html = `<div class="popup-row"><span class="popup-val">\u624B\u8155\u539F\u70B9\uFF0C\u8FD0\u52A8\u5B66\u6811\u6839\u8282\u70B9</span></div>`;
+            } else if (data.type === 'emfBase') {
+                title = 'EMF Sensor Base';
+                html = `<div class="popup-row"><span class="popup-val">${CONFIG.sensors.emfBase.description}<br>offset: [${CONFIG.sensors.emfBase.offset_mm}] mm</span></div>`;
+            }
+
+            popupTitle.textContent = title;
+            popupContent.innerHTML = html;
+
+            // Position popup near click, but keep within viewport
+            const pw = 320, ph = 300;
+            let left = cx + 12, top = cy - 20;
+            if (left + pw > window.innerWidth) left = cx - pw - 12;
+            if (top + ph > window.innerHeight) top = window.innerHeight - ph - 10;
+            if (top < 10) top = 10;
+            popup.style.left = left + 'px';
+            popup.style.top = top + 'px';
+            popup.classList.add('visible');
+        }
+
+        function onResize() {
+            const vc = document.querySelector('.view-3d');
+            camera.aspect = vc.clientWidth / vc.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(vc.clientWidth, vc.clientHeight);
+            orthoCanvasIds.forEach((cid, i) => {
+                const wrap = document.getElementById(cid).parentElement;
+                const ow = wrap.clientWidth, oh = wrap.clientHeight;
+                orthoRenderers[i].setSize(ow, oh);
+                const a = ow / oh;
+                orthoCameras[i].left = -orthoSize * a;
+                orthoCameras[i].right = orthoSize * a;
+                orthoCameras[i].top = orthoSize;
+                orthoCameras[i].bottom = -orthoSize;
+                orthoCameras[i].updateProjectionMatrix();
+            });
+        }
+        window.addEventListener('resize', onResize);
+        onResize();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            orthoRenderers.forEach((r, i) => r.render(scene, orthoCameras[i]));
+        }
+        animate();
+
+        if (window.renderMathInElement)
+            setTimeout(() => renderMathInElement(document.getElementById('cardsPanel')), 500);
+    </script>
+</body>
+
+</html>
