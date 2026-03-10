@@ -55,23 +55,23 @@
         .main { display: flex; flex: 1; overflow: hidden }
 
         .cards-panel {
-            width: 380px; min-width: 300px; overflow-y: auto; overflow-x: hidden;
+            width: 340px; min-width: 280px; overflow-y: auto; overflow-x: hidden;
             background: var(--panel); border-right: 1px solid var(--border);
             padding: 8px; flex-shrink: 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent
         }
 
         .center-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); min-width: 0 }
-        .view-3d { flex: 1; position: relative; min-height: 200px }
+        .view-3d { flex: 1 1 0; position: relative; min-height: 180px; max-height: 55vh }
         #canvas3d { width: 100%; height: 100%; display: block }
 
         .tree-section {
             background: var(--card); border-top: 1px solid var(--border);
-            padding: 10px 16px; max-height: 280px; overflow-y: auto; flex-shrink: 0;
+            padding: 10px 16px; flex: 0 1 auto; overflow-y: auto; flex-shrink: 1;
             scrollbar-width: thin; scrollbar-color: var(--border) transparent
         }
 
         .ortho-col {
-            width: 220px; flex-shrink: 0; display: flex; flex-direction: column;
+            width: 180px; flex-shrink: 0; display: flex; flex-direction: column;
             border-left: 1px solid var(--border); background: var(--bg)
         }
         .ortho-wrap { flex: 1; position: relative; border-bottom: 1px solid var(--border); background: var(--bg) }
@@ -80,6 +80,42 @@
         .ortho-label {
             position: absolute; top: 4px; left: 8px; font-size: 9px; font-weight: 600;
             color: var(--dim); z-index: 2; pointer-events: none
+        }
+
+        /* ── Mobile layout ── */
+        @media (max-width: 768px) {
+            body { overflow: auto; height: auto; min-height: 100vh }
+            .header { flex-wrap: wrap; padding: 8px 12px; gap: 6px }
+            .header h1 { font-size: 13px; flex-basis: 100% }
+            .main { flex-direction: column; overflow: visible }
+            .cards-panel {
+                width: 100%; min-width: unset; max-height: 45vh;
+                border-right: none; border-bottom: 1px solid var(--border);
+                order: 2
+            }
+            .center-col { order: 1; min-height: 0 }
+            .view-3d { min-height: 260px; max-height: 50vh; flex: none; height: 40vh }
+            .tree-section { max-height: 200px }
+            .ortho-col {
+                width: 100%; flex-direction: row; height: 140px;
+                border-left: none; border-top: 1px solid var(--border);
+                order: 3
+            }
+            .ortho-wrap { border-bottom: none; border-right: 1px solid var(--border) }
+            .ortho-wrap:last-child { border-right: none }
+            .node-popup { max-width: 90vw; min-width: 200px }
+            .jc-slider { width: 50px }
+            .jc-input { width: 42px; font-size: 8px }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 { font-size: 12px }
+            .badge { font-size: 8px; padding: 1px 6px }
+            .view-3d { height: 35vh; min-height: 220px }
+            .ortho-col { height: 110px }
+            .cards-panel { max-height: 50vh }
+            .help-box { font-size: 8px }
+            .finger-header { font-size: 10px; padding: 5px 8px }
         }
         .tree-section h3 { font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--accent) }
         .tree-pre {
@@ -232,9 +268,9 @@
         <span class="badge">REP-155 Z=Proximal</span>
         <span class="badge">21 DOF + 6 Sensors</span>
         <button id="btnAnim" style="margin-left:auto;padding:3px 12px;border-radius:12px;border:1px solid var(--border);
-            background:var(--card);color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;
+            background:var(--accent);color:#fff;font-size:10px;font-weight:600;cursor:pointer;
             font-family:var(--font);transition:all .15s">
-            Play Spread+Grasp
+            Stop Animation
         </button>
     </div>
 
@@ -261,7 +297,14 @@
                 <div class="hud-bottom">左键旋转 &middot; 右键平移 &middot; 滚轮缩放 &middot; 单击节点弹出信息</div>
             </div>
             <div class="tree-section" id="treeSection">
-                <h3>Kinematic Tree</h3>
+                <h3>Kinematic Tree <span style="font-weight:400;font-size:9px;color:var(--dim)">(所有节点名仅代表旋转轴，其语义与正方向无关)</span></h3>
+                <div style="font-size:9px;line-height:1.6;color:var(--dim);margin-bottom:6px;padding:4px 8px;
+                    background:rgba(0,0,0,0.02);border-radius:4px;border:1px solid rgba(0,0,0,0.04)">
+                    <b style="color:var(--text)">XYZ 正方向助记 (右手 REP-155)</b><br>
+                    <span style="color:#e44"><b>X+</b> 手刀砍你</span> (radial/桡侧，拇指方向) &middot;
+                    <span style="color:#48e"><b>Z+</b> 指尖戳你喉咙</span> (proximal/近端，骨骼从远端→近端，-Z=指尖方向) &middot;
+                    <span style="color:#4b4"><b>Y+</b> 抓你</span> (ventral/掌侧，手指弯曲方向，Y=X&times;Z)
+                </div>
                 <div class="tree-pre" id="treeOutput"></div>
             </div>
         </div>
@@ -884,12 +927,12 @@
 
                 const hdr = document.createElement('div');
                 hdr.className = 'finger-header';
-                hdr.innerHTML = `<span class="arrow open">\u25B6</span>
+                hdr.innerHTML = `<span class="arrow">\u25B6</span>
                     <span style="color:${ch};font-weight:700">${fdata.label.zh} ${fdata.label.en}</span>
                     <span style="color:var(--dim);font-size:9px;margin-left:auto">${fdata.joints.length} DOF</span>`;
 
                 const body = document.createElement('div');
-                body.className = 'finger-body open';
+                body.className = 'finger-body';
                 hdr.addEventListener('click', () => {
                     body.classList.toggle('open');
                     hdr.querySelector('.arrow').classList.toggle('open');
@@ -1002,7 +1045,7 @@
                     <span style="color:#d07878;font-weight:700;font-size:11px">EMF Sensor Base</span>
                     <span style="color:var(--dim);font-size:9px;margin-left:auto">\u78C1\u4F20\u611F\u5668\u57FA\u7AD9</span>
                 </div>
-                <div class="finger-body open">
+                <div class="finger-body">
                     <div class="joint-card" style="border-left:3px solid #d0787840">
                         <div class="jc-desc">${CONFIG.sensors.emfBase.description}<br>offset: [${CONFIG.sensors.emfBase.offset_mm}] mm (REP-155)</div>
                     </div>
@@ -1098,6 +1141,9 @@
         // ══════════════════════════════════════════════════════
         function buildTreeText() {
             const lines = [];
+            // Axis semantics verification header
+            lines.push('<span style="color:var(--dim);font-size:9px">flex(X): +\u03B8 curl toward palm(+Y) \u2714  abd(Y): +\u03B8 adduction \u2714  link(-Z): distal toward fingertip \u2714</span>');
+            lines.push('');
             lines.push('<span class="fixed">wrist</span> (root)');
             lines.push('\u251C\u2500\u2500 <span class="sensor">emf_sensor_base</span> [fixed, offset: (' +
                 CONFIG.sensors.emfBase.offset_mm.join(', ') + ') mm]');
@@ -1301,8 +1347,106 @@
         window.addEventListener('resize', onResize);
         onResize();
 
+        // ══════════════════════════════════════════════════════
+        //  SPREAD + GRASP ANIMATION
+        // ══════════════════════════════════════════════════════
+        let animRunning = true;
+        let animTime = 0;
+        const animBtn = document.getElementById('btnAnim');
+
+        // Animation keyframes (time 0→1):
+        // 0.00–0.25: spread (abd joints open outward)
+        // 0.25–0.50: hold spread
+        // 0.50–0.85: grasp (flex joints bend)
+        // 0.85–1.00: release back to T-pose
+        function getAnimPose(t) {
+            // Returns { abd, flex } multipliers in [0, 1]
+            let abd = 0, flex = 0;
+            if (t < 0.25) {
+                // Spread open
+                abd = t / 0.25;
+            } else if (t < 0.40) {
+                // Hold spread, start closing
+                abd = 1.0 - (t - 0.25) / 0.15 * 0.5;
+                flex = (t - 0.25) / 0.15 * 0.3;
+            } else if (t < 0.70) {
+                // Full grasp
+                abd = 0.5 - (t - 0.40) / 0.30 * 0.5;
+                flex = 0.3 + (t - 0.40) / 0.30 * 0.7;
+            } else if (t < 0.85) {
+                // Hold grasp
+                flex = 1.0;
+            } else {
+                // Release
+                const r = (t - 0.85) / 0.15;
+                flex = 1.0 - r;
+            }
+            return { abd, flex };
+        }
+
+        function applyAnimPose(pose) {
+            const maxAbd = 0.35;    // max abduction angle (rad)
+            const maxFlex = 1.2;    // max flexion angle (rad)
+            const thumbMaxFlex = 0.8;
+
+            FINGER_ORDER.forEach(fname => {
+                const fdata = model[fname];
+                fdata.joints.forEach((j, ji) => {
+                    if (fname === 'thumb') {
+                        // Thumb: cmc_rot stays at default, flex joints bend
+                        if (ji === 0) return; // cmc_rot keep default
+                        if (ji === 2) {
+                            // cmc_abd: spread outward (negative for thumb = abduction)
+                            j.angle = -pose.abd * maxAbd;
+                        } else if (j.axis[0] > 0.5) {
+                            // flex joints
+                            j.angle = pose.flex * thumbMaxFlex;
+                        }
+                    } else {
+                        // Other fingers
+                        if (j.axis[1] > 0.5) {
+                            // Y-axis = abd joint: spread
+                            // Index/middle spread positive (radial), ring/pinky negative (ulnar)
+                            const sign = (fname === 'index' || fname === 'middle') ? -1 : 1;
+                            j.angle = sign * pose.abd * maxAbd;
+                        } else if (j.axis[0] > 0.5) {
+                            // X-axis = flex joint
+                            j.angle = pose.flex * maxFlex;
+                        }
+                    }
+                });
+                updateChain(fname);
+                updateMatrixDisplays(fname);
+            });
+
+            // Update slider UI
+            FINGER_ORDER.forEach(fname => {
+                model[fname].joints.forEach((j, ji) => {
+                    const slider = cardsPanel.querySelector(`input[type=range][data-f="${fname}"][data-j="${ji}"]`);
+                    if (slider) slider.value = j.angle;
+                    const numInp = cardsPanel.querySelector(`input[data-f="${fname}"][data-j="${ji}"][data-field="angle-num"]`);
+                    if (numInp) numInp.value = j.angle.toFixed(3);
+                });
+            });
+        }
+
+        animBtn.addEventListener('click', () => {
+            animRunning = !animRunning;
+            animBtn.textContent = animRunning ? 'Stop Animation' : 'Play Spread+Grasp';
+            animBtn.style.background = animRunning ? 'var(--accent)' : 'var(--card)';
+            animBtn.style.color = animRunning ? '#fff' : 'var(--accent)';
+            if (animRunning) animTime = 0;
+        });
+
         function animate() {
             requestAnimationFrame(animate);
+
+            if (animRunning) {
+                animTime += 0.004; // ~4 seconds per cycle at 60fps
+                if (animTime > 1) animTime = 0;
+                applyAnimPose(getAnimPose(animTime));
+            }
+
             controls.update();
             renderer.render(scene, camera);
             orthoRenderers.forEach((r, i) => r.render(scene, orthoCameras[i]));
