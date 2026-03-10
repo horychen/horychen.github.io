@@ -8,14 +8,10 @@ const withNextra = nextra({
   contentDirBasePath: '/docs'
 })
 
-const isProd = process.env.NODE_ENV === 'production';
-
 export default withNextra({
   reactStrictMode: true,
   output: 'export',
   trailingSlash: true,
-  basePath: isProd ? '/chenjh' : '',
-  assetPrefix: isProd ? '/chenjh' : '',
   images: {
     unoptimized: true
   }

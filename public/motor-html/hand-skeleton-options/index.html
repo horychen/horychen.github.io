@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WG110 Hand Skeleton — Kinematic Visualization</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --dim: #8b949e;
+            --accent: #58a6ff;
+            --thumb: #f0883e;
+            --index: #3fb950;
+            --middle: #58a6ff;
+            --ring: #bc8cff;
+            --pinky: #f778ba;
+            --sensor: #d29922;
+            --xr: #ff6b6b;
+            --yg: #51cf66;
+            --zb: #339af0;
+            --font: 'Inter', system-ui, sans-serif
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            min-height: 100vh
+        }
+
+        .header {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600
+        }
+
+        .badge {
+            background: var(--accent);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 12px 32px 0;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .tab {
+            padding: 8px 20px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--dim);
+            background: transparent;
+            border: 1px solid transparent;
+            border-bottom: none;
+            transition: all .2s
+        }
+
+        .tab:hover {
+            color: var(--text);
+            background: var(--card)
+        }
+
+        .tab.active {
+            color: var(--text);
+            background: var(--card);
+            border-color: var(--border)
+        }
+
+        .panel {
+            display: none;
+            padding: 24px 32px
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .svg-wrap {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            overflow: auto
+        }
+
+        svg text {
+            font-family: var(--font)
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--dim)
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%
+        }
+
+        .formula-box {
+            margin-top: 16px;
+            padding: 16px 20px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            line-height: 2
+        }
+
+        .formula-box .katex {
+            font-size: 1.1em
+        }
+
+        /* Tab C styles */
+        .chain-section {
+            margin-top: 20px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            background: var(--card)
+        }
+
+        .chain-header {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .chain-flow {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            flex-wrap: wrap
+        }
+
+        .joint-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            min-width: 140px;
+            max-width: 200px;
+            position: relative
+        }
+
+        .joint-card.sensor {
+            border-style: dashed;
+            border-color: var(--sensor)
+        }
+
+        .joint-card h4 {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .joint-card .detail {
+            font-size: 11px;
+            color: var(--dim);
+            line-height: 1.7
+        }
+
+        .joint-card .detail .katex {
+            font-size: 0.95em
+        }
+
+        .card-badge {
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 600
+        }
+
+        .badge-root {
+            background: #1a3a1a;
+            color: #3fb950
+        }
+
+        .badge-twist {
+            background: #553300;
+            color: #d29922
+        }
+
+        .badge-flex {
+            background: #1a2a3a;
+            color: #58a6ff
+        }
+
+        .badge-sensor {
+            background: #332800;
+            color: #d29922
+        }
+
+        .arrow-sep {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            flex-shrink: 0;
+            color: var(--dim);
+            font-size: 18px;
+            font-weight: 300
+        }
+
+        .chain-formula {
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: var(--bg);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 14px;
+            line-height: 1.8
+        }
+
+        .chain-formula .katex {
+            font-size: 1.05em
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>WG110 EMF Glove — Kinematic Chain Visualization</h1>
+        <span class="badge">REP-155</span>
+        <span class="badge" style="background:var(--sensor)">PoE / Screw Axis</span>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">A — 侧视解剖图</div>
+        <div class="tab" onclick="switchTab(1)">B — 俯视展开图</div>
+        <div class="tab" onclick="switchTab(2)">C — 信息卡片</div>
+    </div>
+
+    <div class="panel active" id="panelA"></div>
+    <div class="panel" id="panelB"></div>
+    <div class="panel" id="panelC"></div>
+
+    <script>
+        function switchTab(i) {
+            document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i));
+            document.querySelectorAll('.panel').forEach((p, j) => p.classList.toggle('active', j === i));
+            // re-render KaTeX in newly visible panel
+            if (window.renderMathInElement) renderMathInElement(document.querySelectorAll('.panel')[i]);
+        }
+
+        const C = {
+            thumb: '#f0883e', index: '#3fb950', middle: '#58a6ff', ring: '#bc8cff', pinky: '#f778ba',
+            sensor: '#d29922', xr: '#ff6b6b', yg: '#51cf66', zb: '#339af0', bg: '#161b22', dim: '#8b949e', text: '#e6edf3', border: '#30363d'
+        };
+
+        const fingers = {
+            thumb: {
+                color: C.thumb, label: 'Thumb (拇指)', fingerIdx: 0,
+                joints: [
+                    { name: 'J1 CMC roll', type: 'rot', dh: 'a=16.1, α=−90°, d=−3.1', omega: '\\hat{z}_0', sym: '⊛', rootJ: true, sign: '0=展开, +旋内', dofIdx: 0 },
+                    { name: 'J2 CMC flex', type: 'rot', dh: 'a=0, α=0°, d=0', omega: '\\hat{z}_1', sym: '⊛', rootJ: true, sign: '0=伸直, +=弯曲', dofIdx: 1 },
+                    { name: 'J3 CMC twist', type: 'twist', dh: 'a=34.7, α=0°, d=0', omega: '\\hat{x}_2', sym: '⟳', rootJ: true, sign: '绕骨轴旋转', dofIdx: 2 },
+                    { name: 'J4 MCP flex', type: 'rot', dh: 'a=29.5, α=0°, d=−2.3', omega: '\\hat{z}_3', sym: '●', rootJ: false, sign: '0=伸直, +=弯曲', dofIdx: 3 },
+                    { name: 'J5 IP flex', type: 'rot', dh: 'a=28.3, α=0°, d=−2.0', omega: '\\hat{z}_4', sym: '●', rootJ: false, sign: '0=伸直, +=弯曲', dofIdx: 4 }],
+                links: [16.1, 0, 34.7, 29.5, 28.3], rootDOF: 3
+            },
+            index: {
+                color: C.index, label: 'Index (食指)', fingerIdx: 1,
+                joints: [
+                    { name: 'J1 MCP flex', type: 'rot', dh: 'a=4.6, α=−90°', omega: '\\hat{z}_0', sym: '⊛', rootJ: true, sign: '0=伸直, +=弯曲(屈)', dofIdx: 5 },
+                    { name: 'J2 MCP abd', type: 'rot', dh: 'a=43.9, α=+90°', omega: '\\hat{z}_1', sym: '⊛', rootJ: true, sign: '0=中立, +=内收', dofIdx: 6 },
+                    { name: 'J3 PIP flex', type: 'rot', dh: 'a=29.5, α=0°', omega: '\\hat{z}_2', sym: '●', rootJ: false, sign: '0=伸直, +=弯曲', dofIdx: 7 },
+                    { name: 'J4 DIP flex', type: 'rot', dh: 'a=27.4, α=0°', omega: '\\hat{z}_3', sym: '●', rootJ: false, sign: '0=伸直, +=弯曲', dofIdx: 8 }],
+                links: [4.6, 43.9, 29.5, 27.4], rootDOF: 2
+            },
+            middle: {
+                color: C.middle, label: 'Middle (中指)', fingerIdx: 2,
+                joints: [
+                    { name: 'J1 MCP flex', type: 'rot', dh: 'a=4.6, α=−90°', omega: '\\hat{z}_0', sym: '⊛', rootJ: true, sign: '0=伸直, +=弯曲', dofIdx: 9 },
+                    { name: 'J2 MCP abd', type: 'rot', dh: 'a=43.9, α=+90°', omega: '\\hat{z}_1', sym: '⊛', rootJ: true, sign: '0=中立, +=内收', dofIdx: 10 },
+                    { name: 'J3 PIP flex', type: 'rot', dh: 'a=29.5, α=0°', omega: '\\hat{z}_2', sym: '●', rootJ: false, sign: '0=伸直, +=弯曲', dofIdx: 11 },
+                    { name: 'J4 DIP flex', type: 'rot', dh: 'a=26.7, α=0°', omega: '\\hat{z}_3', sym: '●', rootJ: false, sign: '0=伸直, +=弯曲', dofIdx: 12 }],
+                links: [4.6, 43.9, 29.5, 26.7], rootDOF: 2
+            },
+            ring: {
+                color: C.ring, label: 'Ring (无名指)', fingerIdx: 3,
+                joints: [
+                    { name: 'J1 MCP flex', type: 'rot', dh: 'a=4.6, α=−90°', omega: '\\hat{z}_0', sym: '⊛', rootJ: true, sign: '0=伸直, +=弯曲', dofIdx: 13 },
+                    { name: 'J2 MCP abd', type: 'rot', dh: 'a=43.9, α=+90°', omega: '\\hat{z}_1', sym: '⊛', rootJ: true, sign: '0=中立, +=内收', dofIdx: 14 },
+                    { name: 'J3 PIP flex', type: 'rot', dh: 'a=29.5, α=0°', omega: '\\hat{z}_2', sym: '●', rootJ: false, sign: '0=伸直, +=弯曲', dofIdx: 15 },
+                    { name: 'J4 DIP flex', type: 'rot', dh: 'a=26.7, α=0°', omega: '\\hat{z}_3', sym: '●', rootJ: false, sign: '0=伸直, +=弯曲', dofIdx: 16 }],
+                links: [4.6, 43.9, 29.5, 26.7], rootDOF: 2
+            },
+            pinky: {
+                color: C.pinky, label: 'Pinky (小指)', fingerIdx: 4,
+                joints: [
+                    { name: 'J1 MCP flex', type: 'rot', dh: 'a=4.6, α=−90°', omega: '\\hat{z}_0', sym: '⊛', rootJ: true, sign: '0=伸直, +=弯曲', dofIdx: 17 },
+                    { name: 'J2 MCP abd', type: 'rot', dh: 'a=43.9, α=+90°', omega: '\\hat{z}_1', sym: '⊛', rootJ: true, sign: '0=中立, +=内收', dofIdx: 18 },
+                    { name: 'J3 PIP flex', type: 'rot', dh: 'a=29.5, α=0°', omega: '\\hat{z}_2', sym: '●', rootJ: false, sign: '0=伸直, +=弯曲', dofIdx: 19 },
+                    { name: 'J4 DIP flex', type: 'rot', dh: 'a=26.7, α=0°', omega: '\\hat{z}_3', sym: '●', rootJ: false, sign: '0=伸直, +=弯曲', dofIdx: 20 }],
+                links: [4.6, 43.9, 29.5, 26.7], rootDOF: 2
+            }
+        };
+        const fOrder = ['thumb', 'index', 'middle', 'ring', 'pinky'];
+
+        function svgEl(tag, attrs, parent) {
+            const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+            if (parent) parent.appendChild(e);
+            return e;
+        }
+        function drawAxes(g, x, y, len) {
+            len = len || 20;
+            svgEl('line', { x1: x, y1: y, x2: x + len, y2: y, stroke: C.xr, 'stroke-width': 2 }, g);
+            svgEl('polygon', { points: `${x + len},${y - 3} ${x + len + 6},${y} ${x + len},${y + 3}`, fill: C.xr }, g);
+            svgEl('line', { x1: x, y1: y, x2: x, y2: y - len, stroke: C.yg, 'stroke-width': 2 }, g);
+            svgEl('polygon', { points: `${x - 3},${y - len} ${x},${y - len - 6} ${x + 3},${y - len}`, fill: C.yg }, g);
+            svgEl('line', { x1: x, y1: y, x2: x - len * 0.5, y2: y + len * 0.5, stroke: C.zb, 'stroke-width': 1.5, 'stroke-dasharray': '3,2' }, g);
+            svgEl('text', { x: x + len + 9, y: y + 4, fill: C.xr, 'font-size': 10, 'font-weight': 700 }, g).textContent = 'X';
+            svgEl('text', { x: x + 4, y: y - len - 8, fill: C.yg, 'font-size': 10, 'font-weight': 700 }, g).textContent = 'Y';
+            svgEl('text', { x: x - len * 0.5 - 12, y: y + len * 0.5 + 4, fill: C.zb, 'font-size': 10, 'font-weight': 700 }, g).textContent = 'Z';
+        }
+
+        // ── Scheme A: Side View (improved with leader lines) ────────
+        function buildSchemeA() {
+            const W = 1200, H = 720;
+            const wrap = document.createElement('div'); wrap.className = 'svg-wrap';
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '100%'); svg.setAttribute('height', H);
+            svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+            wrap.appendChild(svg);
+
+            // Grid
+            const gg = svgEl('g', { opacity: 0.06 }, svg);
+            for (let x = 0; x < W; x += 50)svgEl('line', { x1: x, y1: 0, x2: x, y2: H, stroke: '#fff', 'stroke-width': 0.5 }, gg);
+            for (let y = 0; y < H; y += 50)svgEl('line', { x1: 0, y1: y, x2: W, y2: y, stroke: '#fff', 'stroke-width': 0.5 }, gg);
+
+            svgEl('text', { x: 16, y: 28, fill: C.text, 'font-size': 15, 'font-weight': 600 }, svg).textContent = 'Scheme A — Anatomical Side View (侧视解剖图)';
+
+            const wx = 100, wy = 360;
+            // Wrist
+            svgEl('rect', { x: wx - 32, y: wy - 28, width: 64, height: 56, rx: 10, fill: 'none', stroke: C.text, 'stroke-width': 2.5 }, svg);
+            svgEl('text', { x: wx, y: wy + 5, fill: C.text, 'font-size': 14, 'font-weight': 700, 'text-anchor': 'middle' }, svg).textContent = 'Wrist';
+            // EMF base
+            svgEl('rect', { x: wx - 38, y: wy + 38, width: 76, height: 30, rx: 6, fill: 'none', stroke: C.sensor, 'stroke-width': 1.5, 'stroke-dasharray': '5,3' }, svg);
+            svgEl('text', { x: wx, y: wy + 57, fill: C.sensor, 'font-size': 11, 'text-anchor': 'middle', 'font-weight': 500 }, svg).textContent = 'EMF TX Base';
+            drawAxes(svg, wx + 42, wy, 22);
+
+            const yPositions = [80, 220, 360, 490, 620];
+            const scale = 4.0;
+
+            fOrder.forEach((fname, fi) => {
+                const f = fingers[fname];
+                const g = svgEl('g', {}, svg);
+                const y0 = yPositions[fi];
+                let cx = wx + 50;
+
+                // Palm offset line
+                svgEl('line', { x1: wx + 32, y1: wy, x2: cx, y2: y0, stroke: f.color, 'stroke-width': 1.5, 'stroke-dasharray': '5,3', opacity: 0.4 }, g);
+
+                // Finger label (larger)
+                svgEl('text', { x: cx - 10, y: y0 - 30, fill: f.color, 'font-size': 13, 'font-weight': 700 }, g).textContent = f.label;
+
+                // Root DOF rings
+                for (let r = 0; r < f.rootDOF; r++) {
+                    svgEl('circle', { cx: cx, cy: y0, r: 9 + r * 5, fill: 'none', stroke: f.color, 'stroke-width': 1.2, opacity: 0.3 + r * 0.15 }, g);
+                }
+
+                f.joints.forEach((j, ji) => {
+                    const linkLen = Math.max(f.links[ji] * scale, 8);
+                    const nx = cx + linkLen;
+
+                    // Bone link
+                    svgEl('line', { x1: cx, y1: y0, x2: nx, y2: y0, stroke: f.color, 'stroke-width': 4, 'stroke-linecap': 'round' }, g);
+
+                    // Link length label (centered, slightly below bone)
+                    if (f.links[ji] > 1) {
+                        const mx = (cx + nx) / 2;
+                        svgEl('text', { x: mx, y: y0 + 18, fill: C.dim, 'font-size': 9, 'text-anchor': 'middle', 'font-weight': 500 }, g).textContent = f.links[ji].toFixed(1) + ' mm';
+                    }
+                    cx = nx;
+
+                    // Joint node
+                    if (j.type === 'twist') {
+                        svgEl('circle', { cx: cx, cy: y0, r: 7, fill: 'rgba(210,153,34,0.2)', stroke: C.sensor, 'stroke-width': 2 }, g);
+                        svgEl('text', { x: cx, y: y0 + 5, fill: C.sensor, 'font-size': 12, 'text-anchor': 'middle', 'font-weight': 700 }, g).textContent = '⟳';
+                    } else {
+                        svgEl('circle', { cx: cx, cy: y0, r: 6, fill: f.color, stroke: '#fff', 'stroke-width': 2 }, g);
+                    }
+
+                    // Annotation with leader line — alternate above/below
+                    const above = (ji % 2 === 0);
+                    const labelYoff = above ? -42 : 42;
+                    const lineYoff = above ? -12 : 12;
+
+                    // Leader line
+                    svgEl('line', {
+                        x1: cx, y1: y0 + lineYoff, x2: cx, y2: y0 + labelYoff + (above ? 14 : -6),
+                        stroke: C.dim, 'stroke-width': 0.8, 'stroke-dasharray': '2,2', opacity: 0.6
+                    }, g);
+                    // Small dot at line end
+                    svgEl('circle', { cx: cx, cy: y0 + lineYoff, r: 1.5, fill: C.dim, opacity: 0.6 }, g);
+
+                    // Joint name
+                    svgEl('text', { x: cx, y: y0 + labelYoff, fill: C.text, 'font-size': 10, 'text-anchor': 'middle', 'font-weight': 600 }, g).textContent = j.name;
+                    // Screw axis omega
+                    svgEl('text', { x: cx, y: y0 + labelYoff + 14, fill: C.dim, 'font-size': 10, 'text-anchor': 'middle', 'font-style': 'italic' }, g).textContent = 'ω = ' + j.omega.replace(/\\hat\{(\w)\}_(\d)/g, '$1̂$2');
+
+                    // Mini axes at first joint only
+                    if (ji === 0) drawAxes(g, cx + 14, y0 - 14, 14);
+                });
+
+                // Tip
+                cx += 22;
+                svgEl('line', { x1: cx - 22, y1: y0, x2: cx, y2: y0, stroke: f.color, 'stroke-width': 2, 'stroke-dasharray': '4,3' }, g);
+                svgEl('text', { x: cx + 3, y: y0 - 8, fill: C.dim, 'font-size': 10, 'font-weight': 500 }, g).textContent = 'tip';
+
+                // Sensor coil
+                cx += 20;
+                svgEl('line', { x1: cx - 20, y1: y0, x2: cx, y2: y0, stroke: C.sensor, 'stroke-width': 1, 'stroke-dasharray': '2,2' }, g);
+                svgEl('circle', { cx: cx, cy: y0, r: 8, fill: 'none', stroke: C.sensor, 'stroke-width': 2.5 }, g);
+                svgEl('circle', { cx: cx, cy: y0, r: 3, fill: C.sensor }, g);
+                svgEl('text', { x: cx, y: y0 + 22, fill: C.sensor, 'font-size': 9, 'text-anchor': 'middle', 'font-weight': 500 }, g).textContent = 'RX Coil';
+            });
+
+            document.getElementById('panelA').appendChild(wrap);
+
+            // Legend
+            const leg = document.createElement('div'); leg.className = 'legend';
+            leg.innerHTML = `
+    <div class="legend-item"><div class="legend-dot" style="background:${C.xr}"></div>X (桡侧)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:${C.yg}"></div>Y (掌/背)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:${C.zb}"></div>Z (近端)</div>
+    <div class="legend-item"><span style="font-size:16px">⊛</span> 多DOF根关节</div>
+    <div class="legend-item"><span style="font-size:16px">●</span> 单DOF旋转</div>
+    <div class="legend-item"><span style="font-size:16px;color:${C.sensor}">⟳</span> Twist关节</div>
+    <div class="legend-item"><div class="legend-dot" style="background:${C.sensor}"></div>EMF Sensor</div>
+    <div class="legend-item" style="color:${C.dim}">数字 = DH link length (mm)</div>`;
+            document.getElementById('panelA').appendChild(leg);
+
+            // PoE formula box (KaTeX rendered)
+            const fb = document.createElement('div'); fb.className = 'formula-box';
+            fb.innerHTML = `
+    <strong>Product of Exponentials (PoE) Forward Kinematics:</strong><br>
+    $T(\\theta_1,\\dots,\\theta_n) = e^{[\\mathcal{S}_1]\\theta_1} \\cdot e^{[\\mathcal{S}_2]\\theta_2} \\cdots e^{[\\mathcal{S}_n]\\theta_n} \\cdot M$<br>
+    <span style="color:var(--dim)">旋量 $\\mathcal{S}_i = (\\omega_i,\\, v_i) \\in \\mathbb{R}^6$，纯旋转关节 $v_i = -\\omega_i \\times q_i$，twist joint (拇指 J3) $\\omega = \\hat{x}$</span><br>
+    <strong>齐次变换矩阵:</strong> $T \\in SE(3)$，$T = \\begin{bmatrix} R & p \\\\ 0 & 1 \\end{bmatrix}$，其中 $R \\in SO(3)$ 为旋转矩阵，$p \\in \\mathbb{R}^3$ 为位置<br>
+    <strong>关节角数组:</strong> <span style="color:var(--dim)">$\\theta \\in \\mathbb{R}^{20}$，排列: $[\\theta_{\\text{thumb}}^{1..5},\; \\theta_{\\text{index}}^{1..4},\; \\theta_{\\text{mid}}^{1..4},\; \\theta_{\\text{ring}}^{1..4},\; \\theta_{\\text{pinky}}^{1..4}]$ (注意实际 DH 模型拇指5DOF，总计21D)</span><br>
+    <strong>角度约定:</strong> <span style="color:var(--dim)">屈伸关节: 0=伸直, +=弯曲 (rad)；侧摆关节: 0=中立, +=内收</span>`;
+            document.getElementById('panelA').appendChild(fb);
+        }
+
+        // ── Scheme B: Top-Down Spread ───────────────────────────────
+        function buildSchemeB() {
+            const W = 960, H = 780;
+            const wrap = document.createElement('div'); wrap.className = 'svg-wrap';
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '100%'); svg.setAttribute('height', H);
+            svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+            wrap.appendChild(svg);
+
+            svgEl('text', { x: 16, y: 28, fill: C.text, 'font-size': 15, 'font-weight': 600 }, svg).textContent = 'Scheme B — Top-Down Spread View (俯视展开图)';
+            svgEl('text', { x: 16, y: 48, fill: C.dim, 'font-size': 12 }, svg).textContent = 'Hover 关节圆点查看旋量详情 → DH 参数 & screw axis';
+
+            const ox = 480, oy = 700;
+            const sc = 4.2;
+            const angles = [-72, -22, 0, 20, 42];
+
+            // Wrist
+            svgEl('rect', { x: ox - 24, y: oy - 14, width: 48, height: 28, rx: 8, fill: 'none', stroke: C.text, 'stroke-width': 2.5 }, svg);
+            svgEl('text', { x: ox, y: oy + 5, fill: C.text, 'font-size': 13, 'font-weight': 700, 'text-anchor': 'middle' }, svg).textContent = 'Wrist';
+            drawAxes(svg, ox + 32, oy, 20);
+
+            svgEl('rect', { x: ox - 30, y: oy + 20, width: 60, height: 22, rx: 5, fill: 'none', stroke: C.sensor, 'stroke-width': 1.5, 'stroke-dasharray': '4,2' }, svg);
+            svgEl('text', { x: ox, y: oy + 35, fill: C.sensor, 'font-size': 9, 'text-anchor': 'middle', 'font-weight': 500 }, svg).textContent = 'EMF TX';
+
+            // Tooltip group
+            const ttg = svgEl('g', { id: 'tooltip', visibility: 'hidden' }, svg);
+            svgEl('rect', { x: 0, y: 0, width: 230, height: 80, rx: 8, fill: '#1c2333', stroke: C.border, 'stroke-width': 1.5, opacity: 0.97 }, ttg);
+            const tt1 = svgEl('text', { x: 12, y: 20, fill: C.text, 'font-size': 13, 'font-weight': 700 }, ttg);
+            const tt2 = svgEl('text', { x: 12, y: 38, fill: C.dim, 'font-size': 11 }, ttg);
+            const tt3 = svgEl('text', { x: 12, y: 54, fill: '#58a6ff', 'font-size': 11, 'font-style': 'italic' }, ttg);
+            const tt4 = svgEl('text', { x: 12, y: 72, fill: C.zb, 'font-size': 10 }, ttg);
+
+            function showTT(evt, j, flabel) {
+                tt1.textContent = flabel + ' — ' + j.name + '  [idx=' + j.dofIdx + ']';
+                tt2.textContent = 'DH: ' + j.dh;
+                const omegaClean = j.omega.replace(/\\hat\{(\w)\}_(\d)/g, '$1̂₋$2').replace('₋', '');
+                tt3.textContent = 'ω = ' + omegaClean + (j.type === 'twist' ? ' (twist)' : '') + '  |  ' + j.sign;
+                tt4.textContent = '𝒮 = (ω, −ω×q),  pitch = 0';
+                const pt = svg.getBoundingClientRect();
+                const bx = Math.min(evt.clientX - pt.left + 15, W - 245);
+                const by = Math.max(evt.clientY - pt.top - 90, 5);
+                ttg.setAttribute('transform', `translate(${bx},${by})`);
+                ttg.setAttribute('visibility', 'visible');
+            }
+            function hideTT() { ttg.setAttribute('visibility', 'hidden'); }
+
+            fOrder.forEach((fname, fi) => {
+                const f = fingers[fname];
+                const ang = angles[fi] * Math.PI / 180;
+                const dx = Math.sin(ang), dy = -Math.cos(ang);
+                const g = svgEl('g', {}, svg);
+                let cx = ox, cy = oy;
+
+                const palmLen = 34;
+                let nx = cx + dx * palmLen, ny = cy + dy * palmLen;
+                svgEl('line', { x1: cx, y1: cy, x2: nx, y2: ny, stroke: f.color, 'stroke-width': 1.5, 'stroke-dasharray': '5,3', opacity: 0.4 }, g);
+                cx = nx; cy = ny;
+
+                // Finger label near base
+                const lx = cx + dy * 22, ly = cy - dx * 22;
+                svgEl('text', { x: lx, y: ly, fill: f.color, 'font-size': 12, 'text-anchor': 'middle', 'font-weight': 700 }, g).textContent = f.label.split(' ')[0];
+
+                f.joints.forEach((j, ji) => {
+                    const linkPx = Math.max(f.links[ji] * sc, 10);
+                    nx = cx + dx * linkPx; ny = cy + dy * linkPx;
+
+                    svgEl('line', { x1: cx, y1: cy, x2: nx, y2: ny, stroke: f.color, 'stroke-width': 3.5, 'stroke-linecap': 'round' }, g);
+
+                    // Link length label (perpendicular offset)
+                    if (f.links[ji] > 1) {
+                        const mx = (cx + nx) / 2 + dy * 14, my = (cy + ny) / 2 - dx * 14;
+                        svgEl('text', { x: mx, y: my, fill: C.dim, 'font-size': 9, 'text-anchor': 'middle', 'font-weight': 500 }, g).textContent = f.links[ji].toFixed(1) + ' mm';
+                    }
+
+                    cx = nx; cy = ny;
+
+                    // Interactive joint
+                    const r = j.type === 'twist' ? 8 : 6;
+                    const fillCol = j.type === 'twist' ? 'rgba(210,153,34,0.3)' : f.color;
+                    const strokeCol = j.type === 'twist' ? C.sensor : '#fff';
+                    const jc = svgEl('circle', { cx: cx, cy: cy, r: r, fill: fillCol, stroke: strokeCol, 'stroke-width': 2, cursor: 'pointer' }, g);
+                    jc.addEventListener('mouseenter', (e) => showTT(e, j, f.label));
+                    jc.addEventListener('mouseleave', hideTT);
+                });
+
+                // Tip + sensor coil
+                nx = cx + dx * 20; ny = cy + dy * 20;
+                svgEl('line', { x1: cx, y1: cy, x2: nx, y2: ny, stroke: f.color, 'stroke-width': 1.5, 'stroke-dasharray': '4,3' }, g);
+                svgEl('circle', { cx: nx, cy: ny, r: 7, fill: 'none', stroke: C.sensor, 'stroke-width': 2.5 }, g);
+                svgEl('circle', { cx: nx, cy: ny, r: 3, fill: C.sensor }, g);
+            });
+
+            document.getElementById('panelB').appendChild(wrap);
+
+            // Formula box
+            const fb = document.createElement('div'); fb.className = 'formula-box';
+            fb.innerHTML = `
+    <strong>Forward Kinematics (PoE 形式):</strong><br>
+    $T(\\theta_1,\\dots,\\theta_n) = e^{[\\mathcal{S}_1]\\theta_1} \\cdot e^{[\\mathcal{S}_2]\\theta_2} \\cdots e^{[\\mathcal{S}_n]\\theta_n} \\cdot M$，其中 $T = \\begin{bmatrix} R & p \\\\ 0 & 1 \\end{bmatrix} \\in SE(3)$<br>
+    <span style="color:var(--dim)">每条骨骼旁的数字 = DH link length $a_i$ (单位 mm)，即该段指骨的物理长度</span><br>
+    <span style="color:var(--dim)">角度约定: 屈伸关节 0=伸直 +=弯曲(rad)，侧摆 0=中立 +=内收 | 关节角数组 $\\theta \\in \\mathbb{R}^{20}$: [thumb×5, index×4, mid×4, ring×4, pinky×4]</span>`;
+            document.getElementById('panelB').appendChild(fb);
+
+            // Legend
+            const leg = document.createElement('div'); leg.className = 'legend';
+            leg.innerHTML = `
+    <div class="legend-item"><div class="legend-dot" style="background:${C.xr}"></div>X (桡侧)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:${C.yg}"></div>Y (掌/背)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:${C.zb}"></div>Z (近端)</div>
+    <div class="legend-item">骨骼旁数字 = link length $a_i$ (mm)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:${C.sensor}"></div>RX Sensor Coil</div>`;
+            document.getElementById('panelB').appendChild(leg);
+        }
+
+        // ── Scheme C: Info Cards with chained arrows ────────────────
+        function buildSchemeC() {
+            const panel = document.getElementById('panelC');
+
+            // Wrist card
+            panel.innerHTML += `
+  <div class="chain-section" style="border-color:${C.text}">
+    <div class="chain-header">🦴 <span style="font-size:16px">Wrist (root)</span>
+      <span class="badge" style="background:#2d333b;color:${C.text}">REP-155</span></div>
+    <div style="font-size:13px;color:${C.dim};line-height:1.8">
+      坐标系: $X \\to$ 桡侧，$Y \\to$ 掌/背，$Z \\to$ 近端（手臂方向）<br>
+      手腕矩阵: $T_{\\text{wrist}} \\in SE(3)$，$T = \\begin{bmatrix} R_{3\\times3} & p_{3\\times1} \\\\ 0_{1\\times3} & 1 \\end{bmatrix}$，$R \\in SO(3)$ = palm_link 旋转，$p$ = 掌根世界坐标<br>
+      EMF TX Base: 与 wrist 仅平移偏移 (无旋转)，是 EMF 空间追踪参考原点<br>
+      关节角: $\\theta \\in \\mathbb{R}^{20}$，排列 $[\\theta_{f_1 j_1}, \\theta_{f_1 j_2}, \\dots, \\theta_{f_5 j_4}]$，5指×4关节共20DOF (DH模型拇指5DOF=21D)
+    </div>
+  </div>`;
+
+            fOrder.forEach(fname => {
+                const f = fingers[fname];
+                let cardsHTML = '';
+
+                // Palm offset card
+                cardsHTML += `
+      <div class="joint-card" style="border-color:${f.color}50">
+        <h4 style="color:${f.color}">palm_offset<span class="card-badge" style="background:${f.color}30;color:${f.color}">FIXED</span></h4>
+        <div class="detail">固定平移<br>$p_{\\text{wrist}} \\to p_{\\text{J1}}$</div>
+      </div>
+      <div class="arrow-sep">→</div>`;
+
+                f.joints.forEach((j, ji) => {
+                    const badgeClass = j.type === 'twist' ? 'badge-twist' : (j.rootJ ? 'badge-root' : 'badge-flex');
+                    const badgeText = j.type === 'twist' ? 'TWIST' : (j.rootJ ? 'ROOT' : 'FLEX');
+                    cardsHTML += `
+        <div class="joint-card">
+          <h4>${j.name} <span class="card-badge ${badgeClass}">${badgeText}</span>
+            <span style="font-size:9px;color:${C.dim};font-weight:400">idx=${j.dofIdx}</span></h4>
+          <div class="detail">
+            $\\omega = ${j.omega}$<br>
+            DH: ${j.dh}<br>
+            $a = ${f.links[ji].toFixed(1)}$ mm<br>
+            <span style="color:#51cf66;font-size:10px">⤷ ${j.sign}</span>
+          </div>
+        </div>`;
+                    if (ji < f.joints.length - 1) cardsHTML += `<div class="arrow-sep">→</div>`;
+                });
+
+                // Tip + sensor
+                cardsHTML += `
+      <div class="arrow-sep">→</div>
+      <div class="joint-card" style="border-color:${C.dim}">
+        <h4 style="color:${C.dim}">tip</h4>
+        <div class="detail">指尖末端</div>
+      </div>
+      <div class="arrow-sep">→</div>
+      <div class="joint-card sensor">
+        <h4 style="color:${C.sensor}">📡 RX Coil <span class="card-badge badge-sensor">SENSOR</span></h4>
+        <div class="detail">tip_offset $\\in \\mathbb{R}^6$<br>(Stage 1 标定)</div>
+      </div>`;
+
+                // PoE formula for this finger
+                const n = f.joints.length;
+                let poeStr = '$T=';
+                for (let i = 1; i <= n; i++) poeStr += `e^{[\\mathcal{S}_{${i}}]\\theta_{${i}}}`;
+                poeStr += '\\cdot M$';
+
+                panel.innerHTML += `
+    <div class="chain-section" style="border-color:${f.color}">
+      <div class="chain-header"><span style="color:${f.color};font-size:16px">${f.label}</span>
+        <span style="color:${C.dim};font-size:12px;font-weight:400">${n} DOF (根部 ${f.rootDOF} DOF)</span></div>
+      <div class="chain-flow">${cardsHTML}</div>
+      <div class="chain-formula">${poeStr}</div>
+    </div>`;
+            });
+        }
+
+        buildSchemeA();
+        buildSchemeB();
+        buildSchemeC();
+    </script>
+</body>
+
+</html>

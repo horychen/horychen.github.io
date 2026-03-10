@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { ParallaxProvider } from "react-scroll-parallax";
 import { withBasePath } from '../lib/utils';
 
-// const FIRST_IMAGE = "/chenjh/media/slice-motor-24slots-prototype.jpg";
+// const FIRST_IMAGE = "/media/slice-motor-24slots-prototype.jpg";
 const INTERVAL = 6000; // 6秒
 const FADE_DURATION = 800; // ms
 

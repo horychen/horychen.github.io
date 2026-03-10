@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wuji Dexterous Hand — Robot Kinematic Diagram</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --bg: #05080f;
+            --card: #0c1220;
+            --border: #1a2744;
+            --text: #d6e4f0;
+            --dim: #607090;
+            --accent: #4d9fff;
+            --thumb: #ff8844;
+            --index: #44dd66;
+            --middle: #4488ff;
+            --ring: #aa77ff;
+            --pinky: #ff66aa;
+            --wrist: #66ddff;
+            --tip: #ffd644;
+            --joint-glow: rgba(77, 159, 255, 0.15);
+            --font: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            overflow-x: hidden
+        }
+
+        .header {
+            padding: 20px 28px;
+            background: linear-gradient(135deg, #0a1020, #0f1830);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 14px
+        }
+
+        .header h1 {
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: 0.3px
+        }
+
+        .header h1 span {
+            color: var(--accent);
+            font-weight: 800
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            border: 1px solid
+        }
+
+        .tabs {
+            display: flex;
+            gap: 2px;
+            padding: 8px 28px 0;
+            background: var(--card);
+            border-bottom: 1px solid var(--border)
+        }
+
+        .tab {
+            padding: 10px 22px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: var(--dim);
+            background: transparent;
+            border-bottom: 2px solid transparent;
+            transition: all .25s ease;
+            text-transform: uppercase
+        }
+
+        .tab:hover {
+            color: var(--text)
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent)
+        }
+
+        .panel {
+            display: none;
+            padding: 20px 28px
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .svg-wrap {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            overflow: auto;
+            position: relative
+        }
+
+        svg text {
+            font-family: var(--font)
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: fixed;
+            background: rgba(10, 18, 40, 0.97);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .15s;
+            z-index: 999;
+            min-width: 200px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5)
+        }
+
+        .tooltip.visible {
+            opacity: 1
+        }
+
+        .tooltip h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--accent)
+        }
+
+        .tooltip .row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            line-height: 1.6
+        }
+
+        .tooltip .lbl {
+            color: var(--dim);
+            font-weight: 500
+        }
+
+        .tooltip .val {
+            color: var(--text);
+            font-weight: 600;
+            text-align: right
+        }
+
+        .tooltip .sign-tag {
+            margin-top: 4px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            background: rgba(68, 221, 102, 0.1);
+            color: #44dd66;
+            display: inline-block
+        }
+
+        /* Info panel */
+        .info-panel {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px
+        }
+
+        .info-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px
+        }
+
+        .info-card h3 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .info-card .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%
+        }
+
+        .info-card table {
+            width: 100%;
+            font-size: 11px;
+            border-collapse: collapse
+        }
+
+        .info-card th {
+            text-align: left;
+            color: var(--dim);
+            font-weight: 500;
+            padding: 3px 6px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .info-card td {
+            padding: 3px 6px;
+            font-variant-numeric: tabular-nums
+        }
+
+        .info-card td.jname {
+            font-weight: 600;
+            color: var(--accent)
+        }
+
+        /* Formula */
+        .formula-box {
+            margin-top: 16px;
+            padding: 16px 20px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 2
+        }
+
+        .formula-box .katex {
+            font-size: 1.1em
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 14px;
+            padding: 10px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 11px;
+            color: var(--dim);
+            align-items: center
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1><span>WUJI</span> Dexterous Hand — Robot Kinematic Chain</h1>
+        <span class="badge" style="color:var(--accent);border-color:var(--accent)">21 DOF</span>
+        <span class="badge" style="color:#ffd644;border-color:#ffd644">DH Convention</span>
+        <span class="badge" style="color:#44dd66;border-color:#44dd66">REP-155</span>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">Kinematic Schematic</div>
+        <div class="tab" onclick="switchTab(1)">Top-Down Layout</div>
+        <div class="tab" onclick="switchTab(2)">DH Parameter Table</div>
+    </div>
+
+    <div class="panel active" id="panelA"></div>
+    <div class="panel" id="panelB"></div>
+    <div class="panel" id="panelC"></div>
+
+    <!-- Floating tooltip -->
+    <div class="tooltip" id="tooltip">
+        <h3 id="tt-title"></h3>
+        <div class="row"><span class="lbl">SDK Joint</span><span class="val" id="tt-sdk"></span></div>
+        <div class="row"><span class="lbl">Type</span><span class="val" id="tt-type"></span></div>
+        <div class="row"><span class="lbl">Axis</span><span class="val" id="tt-axis"></span></div>
+        <div class="row"><span class="lbl">DH (a, α, d)</span><span class="val" id="tt-dh"></span></div>
+        <div class="row"><span class="lbl">Link</span><span class="val" id="tt-link"></span></div>
+        <div id="tt-sign-wrap" style="margin-top:6px"></div>
+    </div>
+
+    <script>
+        function switchTab(i) {
+            document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i));
+            document.querySelectorAll('.panel').forEach((p, j) => p.classList.toggle('active', j === i));
+            if (window.renderMathInElement) renderMathInElement(document.querySelectorAll('.panel')[i]);
+        }
+
+        const C = {
+            thumb: '#ff8844', index: '#44dd66', middle: '#4488ff', ring: '#aa77ff', pinky: '#ff66aa',
+            wrist: '#66ddff', tip: '#ffd644', bg: '#0c1220', dim: '#607090', text: '#d6e4f0',
+            accent: '#4d9fff', border: '#1a2744'
+        };
+
+        // ── Robot Hand Data (SDK naming) ──
+        const robot = {
+            thumb: {
+                color: C.thumb, label: 'Thumb', sdkPrefix: 'thumb',
+                joints: [
+                    {
+                        name: 'CMC Abd', sdk: 'cmc_abd', type: 'revolute', axis: 'Z', dh: 'a=16.1, α=−90°, d=−3.1',
+                        link: 'metacarpal → proximal_abd', a: 16.1, sign: '0=展开, +旋内', linkName: 'proximal_abd'
+                    },
+                    {
+                        name: 'CMC Flex', sdk: 'cmc_flex', type: 'revolute', axis: 'Z', dh: 'a=0, α=0°, d=0',
+                        link: 'proximal_abd → proximal_rot', a: 0, sign: '0=伸直, +=弯曲', linkName: 'proximal_rot'
+                    },
+                    {
+                        name: 'CMC Rot', sdk: 'cmc_rot', type: 'revolute', axis: 'X', dh: 'a=34.7, α=0°, d=0',
+                        link: 'proximal_rot → proximal', a: 34.7, sign: '绕骨轴旋转 (twist)', linkName: 'proximal'
+                    },
+                    {
+                        name: 'MCP', sdk: 'mcp', type: 'revolute', axis: 'Z', dh: 'a=29.5, α=0°, d=−2.3',
+                        link: 'proximal → middle', a: 29.5, sign: '0=伸直, +=弯曲', linkName: 'middle'
+                    },
+                    {
+                        name: 'IP', sdk: 'ip', type: 'revolute', axis: 'Z', dh: 'a=28.3, α=0°, d=−2.0',
+                        link: 'middle → distal', a: 28.3, sign: '0=伸直, +=弯曲', linkName: 'distal'
+                    }
+                ], dof: 5
+            },
+            index: {
+                color: C.index, label: 'Index', sdkPrefix: 'index_finger',
+                joints: [
+                    {
+                        name: 'MCP Abd', sdk: 'mcp_abd', type: 'revolute', axis: 'Z', dh: 'a=4.6, α=−90°',
+                        link: 'metacarpal → proximal_abd', a: 4.6, sign: '0=伸直, +=弯曲', linkName: 'proximal_abd'
+                    },
+                    {
+                        name: 'MCP Flex', sdk: 'mcp_flex', type: 'revolute', axis: 'Z', dh: 'a=43.9, α=+90°',
+                        link: 'proximal_abd → proximal', a: 43.9, sign: '0=中立, +=内收', linkName: 'proximal'
+                    },
+                    {
+                        name: 'PIP', sdk: 'pip', type: 'revolute', axis: 'Z', dh: 'a=29.5, α=0°',
+                        link: 'proximal → middle', a: 29.5, sign: '0=伸直, +=弯曲', linkName: 'middle'
+                    },
+                    {
+                        name: 'DIP', sdk: 'dip', type: 'revolute', axis: 'Z', dh: 'a=27.4, α=0°',
+                        link: 'middle → distal', a: 27.4, sign: '0=伸直, +=弯曲', linkName: 'distal'
+                    }
+                ], dof: 4
+            },
+            middle: {
+                color: C.middle, label: 'Middle', sdkPrefix: 'middle_finger',
+                joints: [
+                    {
+                        name: 'MCP Abd', sdk: 'mcp_abd', type: 'revolute', axis: 'Z', dh: 'a=4.6, α=−90°',
+                        link: 'metacarpal → proximal_abd', a: 4.6, sign: '0=伸直, +=弯曲', linkName: 'proximal_abd'
+                    },
+                    {
+                        name: 'MCP Flex', sdk: 'mcp_flex', type: 'revolute', axis: 'Z', dh: 'a=43.9, α=+90°',
+                        link: 'proximal_abd → proximal', a: 43.9, sign: '0=中立, +=内收', linkName: 'proximal'
+                    },
+                    {
+                        name: 'PIP', sdk: 'pip', type: 'revolute', axis: 'Z', dh: 'a=29.5, α=0°',
+                        link: 'proximal → middle', a: 29.5, sign: '0=伸直, +=弯曲', linkName: 'middle'
+                    },
+                    {
+                        name: 'DIP', sdk: 'dip', type: 'revolute', axis: 'Z', dh: 'a=26.7, α=0°',
+                        link: 'middle → distal', a: 26.7, sign: '0=伸直, +=弯曲', linkName: 'distal'
+                    }
+                ], dof: 4
+            },
+            ring: {
+                color: C.ring, label: 'Ring', sdkPrefix: 'ring_finger',
+                joints: [
+                    {
+                        name: 'MCP Abd', sdk: 'mcp_abd', type: 'revolute', axis: 'Z', dh: 'a=4.6, α=−90°',
+                        link: 'metacarpal → proximal_abd', a: 4.6, sign: '0=伸直, +=弯曲', linkName: 'proximal_abd'
+                    },
+                    {
+                        name: 'MCP Flex', sdk: 'mcp_flex', type: 'revolute', axis: 'Z', dh: 'a=43.9, α=+90°',
+                        link: 'proximal_abd → proximal', a: 43.9, sign: '0=中立, +=内收', linkName: 'proximal'
+                    },
+                    {
+                        name: 'PIP', sdk: 'pip', type: 'revolute', axis: 'Z', dh: 'a=29.5, α=0°',
+                        link: 'proximal → middle', a: 29.5, sign: '0=伸直, +=弯曲', linkName: 'middle'
+                    },
+                    {
+                        name: 'DIP', sdk: 'dip', type: 'revolute', axis: 'Z', dh: 'a=26.7, α=0°',
+                        link: 'middle → distal', a: 26.7, sign: '0=伸直, +=弯曲', linkName: 'distal'
+                    }
+                ], dof: 4
+            },
+            pinky: {
+                color: C.pinky, label: 'Pinky', sdkPrefix: 'pinky',
+                joints: [
+                    {
+                        name: 'MCP Abd', sdk: 'mcp_abd', type: 'revolute', axis: 'Z', dh: 'a=4.6, α=−90°',
+                        link: 'metacarpal → proximal_abd', a: 4.6, sign: '0=伸直, +=弯曲', linkName: 'proximal_abd'
+                    },
+                    {
+                        name: 'MCP Flex', sdk: 'mcp_flex', type: 'revolute', axis: 'Z', dh: 'a=43.9, α=+90°',
+                        link: 'proximal_abd → proximal', a: 43.9, sign: '0=中立, +=内收', linkName: 'proximal'
+                    },
+                    {
+                        name: 'PIP', sdk: 'pip', type: 'revolute', axis: 'Z', dh: 'a=29.5, α=0°',
+                        link: 'proximal → middle', a: 29.5, sign: '0=伸直, +=弯曲', linkName: 'middle'
+                    },
+                    {
+                        name: 'DIP', sdk: 'dip', type: 'revolute', axis: 'Z', dh: 'a=26.7, α=0°',
+                        link: 'middle → distal', a: 26.7, sign: '0=伸直, +=弯曲', linkName: 'distal'
+                    }
+                ], dof: 4
+            }
+        };
+        const fOrder = ['thumb', 'index', 'middle', 'ring', 'pinky'];
+
+        // ── SVG helpers ──
+        function svgNS(tag, attrs, parent) {
+            const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+            if (parent) parent.appendChild(e);
+            return e;
+        }
+
+        // Draw a 3D-style cylinder joint symbol
+        function drawJoint3D(g, x, y, col, r, isXAxis) {
+            const s = r || 12;
+            // Shadow glow
+            svgNS('ellipse', { cx: x, cy: y, rx: s + 4, ry: s + 4, fill: col, opacity: 0.08 }, g);
+            // Outer ring
+            svgNS('ellipse', { cx: x, cy: y, rx: s, ry: s * 0.45, fill: 'none', stroke: col, 'stroke-width': 2.5 }, g);
+            // Body (cylinder illusion)
+            if (isXAxis) {
+                // Twist joint: draw horizontal groove
+                svgNS('line', { x1: x - s * 0.6, y1: y, x2: x + s * 0.6, y2: y, stroke: col, 'stroke-width': 1.5, 'stroke-dasharray': '3,2' }, g);
+                svgNS('ellipse', { cx: x, cy: y, rx: s * 0.5, ry: s * 0.22, fill: 'none', stroke: col, 'stroke-width': 1.5 }, g);
+            } else {
+                // Vertical barrel lines
+                svgNS('line', { x1: x - s * 0.6, y1: y - s * 0.35, x2: x - s * 0.6, y2: y + s * 0.35, stroke: col, 'stroke-width': 1.5, opacity: 0.5 }, g);
+                svgNS('line', { x1: x + s * 0.6, y1: y - s * 0.35, x2: x + s * 0.6, y2: y + s * 0.35, stroke: col, 'stroke-width': 1.5, opacity: 0.5 }, g);
+            }
+            // Center dot
+            svgNS('circle', { cx: x, cy: y, r: 2.5, fill: col }, g);
+        }
+
+        // Draw rotation arrow around joint
+        function drawRotArrow(g, x, y, col, dir, isXAxis) {
+            const r = 16;
+            if (isXAxis) {
+                // Helical arrow for twist
+                const p = `M${x - r},${y - 3} Q${x - r},${y - r} ${x},${y - r} Q${x + r},${y - r} ${x + r},${y + 3}`;
+                svgNS('path', { d: p, fill: 'none', stroke: col, 'stroke-width': 1.5, opacity: 0.7 }, g);
+                svgNS('polygon', { points: `${x + r},${y + 3} ${x + r - 4},${y - 1} ${x + r + 4},${y - 1}`, fill: col, opacity: 0.7 }, g);
+            } else {
+                // Curved arrow for Z-axis rotation
+                const startAngle = dir === 'cw' ? -160 : -20;
+                const sweep = dir === 'cw' ? 240 : 240;
+                const sa = startAngle * Math.PI / 180, ea = (startAngle + sweep) * Math.PI / 180;
+                const x1 = x + r * Math.cos(sa), y1 = y + r * Math.sin(sa);
+                const x2 = x + r * Math.cos(ea), y2 = y + r * Math.sin(ea);
+                const la = sweep > 180 ? 1 : 0;
+                svgNS('path', {
+                    d: `M${x1},${y1} A${r},${r} 0 ${la} 1 ${x2},${y2}`,
+                    fill: 'none', stroke: col, 'stroke-width': 1.5, opacity: 0.6
+                }, g);
+                // Arrowhead
+                const ax = x2, ay = y2;
+                const tang = ea + (dir === 'cw' ? 0.3 : -0.3);
+                const dx = 5 * Math.cos(tang), dy = 5 * Math.sin(tang);
+                svgNS('polygon', {
+                    points: `${ax},${ay} ${ax - dy - dx * 0.5},${ay + dx - dy * 0.5} ${ax + dy - dx * 0.5},${ay - dx - dy * 0.5}`,
+                    fill: col, opacity: 0.6
+                }, g);
+            }
+        }
+
+        // Draw dimension line between two points
+        function drawDimLine(g, x1, y1, x2, y2, label, offset, col) {
+            const dx = x2 - x1, dy = y2 - y1;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            if (len < 2) return;
+            const nx = -dy / len * offset, ny = dx / len * offset;
+            const ax1 = x1 + nx, ay1 = y1 + ny, ax2 = x2 + nx, ay2 = y2 + ny;
+            const c = col || C.dim;
+            // End ticks
+            svgNS('line', { x1: x1, y1: y1, x2: ax1, y2: ay1, stroke: c, 'stroke-width': 0.6, opacity: 0.4 }, g);
+            svgNS('line', { x1: x2, y1: y2, x2: ax2, y2: ay2, stroke: c, 'stroke-width': 0.6, opacity: 0.4 }, g);
+            // Dimension line
+            svgNS('line', { x1: ax1, y1: ay1, x2: ax2, y2: ay2, stroke: c, 'stroke-width': 0.8, 'stroke-dasharray': '3,2', opacity: 0.5 }, g);
+            // Tick marks
+            const tn = -dy / len * 3, tp = dx / len * 3;
+            svgNS('line', { x1: ax1 - tn, y1: ay1 - tp, x2: ax1 + tn, y2: ay1 + tp, stroke: c, 'stroke-width': 1 }, g);
+            svgNS('line', { x1: ax2 - tn, y1: ay2 - tp, x2: ax2 + tn, y2: ay2 + tp, stroke: c, 'stroke-width': 1 }, g);
+            // Label
+            const mx = (ax1 + ax2) / 2, my = (ay1 + ay2) / 2;
+            svgNS('text', {
+                x: mx, y: my - 4, fill: c, 'font-size': 9, 'text-anchor': 'middle',
+                'font-weight': 600, 'font-variant-numeric': 'tabular-nums'
+            }, g).textContent = label;
+        }
+
+        // ── Tooltip logic ──
+        const tt = document.getElementById('tooltip');
+        function showTooltip(e, finger, j) {
+            document.getElementById('tt-title').textContent = finger.label + ' — ' + j.name;
+            document.getElementById('tt-sdk').textContent = finger.sdkPrefix + '_' + j.sdk;
+            document.getElementById('tt-type').textContent = j.axis === 'X' ? 'Revolute (Twist)' : 'Revolute';
+            document.getElementById('tt-axis').textContent = j.axis === 'X' ? 'X (along link)' : 'Z (joint normal)';
+            document.getElementById('tt-dh').textContent = j.dh;
+            document.getElementById('tt-link').textContent = j.a > 0 ? j.a.toFixed(1) + ' mm' : 'co-located';
+            document.getElementById('tt-sign-wrap').innerHTML = '<span class="sign-tag">' + j.sign + '</span>';
+            tt.classList.add('visible');
+            moveTT(e);
+        }
+        function moveTT(e) {
+            const x = Math.min(e.clientX + 15, window.innerWidth - 240);
+            const y = Math.max(e.clientY - 140, 10);
+            tt.style.left = x + 'px'; tt.style.top = y + 'px';
+        }
+        function hideTooltip() { tt.classList.remove('visible'); }
+
+        // ══════════════════════════════════════════════════════════════
+        //  SCHEME A: Engineering Schematic (ShadowHand style)
+        // ══════════════════════════════════════════════════════════════
+        function buildSchemeA() {
+            const W = 1300, H = 780;
+            const wrap = document.createElement('div'); wrap.className = 'svg-wrap';
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '100%'); svg.setAttribute('height', H);
+            svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+            wrap.appendChild(svg);
+
+            // Defs: filters & gradients
+            const defs = svgNS('defs', {}, svg);
+            const glow = svgNS('filter', { id: 'glow', x: '-50%', y: '-50%', width: '200%', height: '200%' }, defs);
+            svgNS('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: 3, result: 'blur' }, glow);
+            const merge = svgNS('feMerge', {}, glow);
+            svgNS('feMergeNode', { in: 'blur' }, merge);
+            svgNS('feMergeNode', { in: 'SourceGraphic' }, merge);
+
+            // Grid (subtle)
+            const gg = svgNS('g', { opacity: 0.04 }, svg);
+            for (let x = 0; x < W; x += 40)svgNS('line', { x1: x, y1: 0, x2: x, y2: H, stroke: '#88aacc', 'stroke-width': 0.5 }, gg);
+            for (let y = 0; y < H; y += 40)svgNS('line', { x1: 0, y1: y, x2: W, y2: y, stroke: '#88aacc', 'stroke-width': 0.5 }, gg);
+
+            // Title
+            svgNS('text', { x: 20, y: 30, fill: C.text, 'font-size': 15, 'font-weight': 700 }, svg).textContent =
+                'Wuji Hand — Engineering Kinematic Schematic';
+            svgNS('text', { x: 20, y: 48, fill: C.dim, 'font-size': 11 }, svg).textContent =
+                'Hover 关节查看 DH 参数 & SDK 命名 | 21 DOF (Thumb×5 + 4 fingers×4)';
+
+            // Wrist block
+            const wx = 100, wy = 390;
+            svgNS('rect', {
+                x: wx - 30, y: wy - 34, width: 60, height: 68, rx: 10,
+                fill: 'rgba(102,221,255,0.06)', stroke: C.wrist, 'stroke-width': 2.5
+            }, svg);
+            svgNS('text', {
+                x: wx, y: wy - 8, fill: C.wrist, 'font-size': 14, 'font-weight': 800,
+                'text-anchor': 'middle'
+            }, svg).textContent = 'WRIST';
+            svgNS('text', { x: wx, y: wy + 10, fill: C.dim, 'font-size': 9, 'text-anchor': 'middle' }, svg).textContent = '(root)';
+
+            // REP-155 axes at wrist
+            const axLen = 28;
+            svgNS('line', { x1: wx + 40, y1: wy, x2: wx + 40 + axLen, y2: wy, stroke: '#ff6b6b', 'stroke-width': 2.5 }, svg);
+            svgNS('text', { x: wx + 40 + axLen + 6, y: wy + 4, fill: '#ff6b6b', 'font-size': 10, 'font-weight': 700 }, svg).textContent = 'X';
+            svgNS('line', { x1: wx + 40, y1: wy, x2: wx + 40, y2: wy - axLen, stroke: '#51cf66', 'stroke-width': 2.5 }, svg);
+            svgNS('text', { x: wx + 44, y: wy - axLen - 4, fill: '#51cf66', 'font-size': 10, 'font-weight': 700 }, svg).textContent = 'Y';
+            svgNS('circle', { cx: wx + 40, cy: wy, r: 3, fill: '#339af0' }, svg); // Z out of page
+
+            const yPositions = [70, 210, 390, 530, 670];
+            const scale = 4.8;
+
+            fOrder.forEach((fname, fi) => {
+                const f = robot[fname];
+                const g = svgNS('g', {}, svg);
+                const y0 = yPositions[fi];
+                let cx = wx + 60;
+
+                // Palm line (wrist → finger base)
+                svgNS('line', {
+                    x1: wx + 30, y1: wy, x2: cx - 8, y2: y0,
+                    stroke: f.color, 'stroke-width': 2, 'stroke-dasharray': '6,4', opacity: 0.3
+                }, g);
+
+                // Finger label
+                svgNS('text', { x: cx - 30, y: y0 - 38, fill: f.color, 'font-size': 14, 'font-weight': 800 }, g).textContent = f.label;
+                svgNS('text', { x: cx - 30, y: y0 - 24, fill: C.dim, 'font-size': 9, 'font-weight': 500 }, g).textContent =
+                    f.sdkPrefix + ' · ' + f.dof + ' DOF';
+
+                // Metacarpal (fixed base)
+                svgNS('rect', {
+                    x: cx - 8, y: y0 - 8, width: 16, height: 16, rx: 3,
+                    fill: f.color + '22', stroke: f.color, 'stroke-width': 1.5, 'stroke-dasharray': '3,2'
+                }, g);
+
+                f.joints.forEach((j, ji) => {
+                    const linkLen = Math.max(j.a * scale, 12);
+                    const nx = cx + linkLen;
+
+                    // Bone link (3D-ish rounded bar)
+                    const boneG = svgNS('g', {}, g);
+                    svgNS('line', {
+                        x1: cx + 10, y1: y0, x2: nx - 10, y2: y0,
+                        stroke: f.color, 'stroke-width': 7, 'stroke-linecap': 'round', opacity: 0.2
+                    }, boneG);
+                    svgNS('line', {
+                        x1: cx + 10, y1: y0, x2: nx - 10, y2: y0,
+                        stroke: f.color, 'stroke-width': 4, 'stroke-linecap': 'round', opacity: 0.8
+                    }, boneG);
+                    // Bone highlight
+                    svgNS('line', {
+                        x1: cx + 14, y1: y0 - 2, x2: nx - 14, y2: y0 - 2,
+                        stroke: '#ffffff', 'stroke-width': 1, 'stroke-linecap': 'round', opacity: 0.12
+                    }, boneG);
+
+                    // Dimension line
+                    const dimSide = (ji % 2 === 0) ? -1 : 1;
+                    if (j.a > 1) {
+                        drawDimLine(g, cx, y0, nx, y0, j.a.toFixed(1) + ' mm', dimSide * 22, C.dim);
+                    }
+
+                    cx = nx;
+
+                    // Joint symbol (3D cylinder)
+                    const isX = j.axis === 'X';
+                    const jg = svgNS('g', { cursor: 'pointer' }, g);
+                    drawJoint3D(jg, cx, y0, f.color, 13, isX);
+                    drawRotArrow(jg, cx, y0, f.color, 'cw', isX);
+
+                    // SDK joint name (via leader line)
+                    const above = (ji % 2 === 0);
+                    const lyOff = above ? -40 : 40;
+                    svgNS('line', {
+                        x1: cx, y1: y0 + (above ? -14 : 14), x2: cx, y2: y0 + lyOff + (above ? 10 : -4),
+                        stroke: C.dim, 'stroke-width': 0.7, 'stroke-dasharray': '2,2', opacity: 0.5
+                    }, jg);
+                    svgNS('text', {
+                        x: cx, y: y0 + lyOff, fill: C.text, 'font-size': 10, 'text-anchor': 'middle',
+                        'font-weight': 600
+                    }, jg).textContent = j.name;
+                    const sdkLabel = f.sdkPrefix + '_' + j.sdk;
+                    svgNS('text', {
+                        x: cx, y: y0 + lyOff + 13, fill: C.dim, 'font-size': 8, 'text-anchor': 'middle',
+                        'font-style': 'italic'
+                    }, jg).textContent = sdkLabel;
+
+                    // Interactivity
+                    jg.addEventListener('mouseenter', e => showTooltip(e, f, j));
+                    jg.addEventListener('mousemove', moveTT);
+                    jg.addEventListener('mouseleave', hideTooltip);
+                });
+
+                // Tip
+                cx += 18;
+                svgNS('line', {
+                    x1: cx - 18, y1: y0, x2: cx, y2: y0, stroke: f.color, 'stroke-width': 2,
+                    'stroke-dasharray': '4,3', opacity: 0.5
+                }, g);
+                svgNS('circle', { cx: cx, cy: y0, r: 6, fill: f.color + '44', stroke: C.tip, 'stroke-width': 2 }, g);
+                svgNS('text', { x: cx + 10, y: y0 + 4, fill: C.tip, 'font-size': 10, 'font-weight': 600 }, g).textContent = 'tip';
+            });
+
+            document.getElementById('panelA').appendChild(wrap);
+
+            // Legend
+            const leg = document.createElement('div'); leg.className = 'legend';
+            leg.innerHTML = `
+    <div class="legend-item" style="font-weight:700;color:var(--text)">Joint Types:</div>
+    <div class="legend-item"><svg width="22" height="14"><ellipse cx="11" cy="7" rx="10" ry="4.5" fill="none" stroke="${C.accent}" stroke-width="2"/><circle cx="11" cy="7" r="2" fill="${C.accent}"/></svg>Revolute (Z-axis)</div>
+    <div class="legend-item"><svg width="22" height="14"><ellipse cx="11" cy="7" rx="10" ry="4.5" fill="none" stroke="${C.thumb}" stroke-width="2"/><ellipse cx="11" cy="7" rx="5" ry="2.2" fill="none" stroke="${C.thumb}" stroke-width="1.5"/></svg>Revolute (X-axis twist)</div>
+    <div class="legend-item"><svg width="14" height="14"><rect x="1" y="1" width="12" height="12" rx="2" fill="none" stroke="${C.dim}" stroke-width="1.5" stroke-dasharray="3,2"/></svg>Fixed (metacarpal)</div>
+    <div class="legend-item"><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="${C.tip}44" stroke="${C.tip}" stroke-width="2"/></svg>Tip (fingertip)</div>
+    <div class="legend-item" style="margin-left:auto;color:var(--dim)">数字 = DH link length (mm)</div>`;
+            document.getElementById('panelA').appendChild(leg);
+
+            // Formula
+            const fb = document.createElement('div'); fb.className = 'formula-box';
+            fb.innerHTML = `
+    <strong>Forward Kinematics (DH Convention):</strong><br>
+    $T_i = \\text{Rz}(\\theta_i)\\cdot\\text{Tz}(d_i)\\cdot\\text{Tx}(a_i)\\cdot\\text{Rx}(\\alpha_i)$ &nbsp;|&nbsp;
+    $T_{\\text{tip}} = T_{\\text{base}} \\cdot \\prod_{i=1}^{n} T_i(\\theta_i)$<br>
+    <span style="color:var(--dim)">Twist joint (拇指 CMC Rot): $T_i = F_i \\cdot \\text{Rx}(\\theta_i)$, 其中 $F_i = \\text{Tz}(d)\\cdot\\text{Tx}(a)\\cdot\\text{Rx}(\\alpha)$</span><br>
+    <span style="color:var(--dim)">关节角 $\\theta \\in \\mathbb{R}^{21}$: [thumb×5, index×4, middle×4, ring×4, pinky×4]，注意 SDK 扁平数组用20 DOF (拇指忽略 cmc_rot)</span>`;
+            document.getElementById('panelA').appendChild(fb);
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        //  SCHEME B: Top-Down anatomical layout
+        // ══════════════════════════════════════════════════════════════
+        function buildSchemeB() {
+            const W = 1000, H = 840;
+            const wrap = document.createElement('div'); wrap.className = 'svg-wrap';
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '100%'); svg.setAttribute('height', H);
+            svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+            wrap.appendChild(svg);
+
+            svgNS('text', { x: 20, y: 28, fill: C.text, 'font-size': 15, 'font-weight': 700 }, svg).textContent =
+                'Top-Down Spread Layout';
+            svgNS('text', { x: 20, y: 46, fill: C.dim, 'font-size': 11 }, svg).textContent =
+                'Hover 关节查看详情 — 手指按解剖角度展开';
+
+            const ox = 500, oy = 760;
+            const sc = 5.0;
+            const angles = [-75, -24, 0, 22, 45];
+
+            // Wrist
+            svgNS('rect', {
+                x: ox - 26, y: oy - 16, width: 52, height: 32, rx: 8,
+                fill: 'rgba(102,221,255,0.08)', stroke: C.wrist, 'stroke-width': 3
+            }, svg);
+            svgNS('text', {
+                x: ox, y: oy + 5, fill: C.wrist, 'font-size': 13, 'font-weight': 800,
+                'text-anchor': 'middle'
+            }, svg).textContent = 'WRIST';
+
+            fOrder.forEach((fname, fi) => {
+                const f = robot[fname];
+                const ang = angles[fi] * Math.PI / 180;
+                const dx = Math.sin(ang), dy = -Math.cos(ang);
+                const g = svgNS('g', {}, svg);
+                let cx = ox, cy = oy;
+
+                // Palm
+                const palmLen = 38;
+                let nx = cx + dx * palmLen, ny = cy + dy * palmLen;
+                svgNS('line', {
+                    x1: cx, y1: cy, x2: nx, y2: ny, stroke: f.color, 'stroke-width': 2,
+                    'stroke-dasharray': '5,3', opacity: 0.3
+                }, g);
+                cx = nx; cy = ny;
+
+                // metacarpal
+                svgNS('rect', {
+                    x: cx - 5, y: cy - 5, width: 10, height: 10, rx: 2,
+                    fill: f.color + '22', stroke: f.color, 'stroke-width': 1, 'stroke-dasharray': '2,2'
+                }, g);
+
+                // Finger label
+                const lx = cx + dy * 20, ly = cy - dx * 20;
+                svgNS('text', {
+                    x: lx, y: ly, fill: f.color, 'font-size': 12, 'text-anchor': 'middle',
+                    'font-weight': 700
+                }, g).textContent = f.label;
+
+                f.joints.forEach((j, ji) => {
+                    const linkPx = Math.max(j.a * sc, 12);
+                    nx = cx + dx * linkPx; ny = cy + dy * linkPx;
+
+                    // Bone
+                    svgNS('line', {
+                        x1: cx, y1: cy, x2: nx, y2: ny, stroke: f.color, 'stroke-width': 5,
+                        'stroke-linecap': 'round', opacity: 0.3
+                    }, g);
+                    svgNS('line', {
+                        x1: cx, y1: cy, x2: nx, y2: ny, stroke: f.color, 'stroke-width': 3,
+                        'stroke-linecap': 'round'
+                    }, g);
+
+                    // Link length
+                    if (j.a > 1) {
+                        const mx = (cx + nx) / 2 + dy * 14, my = (cy + ny) / 2 - dx * 14;
+                        svgNS('text', {
+                            x: mx, y: my, fill: C.dim, 'font-size': 9, 'text-anchor': 'middle',
+                            'font-weight': 600
+                        }, g).textContent = j.a.toFixed(1);
+                    }
+                    cx = nx; cy = ny;
+
+                    // Joint
+                    const isX = j.axis === 'X';
+                    const r = isX ? 9 : 7;
+                    const jg = svgNS('g', { cursor: 'pointer' }, g);
+                    svgNS('ellipse', {
+                        cx: cx, cy: cy, rx: r, ry: r * 0.5, fill: isX ? f.color + '33' : f.color,
+                        stroke: isX ? f.color : '#fff', 'stroke-width': 2
+                    }, jg);
+                    svgNS('circle', { cx: cx, cy: cy, r: 2, fill: f.color }, jg);
+
+                    jg.addEventListener('mouseenter', e => showTooltip(e, f, j));
+                    jg.addEventListener('mousemove', moveTT);
+                    jg.addEventListener('mouseleave', hideTooltip);
+                });
+
+                // Tip
+                nx = cx + dx * 20; ny = cy + dy * 20;
+                svgNS('line', {
+                    x1: cx, y1: cy, x2: nx, y2: ny, stroke: f.color, 'stroke-width': 1.5,
+                    'stroke-dasharray': '4,3'
+                }, g);
+                svgNS('circle', { cx: nx, cy: ny, r: 6, fill: C.tip + '44', stroke: C.tip, 'stroke-width': 2 }, g);
+            });
+
+            document.getElementById('panelB').appendChild(wrap);
+
+            // Legend & formula
+            const fb = document.createElement('div'); fb.className = 'formula-box';
+            fb.innerHTML = `
+    <span style="color:var(--dim)">数字 = DH link length $a_i$ (mm) | Hover joints for full DH parameters & SDK naming</span><br>
+    $T_{\\text{tip}}^{\\text{world}} = T_{\\text{wrist}} \\cdot T_{\\text{palm}} \\cdot \\prod_{i=1}^{n} T_i(\\theta_i)$,&nbsp; $T_i = \\text{Rz}(\\theta_i)\\cdot\\text{Tz}(d_i)\\cdot\\text{Tx}(a_i)\\cdot\\text{Rx}(\\alpha_i)$`;
+            document.getElementById('panelB').appendChild(fb);
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        //  SCHEME C: DH Parameter Table
+        // ══════════════════════════════════════════════════════════════
+        function buildSchemeC() {
+            const panel = document.getElementById('panelC');
+
+            // Title
+            panel.innerHTML = `
+  <div class="formula-box" style="margin-top:0">
+    <strong>DH 参数总表 (Modified DH Convention)</strong><br>
+    <span style="color:var(--dim)">$T_i(\\theta_i) = \\text{Rz}(\\theta_i)\\cdot\\text{Tz}(d_i)\\cdot\\text{Tx}(a_i)\\cdot\\text{Rx}(\\alpha_i)$ &nbsp;|&nbsp;
+    Twist joint 特殊处理: $T_i(\\theta_i) = F_i \\cdot \\text{Rx}(\\theta_i)$</span><br>
+    <span style="color:var(--dim)">所有长度单位 mm，角度单位 rad | SDK 扁平数组 $\\theta \\in \\mathbb{R}^{20}$: [thumb×5, index×4, mid×4, ring×4, pinky×4]</span>
+  </div>`;
+
+            const grid = document.createElement('div'); grid.className = 'info-panel';
+
+            fOrder.forEach(fname => {
+                const f = robot[fname];
+                const card = document.createElement('div'); card.className = 'info-card';
+                card.style.borderColor = f.color + '44';
+
+                let rows = '';
+                f.joints.forEach((j, ji) => {
+                    const typeTag = j.axis === 'X' ?
+                        '<span style="color:#ffd644;font-size:9px">TWIST</span>' :
+                        (ji < (fname === 'thumb' ? 3 : 2) ?
+                            '<span style="color:#44dd66;font-size:9px">ROOT</span>' :
+                            '<span style="color:#4d9fff;font-size:9px">FLEX</span>');
+                    rows += `<tr>
+        <td class="jname">${j.name}</td>
+        <td>${typeTag}</td>
+        <td style="font-variant-numeric:tabular-nums">${j.a.toFixed(1)}</td>
+        <td style="color:var(--dim)">${j.dh.replace(/a=[\d.]+, /, '')}</td>
+        <td style="color:#51cf66;font-size:10px">${j.sign}</td>
+      </tr>`;
+                });
+
+                card.innerHTML = `
+      <h3><div class="dot" style="background:${f.color}"></div>${f.label}
+        <span style="color:var(--dim);font-size:11px;font-weight:400">${f.sdkPrefix} · ${f.dof} DOF</span></h3>
+      <table>
+        <tr><th>Joint</th><th>Type</th><th>a (mm)</th><th>α, d</th><th>Sign</th></tr>
+        ${rows}
+      </table>`;
+                grid.appendChild(card);
+            });
+            panel.appendChild(grid);
+
+            // Comparison with ShadowHand
+            const cmp = document.createElement('div'); cmp.className = 'formula-box';
+            cmp.innerHTML = `
+    <strong>vs ShadowHand 对比:</strong><br>
+    <table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:8px">
+    <tr style="border-bottom:1px solid var(--border)">
+      <th style="text-align:left;padding:4px 8px;color:var(--dim)"></th>
+      <th style="text-align:center;padding:4px 8px;color:var(--accent)">Wuji Hand</th>
+      <th style="text-align:center;padding:4px 8px;color:var(--dim)">ShadowHand</th></tr>
+    <tr><td style="padding:4px 8px">总 DOF</td>
+      <td style="text-align:center;font-weight:700;color:var(--accent)">21 (5+4×4)</td>
+      <td style="text-align:center">24 (5+4×4+2wrist+LF5)</td></tr>
+    <tr><td style="padding:4px 8px">拇指 DOF</td>
+      <td style="text-align:center;font-weight:700;color:var(--accent)">5 (含 twist)</td>
+      <td style="text-align:center">5</td></tr>
+    <tr><td style="padding:4px 8px">四指 DOF</td>
+      <td style="text-align:center;font-weight:700;color:var(--accent)">4 each</td>
+      <td style="text-align:center">4 each (LF 有 J5)</td></tr>
+    <tr><td style="padding:4px 8px">手腕</td>
+      <td style="text-align:center;font-weight:700;color:var(--accent)">外置 (独立 EMF)</td>
+      <td style="text-align:center">2 DOF (flex/dev)</td></tr>
+    <tr><td style="padding:4px 8px">传感器</td>
+      <td style="text-align:center;font-weight:700;color:var(--accent)">EMF TX+5 RX coil</td>
+      <td style="text-align:center">关节编码器+触觉</td></tr>
+    </table>`;
+            panel.appendChild(cmp);
+        }
+
+        buildSchemeA();
+        buildSchemeB();
+        buildSchemeC();
+    </script>
+</body>
+
+</html>
