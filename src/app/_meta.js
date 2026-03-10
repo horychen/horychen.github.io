@@ -31,13 +31,7 @@ export default {
     href: '/#contact'
   },
   motor: {
-    title: 'Motor Demos',
-    type: 'menu',
-    items: {
-      index: { title: 'All Demos', href: '/motor/' },
-      'hand-skeleton-options': { title: 'WG110 Hand Skeleton', href: '/motor/hand-skeleton-options/' },
-      'robot-hand-kinematic': { title: 'Wuji Dexterous Hand', href: '/motor/robot-hand-kinematic/' },
-      'robot_glove_3d': { title: 'WUJI Glove 110 — 3D', href: '/motor/robot_glove_3d/' }
-    }
+    type: 'page',
+    title: 'Motor Demos'
   }
 }

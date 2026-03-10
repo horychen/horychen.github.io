@@ -2,21 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import Link from 'next/link';
 
-const META: Record<string, { title: string; description: string }> = {
-  'hand-skeleton-options': {
-    title: 'WG110 Hand Skeleton',
-    description: 'Kinematic visualization of the WG110 hand skeleton model.',
-  },
-  'robot-hand-kinematic': {
-    title: 'Wuji Dexterous Hand',
-    description: 'Robot kinematic diagram for the Wuji dexterous hand.',
-  },
-  'robot_glove_3d': {
-    title: 'WUJI Glove 110 — 3D',
-    description: '3D 数采手套运动学模型 (REP-155).',
-  },
-};
-
 function getMotorPages() {
   const dir = path.join(process.cwd(), 'public', 'motor-html');
   if (!fs.existsSync(dir)) return [];
@@ -24,10 +9,14 @@ function getMotorPages() {
     .readdirSync(dir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .filter((d) => fs.existsSync(path.join(dir, d.name, 'index.html')))
-    .map((d) => ({
-      slug: d.name,
-      ...(META[d.name] ?? { title: d.name, description: '' }),
-    }));
+    .map((d) => {
+      const html = fs.readFileSync(path.join(dir, d.name, 'index.html'), 'utf-8');
+      const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+      return {
+        slug: d.name,
+        title: titleMatch?.[1] ?? d.name,
+      };
+    });
 }
 
 export default function MotorIndex() {
@@ -46,12 +35,9 @@ export default function MotorIndex() {
             href={`/motor/${page.slug}/`}
             className="group block rounded-xl border border-gray-200 dark:border-gray-700 p-6 transition-all hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-500"
           >
-            <h2 className="text-lg font-semibold mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            <h2 className="text-lg font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               {page.title}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {page.description}
-            </p>
           </Link>
         ))}
       </div>
