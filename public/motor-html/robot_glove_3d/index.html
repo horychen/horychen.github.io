@@ -275,6 +275,11 @@
             font-family:var(--font);transition:all .15s">
             Stop Animation
         </button>
+        <button id="btnZero" style="padding:3px 12px;border-radius:12px;border:1px solid var(--border);
+            background:var(--card);color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;
+            font-family:var(--font);transition:all .15s">
+            Reset Zero
+        </button>
     </div>
 
     <div class="main">
@@ -309,6 +314,77 @@
                     <span style="color:#4b4"><b>+Y</b> 抓你</span> (ventral/掌侧，手指弯曲方向，Y=X&times;Z)
                 </div>
                 <div class="tree-pre" id="treeOutput"></div>
+                <div id="mediapipeSection" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+                    <h3 style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--accent)">MediaPipe Hand Landmarks 对比
+                        <span style="font-weight:400;font-size:9px;color:var(--dim)">(21 landmarks, 纯位置, 无关节角度)</span></h3>
+                    <div class="tree-pre" style="margin-bottom:8px">WRIST (0)
+├── THUMB:  CMC(1) → MCP(2) → IP(3)  → TIP(4)
+├── INDEX:  MCP(5) → PIP(6) → DIP(7) → TIP(8)
+├── MIDDLE: MCP(9) → PIP(10)→ DIP(11)→ TIP(12)
+├── RING:   MCP(13)→ PIP(14)→ DIP(15)→ TIP(16)
+└── PINKY:  MCP(17)→ PIP(18)→ DIP(19)→ TIP(20)</div>
+                    <table style="width:100%;border-collapse:collapse;font-size:9px;line-height:1.5;margin-bottom:6px">
+                        <thead>
+                            <tr style="background:rgba(0,0,0,0.03);text-align:left">
+                                <th style="padding:3px 6px;border:1px solid var(--border);font-weight:600;color:var(--text)">维度</th>
+                                <th style="padding:3px 6px;border:1px solid var(--border);font-weight:600;color:var(--accent)">WG110 (本模型)</th>
+                                <th style="padding:3px 6px;border:1px solid var(--border);font-weight:600;color:#5e8bb0">MediaPipe</th>
+                            </tr>
+                        </thead>
+                        <tbody style="color:var(--dim)">
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">输出表征</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">21 个关节角度 (θ)</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">21 个 3D 坐标 (x,y,z)</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">拇指</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">5-DOF: rot+flex+abd+mcp+ip</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">4 landmarks: CMC→MCP→IP→TIP</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">四指</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">4-DOF: abd+flex+pip+dip</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">4 landmarks: MCP→PIP→DIP→TIP</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">Abd/Flex</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">拆为两个串联 revolute</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">不拆分，直接给 MCP 位置</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">掌骨</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">显式建模 (fixed offset)</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">隐含在 WRIST→MCP 连线中</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">传感器</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">EMF 磁传感器</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">RGB 摄像头 + 深度估计</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">坐标系</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">REP-155 (X=radial, Z=prox)</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">图像坐标 / 世界坐标</td></tr>
+                        </tbody>
+                    </table>
+                    <div style="font-size:8.5px;line-height:1.5;color:var(--dim);padding:4px 8px;
+                        background:rgba(94,139,176,0.06);border:1px solid rgba(94,139,176,0.15);border-radius:4px">
+                        <b style="color:var(--text)">从 MediaPipe 驱动 WG110</b>：MediaPipe 输出关键点位置，WG110 需要关节角度。
+                        桥接两者需要<b style="color:#5e8bb0">逆运动学 (IK) 求解器</b>：给定 21 个 3D 坐标 → 反解 21 个关节角。
+                        MediaPipe 无需处理 abd/flex 拆分歧义，正是因为它只输出位置，不涉及角度分解。
+                    </div>
+                    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
+                        <div style="flex:1;min-width:200px">
+                            <div style="font-size:9px;font-weight:600;color:var(--dim);margin-bottom:4px">MediaPipe Hand Landmarks (21 keypoints)</div>
+                            <img src="https://ai.google.dev/static/mediapipe/images/solutions/hand-landmarks.png"
+                                alt="MediaPipe Hand Landmarks — 21 个关键点编号示意图"
+                                style="width:100%;border-radius:6px;border:1px solid var(--border);background:#fff"
+                                onerror="this.parentElement.innerHTML='<div style=\'padding:12px;background:var(--bg);border:1px dashed var(--border);border-radius:6px;font-size:9px;color:var(--dim);text-align:center\'>MediaPipe 参考图加载失败<br>请访问 <a href=\'https://ai.google.dev/mediapipe/solutions/vision/hand_landmarker\' target=\'_blank\'>Google MediaPipe 文档</a></div>'">
+                            <div style="font-size:8px;color:var(--dim);margin-top:2px;line-height:1.4">
+                                来源: <a href="https://ai.google.dev/mediapipe/solutions/vision/hand_landmarker" target="_blank"
+                                    style="color:#5e8bb0">Google MediaPipe</a> · 绿线 = 骨骼连接 · 红点 = landmark 编号
+                            </div>
+                        </div>
+                        <div style="flex:1;min-width:200px">
+                            <div style="font-size:9px;font-weight:600;color:var(--dim);margin-bottom:4px">手部关节运动方向 (解剖学参考)</div>
+                            <img src="../assets/hand_anatomy_movements.jpg"
+                                alt="手部解剖学运动方向 — Adduction/Abduction, Flexion/Extension, Opposition/Retroposition"
+                                style="width:100%;border-radius:6px;border:1px solid var(--border);background:#fff"
+                                onerror="this.parentElement.innerHTML='<div style=\'padding:12px;background:var(--bg);border:1px dashed var(--border);border-radius:6px;font-size:9px;color:var(--dim);text-align:center\'>解剖学参考图未找到<br>请将图片保存至 <code>assets/hand_anatomy_movements.jpg</code></div>'">
+                            <div style="font-size:8px;color:var(--dim);margin-top:2px;line-height:1.4">
+                                A: Adduction/Abduction (内收/外展) · B: Flexion/Extension (屈伸) · C: Thumb flex/ext · D: Opposition/Retroposition (对掌)
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -514,6 +590,10 @@
         const DEG = Math.PI / 180;
         const FINGER_ORDER = ['thumb', 'index', 'middle', 'ring', 'pinky'];
         const BG_COLOR = 0xf7f5f2;
+
+        // Global joint ID offset per finger: thumb=0, index=5, middle=9, ring=13, pinky=17
+        const FINGER_GLOBAL_ID_OFFSET = { thumb: 0, index: 5, middle: 9, ring: 13, pinky: 17 };
+        function globalJointId(fname, ji) { return FINGER_GLOBAL_ID_OFFSET[fname] + ji; }
 
         // Deep clone config fingers into a mutable model with runtime angles
         const model = {};
@@ -781,6 +861,68 @@
             return m;
         }
 
+        // Thenar eminence (大鱼际): fleshy mound wrapping thumb CMC Abd link (第一掌骨)
+        // 解剖学上，大鱼际是覆盖拇指第一掌骨的肌肉群，不是骨骼，
+        // 因此用半透明肤色泪滴形代替普通圆柱连杆，与其他手指骨骼形成视觉区分。
+        function createThenarMesh(lv) {
+            const len = lv.length();
+            if (len < 0.5) return null;
+
+            const g = new THREE.Group();
+
+            // Inner skeleton bone (thin, visible through the flesh)
+            const inner = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.0, 1.0, len, 8),
+                new THREE.MeshStandardMaterial({ color: 0xc47272, metalness: 0.4, roughness: 0.45, transparent: true, opacity: 0.6 }));
+            inner.castShadow = false;
+            g.add(inner);
+
+            // Flesh envelope: organic muscle shape via LatheGeometry
+            const pts = [];
+            const N = 20;
+            for (let i = 0; i <= N; i++) {
+                const t = i / N; // 0=proximal(palm) → 1=distal(thumb)
+                // Teardrop profile: wider near palm, tapers toward thumb
+                const bulge = Math.sin(Math.PI * (t * 0.85 + 0.08));
+                const taper = 1.15 - 0.5 * t; // wider at palm end
+                const r = 7.5 * bulge * taper;
+                pts.push(new THREE.Vector2(Math.max(r, 0.3), (t - 0.5) * len));
+            }
+            const fleshGeo = new THREE.LatheGeometry(pts, 14);
+            const fleshMat = new THREE.MeshPhysicalMaterial({
+                color: 0xe8b8a0,
+                metalness: 0.02,
+                roughness: 0.85,
+                transparent: true,
+                opacity: 0.35,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            const flesh = new THREE.Mesh(fleshGeo, fleshMat);
+            g.add(flesh);
+
+            // "大鱼际" label (canvas sprite, always faces camera)
+            const labelCanvas = document.createElement('canvas');
+            labelCanvas.width = 128; labelCanvas.height = 40;
+            const ctx = labelCanvas.getContext('2d');
+            ctx.font = '600 22px Inter, system-ui, sans-serif';
+            ctx.fillStyle = '#c47272';
+            ctx.textAlign = 'center';
+            ctx.fillText('大鱼际', 64, 26);
+            const labelTex = new THREE.CanvasTexture(labelCanvas);
+            const labelMat = new THREE.SpriteMaterial({ map: labelTex, depthTest: false, transparent: true, opacity: 0.8 });
+            const label = new THREE.Sprite(labelMat);
+            label.scale.set(16, 5, 1);
+            label.position.set(8, 0, 0); // offset to the side so it doesn't overlap the mesh
+            g.add(label);
+
+            // Position & orient the whole group along link vector
+            g.position.copy(lv.clone().multiplyScalar(0.5));
+            const up = new THREE.Vector3(0, 1, 0), dir = lv.clone().normalize();
+            if (Math.abs(up.dot(dir)) < 0.999) g.quaternion.setFromUnitVectors(up, dir);
+            return g;
+        }
+
         function disposeMesh(mesh) {
             if (!mesh) return;
             if (mesh.geometry) mesh.geometry.dispose();
@@ -794,10 +936,13 @@
             const j = fdata.joints[ji];
             if (node.bone) {
                 node.pivot.remove(node.bone);
-                disposeMesh(node.bone);
+                // Group (thenar) needs recursive dispose
+                if (node.bone.isGroup) {
+                    node.bone.traverse(c => { if (c.isMesh) disposeMesh(c); });
+                } else { disposeMesh(node.bone); }
             }
             const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
-            const nb = createBone(lv, fdata.color);
+            const nb = node.isThenar ? createThenarMesh(lv) : createBone(lv, fdata.color);
             node.boneBaseLen = lv.length();
             if (nb) { node.pivot.add(nb); node.bone = nb; }
             else { node.bone = null; }
@@ -859,11 +1004,12 @@
                 pivot.add(child);
 
                 const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
-                const bone = createBone(lv, fdata.color);
+                const isThenar = (fname === 'thumb' && ji === 2); // CMC Abd = 大鱼际
+                const bone = isThenar ? createThenarMesh(lv) : createBone(lv, fdata.color);
                 const boneBaseLen = lv.length();
                 if (bone) pivot.add(bone);
 
-                chainNodes.push({ pivot, child, bone, boneBaseLen });
+                chainNodes.push({ pivot, child, bone, boneBaseLen, isThenar });
                 parentObj = child;
             });
 
@@ -965,13 +1111,14 @@
         });
         scene.add(sensorBase);
 
-        // Black metacarpal links (wrist → each finger root)
+        // Metacarpal links (wrist → each finger root)
         const metacarpalMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.2, roughness: 0.6 });
         FINGER_ORDER.forEach(fname => {
             const po = model[fname].palmOffset;
             const target = new THREE.Vector3(po.pos[0], po.pos[1], po.pos[2]);
             const len = target.length();
             if (len < 0.5) return;
+
             const bone = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, len, 8), metacarpalMat);
             bone.position.copy(target.clone().multiplyScalar(0.5));
             const up = new THREE.Vector3(0, 1, 0), dir = target.clone().normalize();
@@ -1051,7 +1198,7 @@
 
                     c.innerHTML = `
                         <div class="jc-header">
-                            <span class="jc-name">J${ji + 1} ${j.name}</span>
+                            <span class="jc-name">(J${globalJointId(fname, ji)}) ${j.name}</span>
                             <span class="jc-cn">${j.nameCN}</span>
                             <span class="jc-badge" style="background:${bc}18;color:${bc}">${bt}</span>
                             <span class="jc-sdk">${fdata.sdk}_${j.sdk}</span>
@@ -1235,12 +1382,15 @@
         // ══════════════════════════════════════════════════════
         function buildTreeText() {
             const lines = [];
+            const cmt = (s) => `<span style="color:#9a9080;font-style:italic">  # ${s}</span>`;
+
             // Axis semantics verification header
             lines.push('<span style="color:var(--dim);font-size:9px">flex(X): +\u03B8 curl toward palm(+Y) \u2714  abd(Y): +\u03B8 adduction \u2714  link(-Z): distal toward fingertip \u2714</span>');
             lines.push('');
-            lines.push('<span class="fixed">wrist</span> (root)');
+            lines.push('<span class="fixed">wrist</span> (root)' + cmt('\u8FD0\u52A8\u5B66\u6811\u7684\u6839\u8282\u70B9\uFF0C\u5168\u5C40\u539F\u70B9\uFF0C\u6240\u6709\u5750\u6807\u7684\u53C2\u8003\u7CFB'));
             lines.push('\u251C\u2500\u2500 <span class="sensor">emf_sensor_base</span> [fixed, offset: (' +
-                CONFIG.sensors.emfBase.offset_mm.join(', ') + ') mm]');
+                CONFIG.sensors.emfBase.offset_mm.join(', ') + ') mm]' +
+                cmt('fixed = \u56FA\u5B9A\u8FDE\u63A5\uFF0C\u65E0\u81EA\u7531\u5EA6\uFF1Boffset = \u76F8\u5BF9\u7236\u8282\u70B9\u7684\u56FA\u5B9A\u504F\u79FB'));
 
             const fingerLabels = {
                 thumb: '\u62C7\u6307', index: '\u98DF\u6307', middle: '\u4E2D\u6307',
@@ -1248,25 +1398,114 @@
             };
             const lastFinger = FINGER_ORDER[FINGER_ORDER.length - 1];
 
+            // Progressive annotation: each concept explained once, tracked by these flags
+            let explained = {
+                metacarpal: false,
+                revolute: false,
+                axis: false,
+                coLocated: false,
+                coLocated2: false,
+                link: false,
+                linkVec: false,
+                tip: false,
+                coil: false,
+                limitRange: false,
+                childInherit: false,
+                dof: false,
+            };
+
             FINGER_ORDER.forEach(fname => {
                 const fdata = model[fname];
                 const isLast = fname === lastFinger;
                 const prefix = isLast ? '\u2514\u2500\u2500 ' : '\u251C\u2500\u2500 ';
                 const sub = isLast ? '    ' : '\u2502   ';
                 const po = fdata.palmOffset;
-                lines.push(`${prefix}<span class="fixed">${fname}_metacarpal</span> [fixed, pos: (${po.pos.join(', ')}) mm] ${fingerLabels[fname]}`);
+                let metacarpalCmt = '';
+                if (!explained.metacarpal) {
+                    metacarpalCmt = cmt('pos = wrist\u21923D\u7A7A\u95F4\u4E2D\u6307\u6839\u7684\u56FA\u5B9A\u504F\u79FB\uFF0C\u5373\u638C\u9AA8\u7684\u51E0\u4F55\u5C3A\u5BF8');
+                    explained.metacarpal = true;
+                }
+                lines.push(`${prefix}<span class="fixed">${fname}_metacarpal</span> [fixed, pos: (${po.pos.join(', ')}) mm] ${fingerLabels[fname]}${metacarpalCmt}`);
 
                 fdata.joints.forEach((j, ji) => {
                     const indent = sub + '    '.repeat(ji);
                     const jt = Math.abs(j.axis[2]) > 0.5 ? 'Z' : (Math.abs(j.axis[1]) > 0.5 ? 'Y' : 'X');
-                    const linkStr = j.link.some(v => v !== 0) ? `, link: (${j.link.join(', ')}) mm` : ', co-located';
-                    lines.push(`${indent}\u2514\u2500\u2500 <span class="joint">${fdata.sdk}_${j.sdk}</span> [revolute, axis: ${jt}${linkStr}]`);
+                    const isCoLocated = !j.link.some(v => v !== 0);
+                    const linkStr = isCoLocated ? ', co-located' : `, link: (${j.link.join(', ')}) mm`;
+
+                    // Pick the most relevant un-explained concept for this joint
+                    let annotation = '';
+                    if (!explained.revolute) {
+                        annotation = cmt('revolute = \u65CB\u8F6C\u5173\u8282\uFF0C\u6709 1 \u4E2A\u65CB\u8F6C\u81EA\u7531\u5EA6\uFF0C\u7ED5 axis \u6307\u5B9A\u7684\u8F74\u65CB\u8F6C');
+                        explained.revolute = true;
+                    } else if (!explained.axis && jt !== 'Z') {
+                        annotation = cmt(`axis = \u65CB\u8F6C\u8F74\u5728\u5F53\u524D\u8282\u70B9\u5C40\u90E8\u5750\u6807\u7CFB\u7684\u65B9\u5411\uFF1B${jt}=flex \u5373\u5C48\u4F38`);
+                        explained.axis = true;
+                    } else if (isCoLocated && !explained.coLocated) {
+                        annotation = cmt('co-located = \u4E0E\u7236\u8282\u70B9\u4F4D\u7F6E\u91CD\u5408\uFF0C\u4E0D\u4EA7\u751F\u4F4D\u79FB\uFF0C\u4EC5\u589E\u52A0\u4E00\u4E2A\u65CB\u8F6C\u81EA\u7531\u5EA6');
+                        explained.coLocated = true;
+                    } else if (isCoLocated && !explained.coLocated2) {
+                        annotation = cmt('\u591A\u4E2A co-located \u5173\u8282\u53E0\u52A0 = \u4E00\u4E2A\u7403\u5173\u8282\u7684\u5206\u89E3\uFF0C\u6BCF\u4E2A\u63A7\u5236\u4E00\u4E2A\u8F74\u7684\u65CB\u8F6C');
+                        explained.coLocated2 = true;
+                    } else if (!isCoLocated && !explained.link) {
+                        annotation = cmt('link = \u5F53\u524D\u5173\u8282\u76F8\u5BF9\u7236\u5173\u8282\u7684\u4F4D\u79FB\u77E2\u91CF\uFF0C\u5373\u9AA8\u9ABC\u957F\u5EA6\u548C\u65B9\u5411');
+                        explained.link = true;
+                    } else if (!isCoLocated && !explained.linkVec) {
+                        annotation = cmt('link \u5728\u7236\u5173\u8282\u65CB\u8F6C\u540E\u7684\u5750\u6807\u7CFB\u4E0B\u5EA6\u91CF\uFF1B-Z \u65B9\u5411\u8868\u793A\u6307\u5411\u6307\u5C16');
+                        explained.linkVec = true;
+                    } else if (!explained.limitRange) {
+                        const lo = (j.limitLower / DEG).toFixed(0);
+                        const hi = (j.limitUpper / DEG).toFixed(0);
+                        annotation = cmt(`\u6BCF\u4E2A\u5173\u8282\u6709\u89D2\u5EA6\u9650\u4F4D\uFF0C\u6B64\u5173\u8282\u8303\u56F4 ${lo}\u00B0~${hi}\u00B0`);
+                        explained.limitRange = true;
+                    } else if (!explained.childInherit) {
+                        annotation = cmt('\u5B50\u8282\u70B9\u7EE7\u627F\u7236\u8282\u70B9\u7684\u53D8\u6362\uFF1AT_global = T_parent \u00B7 T_local');
+                        explained.childInherit = true;
+                    } else if (!explained.dof) {
+                        annotation = cmt('\u56DB\u6307\u5404 4-DOF (1 abd + 3 flex)\uFF0C\u62C7\u6307 5-DOF\uFF0C\u5171 21-DOF');
+                        explained.dof = true;
+                    }
+
+                    // Special case: thumb_cmc_rot is deprecated (passive DOF)
+                    if (fname === 'thumb' && ji === 0) {
+                        lines.push(`${indent}\u2514\u2500\u2500 <span class="joint" style="text-decoration:line-through;opacity:0.5">(J${globalJointId(fname, ji)}) ${fdata.sdk}_${j.sdk}</span> <span style="text-decoration:line-through;opacity:0.4">[revolute, axis: ${jt}${linkStr}]</span>${cmt('\u26A0 \u5DF2\u5F03\u7528\uFF0C\u89C1\u6CE8 [2]')}`);
+                    } else {
+                        lines.push(`${indent}\u2514\u2500\u2500 <span class="joint">(J${globalJointId(fname, ji)}) ${fdata.sdk}_${j.sdk}</span> [revolute, axis: ${jt}${linkStr}]${annotation}`);
+                    }
                 });
                 const tipIndent = sub + '    '.repeat(fdata.joints.length);
-                lines.push(`${tipIndent}\u2514\u2500\u2500 <span class="fixed">${fname}_tip</span> [fixed]`);
+                let tipCmt = '';
+                if (!explained.tip) {
+                    tipCmt = cmt('\u6307\u5C16\u662F\u672B\u7AEF\u6267\u884C\u5668 (end-effector)\uFF0C\u65E0\u81EA\u7531\u5EA6');
+                    explained.tip = true;
+                }
+                lines.push(`${tipIndent}\u2514\u2500\u2500 <span class="fixed">${fname}_tip</span> [fixed]${tipCmt}`);
                 const coilOff = CONFIG.sensors.coils[fname].offset_mm;
-                lines.push(`${tipIndent}    \u2514\u2500\u2500 <span class="sensor">${CONFIG.sensors.coils[fname].name}</span> [fixed, offset: (${coilOff.join(', ')}) mm]`);
+                let coilCmt = '';
+                if (!explained.coil) {
+                    coilCmt = cmt('EMF \u7EBF\u5708\u56FA\u5B9A\u5728\u6307\u7532\u4E0A\uFF0C\u968F\u6307\u5C16\u8FD0\u52A8\uFF0C\u7528\u4E8E\u78C1\u5B9A\u4F4D');
+                    explained.coil = true;
+                }
+                lines.push(`${tipIndent}    \u2514\u2500\u2500 <span class="sensor">${CONFIG.sensors.coils[fname].name}</span> [fixed, offset: (${coilOff.join(', ')}) mm]${coilCmt}`);
             });
+
+            // Annotations at the end of kinematic tree
+            lines.push('');
+            lines.push('<span style="color:var(--dim);font-size:9px">\u6CE8:</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">[1] thumb_mcp / thumb_ip \u662F thumb_mcp_flex / thumb_ip_flex \u7684\u7B80\u79F0\u3002</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    \u62C7\u6307\u4EC5\u6709\u4E00\u4E2A MCP \u548C\u4E00\u4E2A IP \u5173\u8282\uFF0C\u5747\u4E3A\u5C48\u4F38\u8F74\uFF0C\u7701\u7565 _flex \u540E\u7F00\u4E0D\u4F1A\u4EA7\u751F\u6B67\u4E49\u3002</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    \u56DB\u6307\u7684 MCP \u56E0\u540C\u65F6\u5B58\u5728 abd \u548C flex \u4E24\u4E2A\u81EA\u7531\u5EA6\uFF0C\u6545\u5FC5\u987B\u5199\u5168\u540D\u4EE5\u533A\u5206\u3002</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">[2] (J0) thumb_cmc_rot \u5DF2\u5F03\u7528\u3002\u62C7\u6307 CMC \u5173\u8282\uFF08\u7B2C\u4E00\u8155\u638C\u5173\u8282\uFF09\u662F\u978D\u72B6\u5173\u8282 (saddle joint, 2-DOF:</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">    flex/ext + abd/add)\uFF0C\u5176\u8F74\u5411\u65CB\u8F6C\uFF08\u65CB\u524D pronation / \u65CB\u540E supination\uFF09\u662F\u88AB\u52A8\u8026\u5408\u8FD0\u52A8\uFF0C</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">    \u5E76\u975E\u4EBA\u7C7B\u53EF\u4E3B\u52A8\u72EC\u7ACB\u63A7\u5236\u7684\u81EA\u7531\u5EA6\u3002\u56E0\u6B64 thumb_cmc_rot \u5728\u6A21\u578B\u4E2D\u4EC5\u63D0\u4F9B\u4E00\u4E2A\u56FA\u5B9A\u65CB\u8F6C\u89D2\u5EA6\u503C\uFF08\u56E0\u4EBA\u800C\u5F02\uFF09\uFF1A</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">      WG110 (Glove \u4E00\u4EE3) = 45\u00B0 (0.785 rad)</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">      WH110 (Hand \u4E00\u4EE3)  = 36\u00B0 (0.628 rad)</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">      WH120 (Hand \u4E8C\u4EE3)  = 20\u00B0 (0.349 rad)</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">    \u5B9E\u9645\u4F7F\u7528\u65F6\u8BE5\u5173\u8282\u89D2\u5EA6\u9501\u5B9A\u4E3A\u5E38\u91CF\uFF0C\u4E0D\u53C2\u4E0E\u8FD0\u52A8\u5B66\u6C42\u89E3\u3002</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">[3] \u89E3\u5256\u5B66\u4E0A\uFF0Cabd\uFF08\u5916\u5C55/\u5185\u6536\uFF09\u4E0E flex\uFF08\u5C48\u4F38\uFF09\u53D1\u751F\u5728\u540C\u4E00\u4E2A\u5173\u8282\u9762\u4E0A\uFF08MCP = \u9AC1\u72B6\u5173\u8282 condyloid, 2-DOF\uFF1B</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    CMC = \u978D\u72B6\u5173\u8282 saddle, 2-DOF\uFF09\u3002\u5C06\u5176\u62C6\u4E3A\u4E24\u4E2A\u4E32\u8054\u7684 revolute joint \u65F6\uFF0C\u8C01\u5728\u524D\uFF08\u66F4\u9760\u8FD1 root\uFF09\u3001\u8C01\u5728\u540E\uFF0C</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    \u662F\u5EFA\u6A21\u8005\u7684\u9009\u62E9\uFF0C\u4E0D\u662F\u89E3\u5256\u5B66\u7684\u56FA\u6709\u987A\u5E8F\u3002\u672C\u6A21\u578B\u9009\u62E9 abd \u5728\u524D\u3001flex \u5728\u540E\uFF0C\u56E0\u4E3A abd \u8FD0\u52A8\u8303\u56F4\u5C0F\uFF0C</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    \u653E\u5728\u524D\u9762\u5BF9\u4E0B\u6E38\u5173\u8282\u7684\u5F71\u54CD\u66F4\u5C0F\uFF0C\u6570\u503C\u4E0A\u66F4\u7A33\u5B9A\u3002</span>');
 
             document.getElementById('treeOutput').innerHTML = lines.join('\n');
         }
@@ -1358,7 +1597,7 @@
                 const fdata = model[data.finger];
                 const j = fdata.joints[data.jointIdx];
                 const ch = '#' + fdata.color.toString(16).padStart(6, '0');
-                title = `${fdata.label.zh} ${fdata.label.en} — J${data.jointIdx + 1} ${j.name}`;
+                title = `${fdata.label.zh} ${fdata.label.en} — (J${globalJointId(data.finger, data.jointIdx)}) ${j.name}`;
 
                 const axLabel = Math.abs(j.axis[2]) > 0.5 ? 'Z (twist)' :
                     Math.abs(j.axis[1]) > 0.5 ? 'Y (abd)' : 'X (flex)';
@@ -1522,6 +1761,34 @@
                 });
             });
         }
+
+        document.getElementById('btnZero').addEventListener('click', () => {
+            // Stop animation first
+            if (animRunning) {
+                animRunning = false;
+                animBtn.textContent = 'Play Spread+Grasp';
+                animBtn.style.background = 'var(--card)';
+                animBtn.style.color = 'var(--accent)';
+            }
+            // Reset all joints to zero (except thumb CMC Rot which has a meaningful default)
+            FINGER_ORDER.forEach(fname => {
+                model[fname].joints.forEach((j, ji) => {
+                    j.angle = 0;
+                });
+                updateChain(fname);
+                updateMatrixDisplays(fname);
+            });
+            // Update all sliders and inputs
+            FINGER_ORDER.forEach(fname => {
+                model[fname].joints.forEach((j, ji) => {
+                    const slider = sliderRefs[fname]?.[ji];
+                    if (slider) slider.value = '0.0';
+                    const numInp = numInputRefs[fname]?.[ji];
+                    if (numInp) numInp.value = '0.0';
+                    updateZeroStar(fname, ji);
+                });
+            });
+        });
 
         animBtn.addEventListener('click', () => {
             animRunning = !animRunning;
