@@ -281,9 +281,9 @@
         <div class="cards-panel" id="cardsPanel">
             <div class="help-box">
                 <strong>WUJI Glove 110 REP-155</strong><br>
-                <strong style="color:#e44">+X</strong> Radial (桡侧/拇指方向) &middot;
-                <strong style="color:#4b4">+Y</strong> 右手系 (X&times;Z) &middot;
-                <strong style="color:#48e">+Z</strong> Proximal (近端/手腕方向)<br>
+                <strong style="color:#ff3333">+X</strong> Radial (桡侧/手刀砍你) &middot;
+                <strong style="color:#33cc33">+Y</strong> 右手系 Y=X&times;Z (掌侧/抓你) &middot;
+                <strong style="color:#3388ff">+Z</strong> Proximal (近端/指尖戳你)<br>
                 圆柱体 = 旋转关节（轴向=旋转轴）&middot; 单击3D节点弹出信息<br>
                 $T_{i+1} = T_i \cdot R(\hat{\omega}_i, \theta_i) \cdot \text{Trans}(d_x, d_y, d_z)$
             </div>
@@ -293,9 +293,9 @@
             <div class="view-3d">
                 <canvas id="canvas3d"></canvas>
                 <div class="coord-label">
-                    <span style="color:#e44">+X</span> Radial &middot;
-                    <span style="color:#4b4">+Y</span> Right-hand &middot;
-                    <span style="color:#48e">+Z</span> Proximal
+                    <span style="color:#ff3333">+X</span> Radial &middot;
+                    <span style="color:#33cc33">+Y</span> Right-hand &middot;
+                    <span style="color:#3388ff">+Z</span> Proximal
                 </div>
                 <div class="hud-bottom">左键旋转 &middot; 右键平移 &middot; 滚轮缩放 &middot; 单击节点弹出信息</div>
             </div>
@@ -678,6 +678,7 @@
         const controls = new OrbitControls(camera, canvas);
         controls.enableDamping = true;
         controls.dampingFactor = 0.06;
+        controls.addEventListener('change', () => { sceneDirty = true; });
         controls.target.set(0, 10, -60);
 
         // Ortho views
@@ -728,6 +729,24 @@
         // ══════════════════════════════════════════════════════
         //  3D PRIMITIVES
         // ══════════════════════════════════════════════════════
+
+        function createAxes(size) {
+            const g = new THREE.Group();
+            const headLen = size * 0.3;
+            const headW = size * 0.15;
+            const axes = [
+                { dir: new THREE.Vector3(1,0,0), color: 0xff3333 },
+                { dir: new THREE.Vector3(0,1,0), color: 0x33cc33 },
+                { dir: new THREE.Vector3(0,0,1), color: 0x3388ff },
+            ];
+            for (const a of axes) {
+                const arrow = new THREE.ArrowHelper(a.dir, new THREE.Vector3(), size, a.color, headLen, headW);
+                arrow.line.material.linewidth = 2;
+                g.add(arrow);
+            }
+            return g;
+        }
+
         const JR = 3.5, JH = 9, LR = 1.8;
 
         function createJointMesh(color, axis, fingerName, jointIdx) {
@@ -746,8 +765,8 @@
                 new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.5 }));
             dot.userData = { clickable: true, type: 'joint', finger: fingerName, jointIdx };
             g.add(dot);
-            // Local axes helper (8mm)
-            g.add(new THREE.AxesHelper(8));
+            // Local axes (12mm arrows)
+            g.add(createAxes(12));
             return g;
         }
 
@@ -762,6 +781,28 @@
             return m;
         }
 
+        function disposeMesh(mesh) {
+            if (!mesh) return;
+            if (mesh.geometry) mesh.geometry.dispose();
+            if (mesh.material) mesh.material.dispose();
+        }
+
+        function rebuildBone(fname, ji) {
+            const fdata = model[fname];
+            const node = fingerObjects[fname]?.chainNodes[ji];
+            if (!node) return;
+            const j = fdata.joints[ji];
+            if (node.bone) {
+                node.pivot.remove(node.bone);
+                disposeMesh(node.bone);
+            }
+            const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
+            const nb = createBone(lv, fdata.color);
+            node.boneBaseLen = lv.length();
+            if (nb) { node.pivot.add(nb); node.bone = nb; }
+            else { node.bone = null; }
+        }
+
         function createSensorBase() {
             const g = new THREE.Group();
             g.add(new THREE.Mesh(new THREE.BoxGeometry(20, 5, 14),
@@ -769,7 +810,7 @@
             const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 8, 8),
                 new THREE.MeshStandardMaterial({ color: 0xaa5555, metalness: 0.5, roughness: 0.3 }));
             ant.position.y = 6.5; g.add(ant);
-            g.add(new THREE.AxesHelper(4));
+            g.add(createAxes(6));
             return g;
         }
 
@@ -785,6 +826,12 @@
         // ══════════════════════════════════════════════════════
         //  BUILD FINGER CHAINS
         // ══════════════════════════════════════════════════════
+        // Reusable temp objects (avoid per-frame allocations)
+        const _vec3A = new THREE.Vector3();
+        const _vec3B = new THREE.Vector3();
+        const _quatA = new THREE.Quaternion();
+        let sceneDirty = true;  // ortho views only render when dirty
+
         const fingerObjects = {};
         // Store local transforms for each joint (4x4 row-major)
         const jointLocalT = {};
@@ -813,9 +860,10 @@
 
                 const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
                 const bone = createBone(lv, fdata.color);
+                const boneBaseLen = lv.length();
                 if (bone) pivot.add(bone);
 
-                chainNodes.push({ pivot, child, bone });
+                chainNodes.push({ pivot, child, bone, boneBaseLen });
                 parentObj = child;
             });
 
@@ -877,27 +925,24 @@
             const fdata = model[fname];
             const fobj = fingerObjects[fname];
             if (!fobj) return;
+            sceneDirty = true;
 
             const po = fdata.palmOffset;
             fobj.group.position.set(po.pos[0], po.pos[1], po.pos[2]);
 
             fdata.joints.forEach((j, ji) => {
                 const node = fobj.chainNodes[ji];
-                const axisVec = new THREE.Vector3(j.axis[0], j.axis[1], j.axis[2]).normalize();
+                _vec3A.set(j.axis[0], j.axis[1], j.axis[2]).normalize();
 
                 node.pivot.setRotationFromQuaternion(
-                    new THREE.Quaternion().setFromAxisAngle(axisVec, j.angle));
+                    _quatA.setFromAxisAngle(_vec3A, j.angle));
 
                 node.child.position.set(j.link[0], j.link[1], j.link[2]);
 
-                // Update bone
-                if (node.bone) node.pivot.remove(node.bone);
-                const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
-                const nb = createBone(lv, fdata.color);
-                if (nb) { node.pivot.add(nb); node.bone = nb; }
+                // Bone transform is set at build time; only rebuilt on link change (see rebuildBone)
 
                 // Compute local transform matrix
-                const normAxis = [axisVec.x, axisVec.y, axisVec.z];
+                const normAxis = [_vec3A.x, _vec3A.y, _vec3A.z];
                 const T = buildLocalT(normAxis, j.angle, j.link);
                 jointLocalT[fname][ji] = T;
                 jointSpatialVec[fname][ji] = se3Log(T);
@@ -908,7 +953,7 @@
         const wristMesh = new THREE.Mesh(new THREE.SphereGeometry(4, 20, 20), metalMat(CONFIG.colors.wrist, 0.35));
         wristMesh.userData = { clickable: true, type: 'wrist' };
         scene.add(wristMesh);
-        scene.add(new THREE.AxesHelper(16));
+        scene.add(createAxes(24));
 
         // EMF Sensor Base — dorsal side of wrist (right hand: -Y = dorsal/手背)
         const sensorBase = createSensorBase();
@@ -943,6 +988,9 @@
         // Map of matrix display elements for live update
         const matrixDisplays = {};
         const spatialDisplays = {};
+        // Cached slider/input refs for animation (avoid querySelector per frame)
+        const sliderRefs = {};
+        const numInputRefs = {};
 
         function buildCards() {
             FINGER_ORDER.forEach(fname => {
@@ -1020,14 +1068,14 @@
                             <input class="jc-input" value="${(j.angle / DEG).toFixed(1)}" data-f="${fname}" data-j="${ji}" data-field="angle-num">
                             <span class="jc-unit">deg</span>
                             <span class="jc-zero-star ${Math.abs(j.angle) < 0.001 ? 'active' : ''}" data-f="${fname}" data-j="${ji}">\u2605 zero</span></div>
-                        <div class="jc-row"><span class="jc-label">link len</span>
+                        <div class="jc-row"><span class="jc-label">link vec</span>
                             <input class="jc-input" value="${j.link[0]}" data-f="${fname}" data-j="${ji}" data-field="lx">
                             <input class="jc-input" value="${j.link[1]}" data-f="${fname}" data-j="${ji}" data-field="ly">
                             <input class="jc-input" value="${j.link[2]}" data-f="${fname}" data-j="${ji}" data-field="lz">
                             <span class="jc-unit">[x,y,z] mm</span></div>
                         <div class="jc-row">
-                            <span class="jc-label"></span>
-                            <span class="link-len">|link| = ${linkLen.toFixed(1)} mm</span>
+                            <span class="jc-label">link len</span>
+                            <span class="link-len">|d| = ${linkLen.toFixed(1)} mm</span>
                         </div>
                         <div class="jc-sign">\u21B3 ${j.signConvention}</div>
                         <div class="jc-matrix-wrap">
@@ -1042,6 +1090,10 @@
                         </div>`;
 
                     body.appendChild(c);
+                    // Cache slider and numInput refs for animation perf
+                    if (!sliderRefs[fname]) { sliderRefs[fname] = []; numInputRefs[fname] = []; }
+                    sliderRefs[fname][ji] = c.querySelector('input[type=range]');
+                    numInputRefs[fname][ji] = c.querySelector('input[data-field="angle-num"]');
                     // Store element references after append
                     setTimeout(() => {
                         matrixDisplays[fname][ji] = document.getElementById(matId);
@@ -1119,9 +1171,9 @@
             if (f === 'ax') j.axis[0] = v;
             else if (f === 'ay') j.axis[1] = v;
             else if (f === 'az') j.axis[2] = v;
-            else if (f === 'lx') j.link[0] = v;
-            else if (f === 'ly') j.link[1] = v;
-            else if (f === 'lz') j.link[2] = v;
+            else if (f === 'lx') { j.link[0] = v; rebuildBone(fname, ji); }
+            else if (f === 'ly') { j.link[1] = v; rebuildBone(fname, ji); }
+            else if (f === 'lz') { j.link[2] = v; rebuildBone(fname, ji); }
             else if (f === 'angle-num') {
                 j.angle = v * DEG; // input is in degrees, convert to radians
                 const s = cardsPanel.querySelector(`input[type=range][data-f="${fname}"][data-j="${ji}"]`);
@@ -1157,6 +1209,10 @@
                 const matEl = matrixDisplays[fname]?.[ji];
                 const svEl = spatialDisplays[fname]?.[ji];
                 if (!matEl || !svEl) return;
+
+                // Skip update if matrix panel is collapsed (avoid unnecessary DOM writes)
+                const matBody = matEl.closest('.jc-matrix-body');
+                if (matBody && !matBody.classList.contains('open')) return;
 
                 const T = jointLocalT[fname][ji];
                 if (!T) return;
@@ -1201,17 +1257,15 @@
                 lines.push(`${prefix}<span class="fixed">${fname}_metacarpal</span> [fixed, pos: (${po.pos.join(', ')}) mm] ${fingerLabels[fname]}`);
 
                 fdata.joints.forEach((j, ji) => {
-                    const isLastJ = ji === fdata.joints.length - 1;
-                    const jp = isLastJ ? '\u2514\u2500\u2500 ' : '\u251C\u2500\u2500 ';
+                    const indent = sub + '    '.repeat(ji);
                     const jt = Math.abs(j.axis[2]) > 0.5 ? 'Z' : (Math.abs(j.axis[1]) > 0.5 ? 'Y' : 'X');
                     const linkStr = j.link.some(v => v !== 0) ? `, link: (${j.link.join(', ')}) mm` : ', co-located';
-                    lines.push(`${sub}${jp}<span class="joint">${fdata.sdk}_${j.sdk}</span> [revolute, axis: ${jt}${linkStr}]`);
-                    if (isLastJ) {
-                        lines.push(`${sub}    \u2514\u2500\u2500 <span class="fixed">${fname}_tip</span> [fixed]`);
-                        const coilOff = CONFIG.sensors.coils[fname].offset_mm;
-                        lines.push(`${sub}        \u2514\u2500\u2500 <span class="sensor">${CONFIG.sensors.coils[fname].name}</span> [fixed, offset: (${coilOff.join(', ')}) mm]`);
-                    }
+                    lines.push(`${indent}\u2514\u2500\u2500 <span class="joint">${fdata.sdk}_${j.sdk}</span> [revolute, axis: ${jt}${linkStr}]`);
                 });
+                const tipIndent = sub + '    '.repeat(fdata.joints.length);
+                lines.push(`${tipIndent}\u2514\u2500\u2500 <span class="fixed">${fname}_tip</span> [fixed]`);
+                const coilOff = CONFIG.sensors.coils[fname].offset_mm;
+                lines.push(`${tipIndent}    \u2514\u2500\u2500 <span class="sensor">${CONFIG.sensors.coils[fname].name}</span> [fixed, offset: (${coilOff.join(', ')}) mm]`);
             });
 
             document.getElementById('treeOutput').innerHTML = lines.join('\n');
@@ -1457,15 +1511,14 @@
                 updateMatrixDisplays(fname);
             });
 
-            // Update slider UI (display in degrees)
+            // Update slider UI using cached refs (display in degrees)
             FINGER_ORDER.forEach(fname => {
                 model[fname].joints.forEach((j, ji) => {
                     const angleDeg = j.angle / DEG;
-                    const slider = cardsPanel.querySelector(`input[type=range][data-f="${fname}"][data-j="${ji}"]`);
+                    const slider = sliderRefs[fname]?.[ji];
                     if (slider) slider.value = angleDeg.toFixed(1);
-                    const numInp = cardsPanel.querySelector(`input[data-f="${fname}"][data-j="${ji}"][data-field="angle-num"]`);
+                    const numInp = numInputRefs[fname]?.[ji];
                     if (numInp) numInp.value = angleDeg.toFixed(1);
-                    updateZeroStar(fname, ji);
                 });
             });
         }
@@ -1489,7 +1542,10 @@
 
             controls.update();
             renderer.render(scene, camera);
-            orthoRenderers.forEach((r, i) => r.render(scene, orthoCameras[i]));
+            if (sceneDirty) {
+                orthoRenderers.forEach((r, i) => r.render(scene, orthoCameras[i]));
+                sceneDirty = false;
+            }
         }
         animate();
 
