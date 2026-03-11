@@ -166,6 +166,9 @@
         .jc-unit { color: var(--dim); font-size: 8px; width: 50px }
         .jc-sign { color: #6a8a50; font-size: 8px; margin-top: 1px }
         .jc-slider { width: 68px; accent-color: var(--accent); height: 14px }
+        .jc-zero-star { color: #e8a020; font-size: 11px; font-weight: 700; margin-left: 1px; visibility: hidden }
+        .jc-zero-star.active { visibility: visible }
+        .jc-limit { color: var(--dim); font-size: 7.5px; white-space: nowrap; opacity: 0.7 }
         .jc-desc {
             color: var(--dim); font-size: 8.5px; line-height: 1.4; margin-top: 3px;
             padding: 4px 6px; background: rgba(0,0,0,0.015); border-radius: 4px;
@@ -386,19 +389,24 @@
                     joints: [
                         { index: 0, name: "CMC Rot", nameCN: "腕掌关节 旋转", sdk: "cmc_rot",
                           type: "revolute", axis: [0,0,1], defaultAngle_rad: 0.785,
-                          link_mm: [0,0,0], signConvention: "绕骨轴旋转 (URDF 初始 45°)" },
+                          link_mm: [0,0,0], signConvention: "绕骨轴旋转 (URDF 初始 45°)",
+                          limitLower_rad: -0.1745, limitUpper_rad: 0.8727 },
                         { index: 1, name: "CMC Flex", nameCN: "腕掌关节 屈伸", sdk: "cmc_flex",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲" },
+                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.3491, limitUpper_rad: 0.8727 },
                         { index: 2, name: "CMC Abd", nameCN: "腕掌关节 外展", sdk: "cmc_abd",
                           type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-40.7], signConvention: "0=展开, +=内收" },
+                          link_mm: [0,0,-40.7], signConvention: "0=展开, +=内收",
+                          limitLower_rad: -0.1745, limitUpper_rad: 0.6981 },
                         { index: 3, name: "MCP", nameCN: "掌指关节 屈伸", sdk: "mcp",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-34.6], signConvention: "0=伸直, +=弯曲" },
+                          link_mm: [0,0,-34.6], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.2217 },
                         { index: 4, name: "IP", nameCN: "指间关节 屈伸", sdk: "ip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-33.2], signConvention: "0=伸直, +=弯曲" }
+                          link_mm: [0,0,-33.2], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.3963 }
                     ]
                 },
                 index: {
@@ -409,16 +417,20 @@
                     joints: [
                         { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
                           type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,0], signConvention: "0=中立, +=内收" },
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收",
+                          limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
                         { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-38.7], signConvention: "0=伸直, +=弯曲" },
+                          link_mm: [0,0,-38.7], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
                         { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-26.0], signConvention: "0=伸直, +=弯曲" },
+                          link_mm: [0,0,-26.0], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.7453 },
                         { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-24.1], signConvention: "0=伸直, +=弯曲" }
+                          link_mm: [0,0,-24.1], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.2217 }
                     ]
                 },
                 middle: {
@@ -429,16 +441,20 @@
                     joints: [
                         { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
                           type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,0], signConvention: "0=中立, +=内收" },
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收",
+                          limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
                         { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-42.5], signConvention: "0=伸直, +=弯曲" },
+                          link_mm: [0,0,-42.5], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
                         { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-28.6], signConvention: "0=伸直, +=弯曲" },
+                          link_mm: [0,0,-28.6], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.7453 },
                         { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-25.9], signConvention: "0=伸直, +=弯曲" }
+                          link_mm: [0,0,-25.9], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.2217 }
                     ]
                 },
                 ring: {
@@ -449,16 +465,20 @@
                     joints: [
                         { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
                           type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,0], signConvention: "0=中立, +=内收" },
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收",
+                          limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
                         { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-40.7], signConvention: "0=伸直, +=弯曲" },
+                          link_mm: [0,0,-40.7], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
                         { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-27.3], signConvention: "0=伸直, +=弯曲" },
+                          link_mm: [0,0,-27.3], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.7453 },
                         { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-24.7], signConvention: "0=伸直, +=弯曲" }
+                          link_mm: [0,0,-24.7], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.2217 }
                     ]
                 },
                 pinky: {
@@ -469,16 +489,20 @@
                     joints: [
                         { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
                           type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,0], signConvention: "0=中立, +=内收" },
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收",
+                          limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
                         { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-32.1], signConvention: "0=伸直, +=弯曲" },
+                          link_mm: [0,0,-32.1], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
                         { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-21.5], signConvention: "0=伸直, +=弯曲" },
+                          link_mm: [0,0,-21.5], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.7453 },
                         { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-19.4], signConvention: "0=伸直, +=弯曲" }
+                          link_mm: [0,0,-19.4], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.2217 }
                     ]
                 }
             }
@@ -507,7 +531,9 @@
                     ...j,
                     axis: [...j.axis],
                     link: [...j.link_mm],
-                    angle: j.defaultAngle_rad
+                    angle: j.defaultAngle_rad,
+                    limitLower: j.limitLower_rad ?? -Math.PI,
+                    limitUpper: j.limitUpper_rad ?? Math.PI
                 }))
             };
         }
@@ -988,11 +1014,13 @@
                             <input class="jc-input" value="${j.axis[2]}" data-f="${fname}" data-j="${ji}" data-field="az">
                             <span class="jc-unit">\u03C9 \u2208 {X,Y,Z}</span></div>
                         <div class="jc-row"><span class="jc-label">\u03B8</span>
-                            <input type="range" class="jc-slider" min="-1.57" max="1.57" step="0.01" value="${j.angle}"
+                            <input type="range" class="jc-slider" min="${(j.limitLower / DEG).toFixed(1)}" max="${(j.limitUpper / DEG).toFixed(1)}" step="0.5" value="${(j.angle / DEG).toFixed(1)}"
                                 data-f="${fname}" data-j="${ji}" data-field="angle">
-                            <input class="jc-input" value="${j.angle.toFixed(3)}" data-f="${fname}" data-j="${ji}" data-field="angle-num">
-                            <span class="jc-unit">rad</span></div>
-                        <div class="jc-row"><span class="jc-label">link</span>
+                            <span class="jc-limit">${(j.limitLower / DEG).toFixed(0)}°~${(j.limitUpper / DEG).toFixed(0)}°</span>
+                            <input class="jc-input" value="${(j.angle / DEG).toFixed(1)}" data-f="${fname}" data-j="${ji}" data-field="angle-num">
+                            <span class="jc-unit">deg</span>
+                            <span class="jc-zero-star ${Math.abs(j.angle) < 0.001 ? 'active' : ''}" data-f="${fname}" data-j="${ji}">\u2605 zero</span></div>
+                        <div class="jc-row"><span class="jc-label">link len</span>
                             <input class="jc-input" value="${j.link[0]}" data-f="${fname}" data-j="${ji}" data-field="lx">
                             <input class="jc-input" value="${j.link[1]}" data-f="${fname}" data-j="${ji}" data-field="ly">
                             <input class="jc-input" value="${j.link[2]}" data-f="${fname}" data-j="${ji}" data-field="lz">
@@ -1095,9 +1123,10 @@
             else if (f === 'ly') j.link[1] = v;
             else if (f === 'lz') j.link[2] = v;
             else if (f === 'angle-num') {
-                j.angle = v;
+                j.angle = v * DEG; // input is in degrees, convert to radians
                 const s = cardsPanel.querySelector(`input[type=range][data-f="${fname}"][data-j="${ji}"]`);
                 if (s) s.value = v;
+                updateZeroStar(fname, ji);
             }
             updateChain(fname);
             updateMatrixDisplays(fname);
@@ -1105,12 +1134,21 @@
 
         function handleSlider(e) {
             const el = e.target, fname = el.dataset.f, ji = parseInt(el.dataset.j);
-            const v = parseFloat(el.value);
-            model[fname].joints[ji].angle = v;
+            const vDeg = parseFloat(el.value);
+            model[fname].joints[ji].angle = vDeg * DEG; // slider is in degrees
             const ni = cardsPanel.querySelector(`input[data-f="${fname}"][data-j="${ji}"][data-field="angle-num"]`);
-            if (ni) ni.value = v.toFixed(3);
+            if (ni) ni.value = vDeg.toFixed(1);
             updateChain(fname);
             updateMatrixDisplays(fname);
+            updateZeroStar(fname, ji);
+        }
+
+        function updateZeroStar(fname, ji) {
+            const star = cardsPanel.querySelector(`.jc-zero-star[data-f="${fname}"][data-j="${ji}"]`);
+            if (star) {
+                const isZero = Math.abs(model[fname].joints[ji].angle) < 0.001;
+                star.classList.toggle('active', isZero);
+            }
         }
 
         function updateMatrixDisplays(fname) {
@@ -1278,7 +1316,7 @@
                     <div class="popup-row"><span class="popup-label">\u03C9</span>
                         <span class="popup-val">[${j.axis.join(', ')}] — ${axLabel}</span></div>
                     <div class="popup-row"><span class="popup-label">\u03B8</span>
-                        <span class="popup-val" style="color:${ch};font-weight:600">${j.angle.toFixed(4)} rad (${(j.angle * 180 / Math.PI).toFixed(1)}\u00B0)</span></div>
+                        <span class="popup-val" style="color:${ch};font-weight:600">${(j.angle / DEG).toFixed(1)}\u00B0 (${j.angle.toFixed(4)} rad)</span></div>
                     <div class="popup-row"><span class="popup-label">link</span>
                         <span class="popup-val">[${j.link.map(v=>v.toFixed(1)).join(', ')}] mm  |link|=${linkLen.toFixed(1)}</span></div>
                     <div class="popup-row"><span class="popup-label">sign</span>
@@ -1419,13 +1457,15 @@
                 updateMatrixDisplays(fname);
             });
 
-            // Update slider UI
+            // Update slider UI (display in degrees)
             FINGER_ORDER.forEach(fname => {
                 model[fname].joints.forEach((j, ji) => {
+                    const angleDeg = j.angle / DEG;
                     const slider = cardsPanel.querySelector(`input[type=range][data-f="${fname}"][data-j="${ji}"]`);
-                    if (slider) slider.value = j.angle;
+                    if (slider) slider.value = angleDeg.toFixed(1);
                     const numInp = cardsPanel.querySelector(`input[data-f="${fname}"][data-j="${ji}"][data-field="angle-num"]`);
-                    if (numInp) numInp.value = j.angle.toFixed(3);
+                    if (numInp) numInp.value = angleDeg.toFixed(1);
+                    updateZeroStar(fname, ji);
                 });
             });
         }
