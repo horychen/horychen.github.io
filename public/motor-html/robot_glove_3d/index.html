@@ -281,9 +281,9 @@
         <div class="cards-panel" id="cardsPanel">
             <div class="help-box">
                 <strong>WUJI Glove 110 REP-155</strong><br>
-                <strong style="color:#ff3333">+X</strong> Radial (桡侧/手刀砍你) &middot;
-                <strong style="color:#33cc33">+Y</strong> 右手系 Y=X&times;Z (掌侧/抓你) &middot;
-                <strong style="color:#3388ff">+Z</strong> Proximal (近端/指尖戳你)<br>
+                <strong style="color:#ff3333">-X</strong> Radial (桡侧/手刀砍你) &middot;
+                <strong style="color:#3388ff">-Z</strong> Proximal (近端/指尖戳你) &middot;
+                <strong style="color:#33cc33">+Y</strong> 右手系 Y=X&times;Z (掌侧/抓你) <br>
                 圆柱体 = 旋转关节（轴向=旋转轴）&middot; 单击3D节点弹出信息<br>
                 $T_{i+1} = T_i \cdot R(\hat{\omega}_i, \theta_i) \cdot \text{Trans}(d_x, d_y, d_z)$
             </div>
@@ -293,9 +293,9 @@
             <div class="view-3d">
                 <canvas id="canvas3d"></canvas>
                 <div class="coord-label">
-                    <span style="color:#ff3333">+X</span> Radial &middot;
-                    <span style="color:#33cc33">+Y</span> Right-hand &middot;
-                    <span style="color:#3388ff">+Z</span> Proximal
+                    <span style="color:#ff3333">-X</span> Radial &middot;
+                    <span style="color:#3388ff">-Z</span> Proximal &middot;
+                    <span style="color:#33cc33">+Y</span> Right-hand
                 </div>
                 <div class="hud-bottom">左键旋转 &middot; 右键平移 &middot; 滚轮缩放 &middot; 单击节点弹出信息</div>
             </div>
@@ -304,9 +304,9 @@
                 <div style="font-size:9px;line-height:1.6;color:var(--dim);margin-bottom:6px;padding:4px 8px;
                     background:rgba(0,0,0,0.02);border-radius:4px;border:1px solid rgba(0,0,0,0.04)">
                     <b style="color:var(--text)">XYZ 正方向助记 (右手 REP-155)</b><br>
-                    <span style="color:#e44"><b>X+</b> 手刀砍你</span> (radial/桡侧，拇指方向) &middot;
-                    <span style="color:#48e"><b>Z+</b> 指尖戳你喉咙</span> (proximal/近端，骨骼从远端→近端，-Z=指尖方向) &middot;
-                    <span style="color:#4b4"><b>Y+</b> 抓你</span> (ventral/掌侧，手指弯曲方向，Y=X&times;Z)
+                    <span style="color:#e44"><b>-X</b> 手刀砍你</span> (radial/桡侧，-X=拇指所在方向) &middot;
+                    <span style="color:#48e"><b>-Z</b> 指尖戳你喉咙</span> (proximal/近端，骨骼从远端→近端，-Z=指尖方向) &middot;
+                    <span style="color:#4b4"><b>+Y</b> 抓你</span> (ventral/掌侧，手指弯曲方向，Y=X&times;Z)
                 </div>
                 <div class="tree-pre" id="treeOutput"></div>
             </div>
