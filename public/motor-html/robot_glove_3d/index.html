@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WUJI Glove 110 — 3D 数采手套运动学模型 (REP-155)</title>
+    <title>WUJI Glove 110v11 — 3D 运动学模型 (REP-155)</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
@@ -266,25 +266,30 @@
 <body>
 
     <div class="header">
-        <h1><span>WUJI</span> Glove 110 — 3D 运动学模型 (REP-155)</h1>
+        <h1><span>WUJI</span> Glove 110v11 — 3D 运动学模型 (REP-155)</h1>
         <span class="badge">Three.js</span>
         <span class="badge">REP-155 Z=Proximal</span>
-        <span class="badge">21 DOF + 6 Sensors</span>
+        <span class="badge">20 DOF + 6 Sensors</span>
         <button id="btnAnim" style="margin-left:auto;padding:3px 12px;border-radius:12px;border:1px solid var(--border);
             background:var(--accent);color:#fff;font-size:10px;font-weight:600;cursor:pointer;
             font-family:var(--font);transition:all .15s">
             Stop Animation
+        </button>
+        <button id="btnZero" style="padding:3px 12px;border-radius:12px;border:1px solid var(--border);
+            background:var(--card);color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;
+            font-family:var(--font);transition:all .15s">
+            Reset Zero
         </button>
     </div>
 
     <div class="main">
         <div class="cards-panel" id="cardsPanel">
             <div class="help-box">
-                <strong>WUJI Glove 110 REP-155</strong><br>
+                <strong>WUJI Glove 110v11 REP-155</strong><br>
                 <strong style="color:#ff3333">-X</strong> Radial (桡侧/手刀砍你) &middot;
                 <strong style="color:#3388ff">-Z</strong> Proximal (近端/指尖戳你) &middot;
                 <strong style="color:#33cc33">+Y</strong> 右手系 Y=X&times;Z (掌侧/抓你) <br>
-                圆柱体 = 旋转关节（轴向=旋转轴）&middot; 单击3D节点弹出信息<br>
+                20 DOF + 6 Sensors &middot; 圆柱体 = 旋转关节（轴向=旋转轴）&middot; 单击3D节点弹出信息<br>
                 $T_{i+1} = T_i \cdot R(\hat{\omega}_i, \theta_i) \cdot \text{Trans}(d_x, d_y, d_z)$
             </div>
         </div>
@@ -309,6 +314,77 @@
                     <span style="color:#4b4"><b>+Y</b> 抓你</span> (ventral/掌侧，手指弯曲方向，Y=X&times;Z)
                 </div>
                 <div class="tree-pre" id="treeOutput"></div>
+                <div id="mediapipeSection" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+                    <h3 style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--accent)">MediaPipe Hand Landmarks 对比
+                        <span style="font-weight:400;font-size:9px;color:var(--dim)">(21 landmarks, 纯位置, 无关节角度)</span></h3>
+                    <div class="tree-pre" style="margin-bottom:8px">WRIST (0)
+├── THUMB:  CMC(1) → MCP(2) → IP(3)  → TIP(4)
+├── INDEX:  MCP(5) → PIP(6) → DIP(7) → TIP(8)
+├── MIDDLE: MCP(9) → PIP(10)→ DIP(11)→ TIP(12)
+├── RING:   MCP(13)→ PIP(14)→ DIP(15)→ TIP(16)
+└── PINKY:  MCP(17)→ PIP(18)→ DIP(19)→ TIP(20)</div>
+                    <table style="width:100%;border-collapse:collapse;font-size:9px;line-height:1.5;margin-bottom:6px">
+                        <thead>
+                            <tr style="background:rgba(0,0,0,0.03);text-align:left">
+                                <th style="padding:3px 6px;border:1px solid var(--border);font-weight:600;color:var(--text)">维度</th>
+                                <th style="padding:3px 6px;border:1px solid var(--border);font-weight:600;color:var(--accent)">WG110v11 (本模型)</th>
+                                <th style="padding:3px 6px;border:1px solid var(--border);font-weight:600;color:#5e8bb0">MediaPipe</th>
+                            </tr>
+                        </thead>
+                        <tbody style="color:var(--dim)">
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">输出表征</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">20 个关节角度 (θ)</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">21 个 3D 坐标 (x,y,z)</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">拇指</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">4-DOF: flex+abd+mcp+ip</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">4 landmarks: CMC→MCP→IP→TIP</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">四指</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">4-DOF: flex+abd+pip+dip</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">4 landmarks: MCP→PIP→DIP→TIP</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">Abd/Flex</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">拆为两个串联 revolute</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">不拆分，直接给 MCP 位置</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">掌骨</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">显式建模 (fixed offset)</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">隐含在 WRIST→MCP 连线中</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">传感器</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">EMF 磁传感器</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">RGB 摄像头 + 深度估计</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">坐标系</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">REP-155 (X=radial, Z=prox)</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">图像坐标 / 世界坐标</td></tr>
+                        </tbody>
+                    </table>
+                    <div style="font-size:8.5px;line-height:1.5;color:var(--dim);padding:4px 8px;
+                        background:rgba(94,139,176,0.06);border:1px solid rgba(94,139,176,0.15);border-radius:4px">
+                        <b style="color:var(--text)">从 MediaPipe 驱动 WG110v11</b>：MediaPipe 输出关键点位置，WG110v11 需要关节角度。
+                        桥接两者需要<b style="color:#5e8bb0">逆运动学 (IK) 求解器</b>：给定 21 个 3D 坐标 → 反解 20 个关节角。
+                        MediaPipe 无需处理 abd/flex 拆分歧义，正是因为它只输出位置，不涉及角度分解。
+                    </div>
+                    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
+                        <div style="flex:1;min-width:200px">
+                            <div style="font-size:9px;font-weight:600;color:var(--dim);margin-bottom:4px">MediaPipe Hand Landmarks (21 keypoints)</div>
+                            <img src="https://ai.google.dev/static/mediapipe/images/solutions/hand-landmarks.png"
+                                alt="MediaPipe Hand Landmarks — 21 个关键点编号示意图"
+                                style="width:100%;border-radius:6px;border:1px solid var(--border);background:#fff"
+                                onerror="this.parentElement.innerHTML='<div style=\'padding:12px;background:var(--bg);border:1px dashed var(--border);border-radius:6px;font-size:9px;color:var(--dim);text-align:center\'>MediaPipe 参考图加载失败<br>请访问 <a href=\'https://ai.google.dev/mediapipe/solutions/vision/hand_landmarker\' target=\'_blank\'>Google MediaPipe 文档</a></div>'">
+                            <div style="font-size:8px;color:var(--dim);margin-top:2px;line-height:1.4">
+                                来源: <a href="https://ai.google.dev/mediapipe/solutions/vision/hand_landmarker" target="_blank"
+                                    style="color:#5e8bb0">Google MediaPipe</a> · 绿线 = 骨骼连接 · 红点 = landmark 编号
+                            </div>
+                        </div>
+                        <div style="flex:1;min-width:200px">
+                            <div style="font-size:9px;font-weight:600;color:var(--dim);margin-bottom:4px">手部关节运动方向 (解剖学参考)</div>
+                            <img src="/hand_anatomy_movements.jpg"
+                                alt="手部解剖学运动方向 — Adduction/Abduction, Flexion/Extension, Opposition/Retroposition"
+                                style="width:100%;border-radius:6px;border:1px solid var(--border);background:#fff"
+                                onerror="this.parentElement.innerHTML='<div style=\'padding:12px;background:var(--bg);border:1px dashed var(--border);border-radius:6px;font-size:9px;color:var(--dim);text-align:center\'>解剖学参考图未找到<br>请将图片保存至 <code>assets/hand_anatomy_movements.jpg</code></div>'">
+                            <div style="font-size:8px;color:var(--dim);margin-top:2px;line-height:1.4">
+                                A: Adduction/Abduction (内收/外展) · B: Flexion/Extension (屈伸) · C: Thumb flex/ext · D: Opposition/Retroposition (对掌)
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -345,14 +421,15 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
         // ══════════════════════════════════════════════════════
-        //  EMBEDDED CONFIG (Z-axis corrected for REP-155)
+        //  EMBEDDED CONFIG — WG110v11 (20 DOF, no cmc_rot on thumb)
         //  +Z = proximal (toward wrist), -Z = distal (toward fingertips)
+        //  Four fingers: flex→abd order (MCP Flex first, then MCP Abd)
         // ══════════════════════════════════════════════════════
         const CONFIG = {
             metadata: {
-                name: "WUJI Glove 110",
+                name: "WUJI Glove 110v11",
                 hand: "right",
-                totalDOF: 21,
+                totalDOF: 20,
                 coordinateSystem: {
                     standard: "REP-155",
                     X: "radial (桡侧)",
@@ -385,25 +462,21 @@
                     label: { en: "Thumb", zh: "拇指" },
                     sdk: "thumb",
                     color: 0xc47272,
-                    palmOffset: { position_mm: [33, 36, -24], rotationEulerDeg: [0, 65, 0] },
+                    palmOffset: { position_mm: [33, 36, -24], rotationEulerDeg: [0, -45, 45] },
                     joints: [
-                        { index: 0, name: "CMC Rot", nameCN: "腕掌关节 旋转", sdk: "cmc_rot",
-                          type: "revolute", axis: [0,0,1], defaultAngle_rad: 0.785,
-                          link_mm: [0,0,0], signConvention: "绕骨轴旋转 (URDF 初始 45°)",
-                          limitLower_rad: -0.1745, limitUpper_rad: 0.8727 },
-                        { index: 1, name: "CMC Flex", nameCN: "腕掌关节 屈伸", sdk: "cmc_flex",
+                        { index: 0, name: "CMC Flex", nameCN: "腕掌关节 屈伸", sdk: "cmc_flex",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
                           link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲",
-                          limitLower_rad: -0.3491, limitUpper_rad: 0.8727 },
-                        { index: 2, name: "CMC Abd", nameCN: "腕掌关节 外展", sdk: "cmc_abd",
+                          limitLower_rad: -0.8791, limitUpper_rad: 0.8727 },
+                        { index: 1, name: "CMC Abd", nameCN: "腕掌关节 外展", sdk: "cmc_abd",
                           type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
                           link_mm: [0,0,-40.7], signConvention: "0=展开, +=内收",
-                          limitLower_rad: -0.1745, limitUpper_rad: 0.6981 },
-                        { index: 3, name: "MCP", nameCN: "掌指关节 屈伸", sdk: "mcp",
+                          limitLower_rad: -0.7045, limitUpper_rad: 0.6981 },
+                        { index: 2, name: "MCP", nameCN: "掌指关节 屈伸", sdk: "mcp",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
                           link_mm: [0,0,-34.6], signConvention: "0=伸直, +=弯曲",
                           limitLower_rad: 0, limitUpper_rad: 1.2217 },
-                        { index: 4, name: "IP", nameCN: "指间关节 屈伸", sdk: "ip",
+                        { index: 3, name: "IP", nameCN: "指间关节 屈伸", sdk: "ip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
                           link_mm: [0,0,-33.2], signConvention: "0=伸直, +=弯曲",
                           limitLower_rad: 0, limitUpper_rad: 1.3963 }
@@ -413,19 +486,19 @@
                     label: { en: "Index", zh: "食指" },
                     sdk: "index_finger",
                     color: 0xc49a6e,
-                    palmOffset: { position_mm: [32, 11, -88], rotationEulerDeg: [0,0,0] },
+                    palmOffset: { position_mm: [32, 0, -88], rotationEulerDeg: [0,0,0] },
                     joints: [
-                        { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                        { index: 0, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { index: 1, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
                           type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
                           link_mm: [0,0,0], signConvention: "0=中立, +=内收",
                           limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
-                        { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
-                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-38.7], signConvention: "0=伸直, +=弯曲",
-                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
                         { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-26.0], signConvention: "0=伸直, +=弯曲",
+                          link_mm: [0,0,-38.7], signConvention: "0=伸直, +=弯曲",
                           limitLower_rad: 0, limitUpper_rad: 1.7453 },
                         { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
@@ -437,23 +510,23 @@
                     label: { en: "Middle", zh: "中指" },
                     sdk: "middle_finger",
                     color: 0x7ea86e,
-                    palmOffset: { position_mm: [14, 2, -95], rotationEulerDeg: [0,0,0] },
+                    palmOffset: { position_mm: [14, 0, -95], rotationEulerDeg: [0,0,0] },
                     joints: [
-                        { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                        { index: 0, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { index: 1, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
                           type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
                           link_mm: [0,0,0], signConvention: "0=中立, +=内收",
                           limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
-                        { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
-                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-42.5], signConvention: "0=伸直, +=弯曲",
-                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
                         { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-28.6], signConvention: "0=伸直, +=弯曲",
+                          link_mm: [0,0,-42.5], signConvention: "0=伸直, +=弯曲",
                           limitLower_rad: 0, limitUpper_rad: 1.7453 },
                         { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-25.9], signConvention: "0=伸直, +=弯曲",
+                          link_mm: [0,0,-28.6], signConvention: "0=伸直, +=弯曲",
                           limitLower_rad: 0, limitUpper_rad: 1.2217 }
                     ]
                 },
@@ -461,23 +534,23 @@
                     label: { en: "Ring", zh: "无名指" },
                     sdk: "ring_finger",
                     color: 0x5e8bb0,
-                    palmOffset: { position_mm: [-7, 5, -82], rotationEulerDeg: [0,0,0] },
+                    palmOffset: { position_mm: [-7, 0, -82], rotationEulerDeg: [0,0,0] },
                     joints: [
-                        { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                        { index: 0, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { index: 1, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
                           type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
                           link_mm: [0,0,0], signConvention: "0=中立, +=内收",
                           limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
-                        { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
-                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-40.7], signConvention: "0=伸直, +=弯曲",
-                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
                         { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-27.3], signConvention: "0=伸直, +=弯曲",
+                          link_mm: [0,0,-40.7], signConvention: "0=伸直, +=弯曲",
                           limitLower_rad: 0, limitUpper_rad: 1.7453 },
                         { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-24.7], signConvention: "0=伸直, +=弯曲",
+                          link_mm: [0,0,-27.3], signConvention: "0=伸直, +=弯曲",
                           limitLower_rad: 0, limitUpper_rad: 1.2217 }
                     ]
                 },
@@ -485,23 +558,23 @@
                     label: { en: "Pinky", zh: "小指" },
                     sdk: "pinky",
                     color: 0x8a6aaa,
-                    palmOffset: { position_mm: [-23, 21, -69], rotationEulerDeg: [0,0,0] },
+                    palmOffset: { position_mm: [-23, 0, -69], rotationEulerDeg: [0,0,0] },
                     joints: [
-                        { index: 0, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                        { index: 0, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { index: 1, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
                           type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
                           link_mm: [0,0,0], signConvention: "0=中立, +=内收",
                           limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
-                        { index: 1, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
-                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-32.1], signConvention: "0=伸直, +=弯曲",
-                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
                         { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-21.5], signConvention: "0=伸直, +=弯曲",
+                          link_mm: [0,0,-32.1], signConvention: "0=伸直, +=弯曲",
                           limitLower_rad: 0, limitUpper_rad: 1.7453 },
                         { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
                           type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
-                          link_mm: [0,0,-19.4], signConvention: "0=伸直, +=弯曲",
+                          link_mm: [0,0,-21.5], signConvention: "0=伸直, +=弯曲",
                           limitLower_rad: 0, limitUpper_rad: 1.2217 }
                     ]
                 }
@@ -514,6 +587,10 @@
         const DEG = Math.PI / 180;
         const FINGER_ORDER = ['thumb', 'index', 'middle', 'ring', 'pinky'];
         const BG_COLOR = 0xf7f5f2;
+
+        // Global joint ID offset per finger: thumb=0(4), index=4(4), middle=8(4), ring=12(4), pinky=16(4) → 20 DOF
+        const FINGER_GLOBAL_ID_OFFSET = { thumb: 0, index: 4, middle: 8, ring: 12, pinky: 16 };
+        function globalJointId(fname, ji) { return FINGER_GLOBAL_ID_OFFSET[fname] + ji; }
 
         // Deep clone config fingers into a mutable model with runtime angles
         const model = {};
@@ -542,21 +619,7 @@
         //  MATRIX MATH UTILITIES
         // ══════════════════════════════════════════════════════
 
-        // Build 4x4 homogeneous transform from axis-angle rotation + translation
-        // T = R(omega, theta) * Trans(d) = [R  R*d; 0 1]
-        // But in our scene graph, child.position = d is in the rotated frame,
-        // so T_local = [R d; 0 1] where d is the link in the rotated frame.
-        // Actually: pivot rotates, child translates in rotated frame:
-        // T = [R 0;0 1] * [I d;0 1] = [R R*d;0 1] ... no.
-        // Three.js: child world = parent * rotation * translation
-        // The 4x4 from parent to child frame origin is: [R d; 0 1]
-        // where d is child.position (in pivot's local=rotated frame).
-        // The position in parent frame: p = R * d (not d itself).
-        // For the matrix card we show T_local = [R  d_parent; 0 1]
-        // where d_parent = R * link (link in rotated frame → parent frame)
-
         function rodrigues(omega, theta) {
-            // Returns 3x3 rotation matrix as flat array [row-major]
             const c = Math.cos(theta), s = Math.sin(theta), t = 1 - c;
             const [x, y, z] = omega;
             return [
@@ -575,10 +638,8 @@
         }
 
         function buildLocalT(axis, angle, link) {
-            // axis: unit vector [3], angle: scalar, link: [3] in rotated frame
-            // Returns 4x4 row-major flat array
             const R = rodrigues(axis, angle);
-            const p = mat3mulVec(R, link); // translate link from rotated→parent
+            const p = mat3mulVec(R, link);
             return [
                 R[0], R[1], R[2], p[0],
                 R[3], R[4], R[5], p[1],
@@ -587,8 +648,6 @@
             ];
         }
 
-        // se(3) logarithm: extract 6-vector from 4x4 T = [R p; 0 1]
-        // Returns [omega_x*theta, omega_y*theta, omega_z*theta, v_x, v_y, v_z]
         function se3Log(T) {
             const R = [T[0], T[1], T[2], T[4], T[5], T[6], T[8], T[9], T[10]];
             const p = [T[3], T[7], T[11]];
@@ -597,34 +656,28 @@
             const ct = Math.max(-1, Math.min(1, (tr - 1) / 2));
 
             if (ct > 0.9999) {
-                // theta ~ 0, log is pure translation
                 return [0, 0, 0, p[0], p[1], p[2]];
             }
 
             const theta = Math.acos(ct);
             const sth = Math.sin(theta);
 
-            // omega from skew(R - R^T) / (2 sin theta)
             const w = [
-                (R[5] - R[7]) / (2 * sth),  // R[1][2] - R[2][1]
-                (R[6] - R[2]) / (2 * sth),  // R[2][0] - R[0][2]
-                (R[1] - R[3]) / (2 * sth)   // R[0][1] - R[1][0]
+                (R[5] - R[7]) / (2 * sth),
+                (R[6] - R[2]) / (2 * sth),
+                (R[1] - R[3]) / (2 * sth)
             ];
 
-            // G^{-1} = I/theta - [w]x/2 + (1/theta - 1/(2*tan(theta/2))) [w]x^2
             const a = 1 / theta;
             const b = 1 / (2 * Math.tan(theta / 2));
             const c = a - b;
 
-            // [w]x^2 = w*w^T - I  (since |w|=1)
             const ww = [
                 w[0]*w[0]-1, w[0]*w[1],   w[0]*w[2],
                 w[1]*w[0],   w[1]*w[1]-1, w[1]*w[2],
                 w[2]*w[0],   w[2]*w[1],   w[2]*w[2]-1
             ];
 
-            // G^{-1} = a*I + (-1/2)*[w]x + c*[w]x^2
-            // [w]x = [[0,-wz,wy],[wz,0,-wx],[-wy,wx,0]]
             const Gi = [
                 a + c*ww[0],         w[2]/2 + c*ww[1],  -w[1]/2 + c*ww[2],
                 -w[2]/2 + c*ww[3],   a + c*ww[4],        w[0]/2 + c*ww[5],
@@ -687,13 +740,10 @@
         const orthoCanvasIds = ['cvFront', 'cvTop', 'cvSide'];
         const orthoSize = 140;
         const center3D = new THREE.Vector3(0, 10, -55);
-        // Front: look along +Z (from -Z side toward +Z, seeing X-Y plane)
-        // Top: look along -Y (from above, seeing X-Z plane)
-        // Side: look along +X (from -X side, seeing Y-Z plane)
         const orthoViews = [
-            { dir: [0, 0, 1], up: [0, 1, 0] },   // Front X-Y, look along +Z (toward proximal)
-            { dir: [0, -1, 0], up: [0, 0, 1] },   // Top X-Z, look from above
-            { dir: [1, 0, 0], up: [0, 1, 0] }     // Side Y-Z, look along +X
+            { dir: [0, 0, 1], up: [0, 1, 0] },
+            { dir: [0, -1, 0], up: [0, 0, 1] },
+            { dir: [1, 0, 0], up: [0, 1, 0] }
         ];
         orthoCanvasIds.forEach((cid, i) => {
             const cv = document.getElementById(cid);
@@ -752,20 +802,16 @@
         function createJointMesh(color, axis, fingerName, jointIdx) {
             const g = new THREE.Group();
             const cyl = new THREE.Mesh(new THREE.CylinderGeometry(JR, JR, JH, 20), metalMat(color, 0.35));
-            // Orient cylinder along rotation axis
             const ax = Math.abs(axis[0]) > 0.5, ay = Math.abs(axis[1]) > 0.5;
             if (ax) cyl.rotation.z = Math.PI / 2;
-            else if (!ay) cyl.rotation.x = Math.PI / 2; // Z axis
+            else if (!ay) cyl.rotation.x = Math.PI / 2;
             cyl.castShadow = true;
-            // Tag for raycasting
             cyl.userData = { clickable: true, type: 'joint', finger: fingerName, jointIdx };
             g.add(cyl);
-            // Center dot
             const dot = new THREE.Mesh(new THREE.SphereGeometry(1.2, 10, 10),
                 new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.5 }));
             dot.userData = { clickable: true, type: 'joint', finger: fingerName, jointIdx };
             g.add(dot);
-            // Local axes (12mm arrows)
             g.add(createAxes(12));
             return g;
         }
@@ -781,6 +827,61 @@
             return m;
         }
 
+        // Thenar eminence (大鱼际): fleshy mound wrapping thumb CMC Abd link (第一掌骨)
+        function createThenarMesh(lv) {
+            const len = lv.length();
+            if (len < 0.5) return null;
+
+            const g = new THREE.Group();
+
+            const inner = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.0, 1.0, len, 8),
+                new THREE.MeshStandardMaterial({ color: 0xc47272, metalness: 0.4, roughness: 0.45, transparent: true, opacity: 0.6 }));
+            inner.castShadow = false;
+            g.add(inner);
+
+            const pts = [];
+            const N = 20;
+            for (let i = 0; i <= N; i++) {
+                const t = i / N;
+                const bulge = Math.sin(Math.PI * (t * 0.85 + 0.08));
+                const taper = 1.15 - 0.5 * t;
+                const r = 7.5 * bulge * taper;
+                pts.push(new THREE.Vector2(Math.max(r, 0.3), (t - 0.5) * len));
+            }
+            const fleshGeo = new THREE.LatheGeometry(pts, 14);
+            const fleshMat = new THREE.MeshPhysicalMaterial({
+                color: 0xe8b8a0,
+                metalness: 0.02,
+                roughness: 0.85,
+                transparent: true,
+                opacity: 0.35,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            const flesh = new THREE.Mesh(fleshGeo, fleshMat);
+            g.add(flesh);
+
+            const labelCanvas = document.createElement('canvas');
+            labelCanvas.width = 128; labelCanvas.height = 40;
+            const ctx = labelCanvas.getContext('2d');
+            ctx.font = '600 22px Inter, system-ui, sans-serif';
+            ctx.fillStyle = '#c47272';
+            ctx.textAlign = 'center';
+            ctx.fillText('大鱼际', 64, 26);
+            const labelTex = new THREE.CanvasTexture(labelCanvas);
+            const labelMat = new THREE.SpriteMaterial({ map: labelTex, depthTest: false, transparent: true, opacity: 0.8 });
+            const label = new THREE.Sprite(labelMat);
+            label.scale.set(16, 5, 1);
+            label.position.set(8, 0, 0);
+            g.add(label);
+
+            g.position.copy(lv.clone().multiplyScalar(0.5));
+            const up = new THREE.Vector3(0, 1, 0), dir = lv.clone().normalize();
+            if (Math.abs(up.dot(dir)) < 0.999) g.quaternion.setFromUnitVectors(up, dir);
+            return g;
+        }
+
         function disposeMesh(mesh) {
             if (!mesh) return;
             if (mesh.geometry) mesh.geometry.dispose();
@@ -794,10 +895,12 @@
             const j = fdata.joints[ji];
             if (node.bone) {
                 node.pivot.remove(node.bone);
-                disposeMesh(node.bone);
+                if (node.bone.isGroup) {
+                    node.bone.traverse(c => { if (c.isMesh) disposeMesh(c); });
+                } else { disposeMesh(node.bone); }
             }
             const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
-            const nb = createBone(lv, fdata.color);
+            const nb = node.isThenar ? createThenarMesh(lv) : createBone(lv, fdata.color);
             node.boneBaseLen = lv.length();
             if (nb) { node.pivot.add(nb); node.bone = nb; }
             else { node.bone = null; }
@@ -826,16 +929,13 @@
         // ══════════════════════════════════════════════════════
         //  BUILD FINGER CHAINS
         // ══════════════════════════════════════════════════════
-        // Reusable temp objects (avoid per-frame allocations)
         const _vec3A = new THREE.Vector3();
         const _vec3B = new THREE.Vector3();
         const _quatA = new THREE.Quaternion();
-        let sceneDirty = true;  // ortho views only render when dirty
+        let sceneDirty = true;
 
         const fingerObjects = {};
-        // Store local transforms for each joint (4x4 row-major)
         const jointLocalT = {};
-        // Store spatial vectors for each joint
         const jointSpatialVec = {};
 
         function buildFingerChain(fname) {
@@ -859,30 +959,28 @@
                 pivot.add(child);
 
                 const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
-                const bone = createBone(lv, fdata.color);
+                const isThenar = (fname === 'thumb' && ji === 1); // CMC Abd = 大鱼际 (index 1 in WG110v11)
+                const bone = isThenar ? createThenarMesh(lv) : createBone(lv, fdata.color);
                 const boneBaseLen = lv.length();
                 if (bone) pivot.add(bone);
 
-                chainNodes.push({ pivot, child, bone, boneBaseLen });
+                chainNodes.push({ pivot, child, bone, boneBaseLen, isThenar });
                 parentObj = child;
             });
 
             // Fingertip with nail
-            // Tip pad (slightly flattened sphere)
             const tipMesh = new THREE.Mesh(
                 new THREE.SphereGeometry(2.5, 14, 14),
                 new THREE.MeshPhysicalMaterial({
                     color: CONFIG.colors.tip, emissive: CONFIG.colors.tip, emissiveIntensity: 0.15,
                     metalness: 0.3, roughness: 0.3
                 }));
-            tipMesh.scale.set(1, 0.7, 1); // flatten slightly in Y
+            tipMesh.scale.set(1, 0.7, 1);
             tipMesh.userData = { clickable: true, type: 'tip', finger: fname };
             parentObj.add(tipMesh);
 
-            // Fingernail: flat rounded plate on dorsal side (-Y for right hand)
-            // Nail sits on top of the fingertip pad, oriented along the bone (-Z distal)
             const nailShape = new THREE.Shape();
-            const nw = 2.8, nl = 4.5, nr = 1.2;  // width, length, corner radius
+            const nw = 2.8, nl = 4.5, nr = 1.2;
             nailShape.moveTo(-nw + nr, -nl);
             nailShape.lineTo(nw - nr, -nl);
             nailShape.quadraticCurveTo(nw, -nl, nw, -nl + nr);
@@ -898,16 +996,13 @@
                     color: 0xf0d0c0, metalness: 0.1, roughness: 0.3,
                     clearcoat: 0.8, clearcoatRoughness: 0.2
                 }));
-            // Position: on dorsal side (-Y), rotated to lie flat on fingertip
-            // Nail surface faces -Y (dorsal), nail extends along -Z (distal)
             nailMesh.rotation.x = -Math.PI / 2;
-            nailMesh.position.set(0, -2, 0); // dorsal side
+            nailMesh.position.set(0, -2, 0);
             nailMesh.userData = { clickable: true, type: 'tip', finger: fname };
             parentObj.add(nailMesh);
 
-            // Coil above the nail (further dorsal, i.e. more -Y)
             const coil = createCoil();
-            coil.position.set(0, -5, 0); // above nail on dorsal side
+            coil.position.set(0, -5, 0);
             coil.children.forEach(c => {
                 if (c.isMesh) c.userData = { clickable: true, type: 'coil', finger: fname };
             });
@@ -916,7 +1011,6 @@
             scene.add(group);
             fingerObjects[fname] = { group, chainNodes, tipParent: parentObj };
 
-            // Initialize transform storage
             jointLocalT[fname] = [];
             jointSpatialVec[fname] = [];
         }
@@ -939,9 +1033,6 @@
 
                 node.child.position.set(j.link[0], j.link[1], j.link[2]);
 
-                // Bone transform is set at build time; only rebuilt on link change (see rebuildBone)
-
-                // Compute local transform matrix
                 const normAxis = [_vec3A.x, _vec3A.y, _vec3A.z];
                 const T = buildLocalT(normAxis, j.angle, j.link);
                 jointLocalT[fname][ji] = T;
@@ -955,23 +1046,23 @@
         scene.add(wristMesh);
         scene.add(createAxes(24));
 
-        // EMF Sensor Base — dorsal side of wrist (right hand: -Y = dorsal/手背)
+        // EMF Sensor Base
         const sensorBase = createSensorBase();
-        // Override config offset: place on dorsal side (-Y), slightly proximal (+Z)
         sensorBase.position.set(0, -12, 5);
-        sensorBase.rotation.x = Math.PI; // flip so antenna points -Y (dorsal/away from palm)
+        sensorBase.rotation.x = Math.PI;
         sensorBase.children.forEach(c => {
             if (c.isMesh) c.userData = { clickable: true, type: 'emfBase' };
         });
         scene.add(sensorBase);
 
-        // Black metacarpal links (wrist → each finger root)
+        // Metacarpal links
         const metacarpalMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.2, roughness: 0.6 });
         FINGER_ORDER.forEach(fname => {
             const po = model[fname].palmOffset;
             const target = new THREE.Vector3(po.pos[0], po.pos[1], po.pos[2]);
             const len = target.length();
             if (len < 0.5) return;
+
             const bone = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, len, 8), metacarpalMat);
             bone.position.copy(target.clone().multiplyScalar(0.5));
             const up = new THREE.Vector3(0, 1, 0), dir = target.clone().normalize();
@@ -985,10 +1076,8 @@
         // ══════════════════════════════════════════════════════
         const cardsPanel = document.getElementById('cardsPanel');
 
-        // Map of matrix display elements for live update
         const matrixDisplays = {};
         const spatialDisplays = {};
-        // Cached slider/input refs for animation (avoid querySelector per frame)
         const sliderRefs = {};
         const numInputRefs = {};
 
@@ -1051,7 +1140,7 @@
 
                     c.innerHTML = `
                         <div class="jc-header">
-                            <span class="jc-name">J${ji + 1} ${j.name}</span>
+                            <span class="jc-name">(J${globalJointId(fname, ji)}) ${j.name}</span>
                             <span class="jc-cn">${j.nameCN}</span>
                             <span class="jc-badge" style="background:${bc}18;color:${bc}">${bt}</span>
                             <span class="jc-sdk">${fdata.sdk}_${j.sdk}</span>
@@ -1090,11 +1179,9 @@
                         </div>`;
 
                     body.appendChild(c);
-                    // Cache slider and numInput refs for animation perf
                     if (!sliderRefs[fname]) { sliderRefs[fname] = []; numInputRefs[fname] = []; }
                     sliderRefs[fname][ji] = c.querySelector('input[type=range]');
                     numInputRefs[fname][ji] = c.querySelector('input[data-field="angle-num"]');
-                    // Store element references after append
                     setTimeout(() => {
                         matrixDisplays[fname][ji] = document.getElementById(matId);
                         spatialDisplays[fname][ji] = document.getElementById(svId);
@@ -1132,7 +1219,7 @@
                 </div>`;
             cardsPanel.appendChild(sbs);
 
-            // Event handlers for inputs
+            // Event handlers
             cardsPanel.querySelectorAll('.jc-input').forEach(inp => {
                 inp.addEventListener('change', handleInput);
                 inp.addEventListener('input', handleInput);
@@ -1140,7 +1227,6 @@
             cardsPanel.querySelectorAll('.jc-slider').forEach(s => {
                 s.addEventListener('input', handleSlider);
             });
-            // Matrix toggle handlers
             cardsPanel.querySelectorAll('.jc-matrix-toggle').forEach(t => {
                 t.addEventListener('click', () => {
                     const target = document.getElementById(t.dataset.target);
@@ -1175,7 +1261,7 @@
             else if (f === 'ly') { j.link[1] = v; rebuildBone(fname, ji); }
             else if (f === 'lz') { j.link[2] = v; rebuildBone(fname, ji); }
             else if (f === 'angle-num') {
-                j.angle = v * DEG; // input is in degrees, convert to radians
+                j.angle = v * DEG;
                 const s = cardsPanel.querySelector(`input[type=range][data-f="${fname}"][data-j="${ji}"]`);
                 if (s) s.value = v;
                 updateZeroStar(fname, ji);
@@ -1187,7 +1273,7 @@
         function handleSlider(e) {
             const el = e.target, fname = el.dataset.f, ji = parseInt(el.dataset.j);
             const vDeg = parseFloat(el.value);
-            model[fname].joints[ji].angle = vDeg * DEG; // slider is in degrees
+            model[fname].joints[ji].angle = vDeg * DEG;
             const ni = cardsPanel.querySelector(`input[data-f="${fname}"][data-j="${ji}"][data-field="angle-num"]`);
             if (ni) ni.value = vDeg.toFixed(1);
             updateChain(fname);
@@ -1210,7 +1296,6 @@
                 const svEl = spatialDisplays[fname]?.[ji];
                 if (!matEl || !svEl) return;
 
-                // Skip update if matrix panel is collapsed (avoid unnecessary DOM writes)
                 const matBody = matEl.closest('.jc-matrix-body');
                 if (matBody && !matBody.classList.contains('open')) return;
 
@@ -1235,12 +1320,14 @@
         // ══════════════════════════════════════════════════════
         function buildTreeText() {
             const lines = [];
-            // Axis semantics verification header
+            const cmt = (s) => `<span style="color:#9a9080;font-style:italic">  # ${s}</span>`;
+
             lines.push('<span style="color:var(--dim);font-size:9px">flex(X): +\u03B8 curl toward palm(+Y) \u2714  abd(Y): +\u03B8 adduction \u2714  link(-Z): distal toward fingertip \u2714</span>');
             lines.push('');
-            lines.push('<span class="fixed">wrist</span> (root)');
+            lines.push('<span class="fixed">wrist</span> (root)' + cmt('\u8FD0\u52A8\u5B66\u6811\u7684\u6839\u8282\u70B9\uFF0C\u5168\u5C40\u539F\u70B9\uFF0C\u6240\u6709\u5750\u6807\u7684\u53C2\u8003\u7CFB'));
             lines.push('\u251C\u2500\u2500 <span class="sensor">emf_sensor_base</span> [fixed, offset: (' +
-                CONFIG.sensors.emfBase.offset_mm.join(', ') + ') mm]');
+                CONFIG.sensors.emfBase.offset_mm.join(', ') + ') mm]' +
+                cmt('fixed = \u56FA\u5B9A\u8FDE\u63A5\uFF0C\u65E0\u81EA\u7531\u5EA6\uFF1Boffset = \u76F8\u5BF9\u7236\u8282\u70B9\u7684\u56FA\u5B9A\u504F\u79FB'));
 
             const fingerLabels = {
                 thumb: '\u62C7\u6307', index: '\u98DF\u6307', middle: '\u4E2D\u6307',
@@ -1248,25 +1335,99 @@
             };
             const lastFinger = FINGER_ORDER[FINGER_ORDER.length - 1];
 
+            let explained = {
+                metacarpal: false,
+                revolute: false,
+                axis: false,
+                coLocated: false,
+                coLocated2: false,
+                link: false,
+                linkVec: false,
+                tip: false,
+                coil: false,
+                limitRange: false,
+                childInherit: false,
+                dof: false,
+            };
+
             FINGER_ORDER.forEach(fname => {
                 const fdata = model[fname];
                 const isLast = fname === lastFinger;
                 const prefix = isLast ? '\u2514\u2500\u2500 ' : '\u251C\u2500\u2500 ';
                 const sub = isLast ? '    ' : '\u2502   ';
                 const po = fdata.palmOffset;
-                lines.push(`${prefix}<span class="fixed">${fname}_metacarpal</span> [fixed, pos: (${po.pos.join(', ')}) mm] ${fingerLabels[fname]}`);
+                let metacarpalCmt = '';
+                if (!explained.metacarpal) {
+                    metacarpalCmt = cmt('pos = wrist\u21923D\u7A7A\u95F4\u4E2D\u6307\u6839\u7684\u56FA\u5B9A\u504F\u79FB\uFF0C\u5373\u638C\u9AA8\u7684\u51E0\u4F55\u5C3A\u5BF8');
+                    explained.metacarpal = true;
+                }
+                lines.push(`${prefix}<span class="fixed">${fname}_metacarpal</span> [fixed, pos: (${po.pos.join(', ')}) mm] ${fingerLabels[fname]}${metacarpalCmt}`);
 
                 fdata.joints.forEach((j, ji) => {
                     const indent = sub + '    '.repeat(ji);
                     const jt = Math.abs(j.axis[2]) > 0.5 ? 'Z' : (Math.abs(j.axis[1]) > 0.5 ? 'Y' : 'X');
-                    const linkStr = j.link.some(v => v !== 0) ? `, link: (${j.link.join(', ')}) mm` : ', co-located';
-                    lines.push(`${indent}\u2514\u2500\u2500 <span class="joint">${fdata.sdk}_${j.sdk}</span> [revolute, axis: ${jt}${linkStr}]`);
+                    const isCoLocated = !j.link.some(v => v !== 0);
+                    const linkStr = isCoLocated ? ', co-located' : `, link: (${j.link.join(', ')}) mm`;
+
+                    let annotation = '';
+                    if (!explained.revolute) {
+                        annotation = cmt('revolute = \u65CB\u8F6C\u5173\u8282\uFF0C\u6709 1 \u4E2A\u65CB\u8F6C\u81EA\u7531\u5EA6\uFF0C\u7ED5 axis \u6307\u5B9A\u7684\u8F74\u65CB\u8F6C');
+                        explained.revolute = true;
+                    } else if (!explained.axis && jt !== 'Z') {
+                        annotation = cmt(`axis = \u65CB\u8F6C\u8F74\u5728\u5F53\u524D\u8282\u70B9\u5C40\u90E8\u5750\u6807\u7CFB\u7684\u65B9\u5411\uFF1B${jt}=flex \u5373\u5C48\u4F38`);
+                        explained.axis = true;
+                    } else if (isCoLocated && !explained.coLocated) {
+                        annotation = cmt('co-located = \u4E0E\u7236\u8282\u70B9\u4F4D\u7F6E\u91CD\u5408\uFF0C\u4E0D\u4EA7\u751F\u4F4D\u79FB\uFF0C\u4EC5\u589E\u52A0\u4E00\u4E2A\u65CB\u8F6C\u81EA\u7531\u5EA6');
+                        explained.coLocated = true;
+                    } else if (isCoLocated && !explained.coLocated2) {
+                        annotation = cmt('\u591A\u4E2A co-located \u5173\u8282\u53E0\u52A0 = \u4E00\u4E2A\u7403\u5173\u8282\u7684\u5206\u89E3\uFF0C\u6BCF\u4E2A\u63A7\u5236\u4E00\u4E2A\u8F74\u7684\u65CB\u8F6C');
+                        explained.coLocated2 = true;
+                    } else if (!isCoLocated && !explained.link) {
+                        annotation = cmt('link = \u5F53\u524D\u5173\u8282\u76F8\u5BF9\u7236\u5173\u8282\u7684\u4F4D\u79FB\u77E2\u91CF\uFF0C\u5373\u9AA8\u9ABC\u957F\u5EA6\u548C\u65B9\u5411');
+                        explained.link = true;
+                    } else if (!isCoLocated && !explained.linkVec) {
+                        annotation = cmt('link \u5728\u7236\u5173\u8282\u65CB\u8F6C\u540E\u7684\u5750\u6807\u7CFB\u4E0B\u5EA6\u91CF\uFF1B-Z \u65B9\u5411\u8868\u793A\u6307\u5411\u6307\u5C16');
+                        explained.linkVec = true;
+                    } else if (!explained.limitRange) {
+                        const lo = (j.limitLower / DEG).toFixed(0);
+                        const hi = (j.limitUpper / DEG).toFixed(0);
+                        annotation = cmt(`\u6BCF\u4E2A\u5173\u8282\u6709\u89D2\u5EA6\u9650\u4F4D\uFF0C\u6B64\u5173\u8282\u8303\u56F4 ${lo}\u00B0~${hi}\u00B0`);
+                        explained.limitRange = true;
+                    } else if (!explained.childInherit) {
+                        annotation = cmt('\u5B50\u8282\u70B9\u7EE7\u627F\u7236\u8282\u70B9\u7684\u53D8\u6362\uFF1AT_global = T_parent \u00B7 T_local');
+                        explained.childInherit = true;
+                    } else if (!explained.dof) {
+                        annotation = cmt('\u56DB\u6307\u5404 4-DOF (1 abd + 3 flex)\uFF0C\u62C7\u6307 4-DOF (2 flex + 1 abd + 1 flex)\uFF0C\u5171 20-DOF');
+                        explained.dof = true;
+                    }
+
+                    lines.push(`${indent}\u2514\u2500\u2500 <span class="joint">(J${globalJointId(fname, ji)}) ${fdata.sdk}_${j.sdk}</span> [revolute, axis: ${jt}${linkStr}]${annotation}`);
                 });
                 const tipIndent = sub + '    '.repeat(fdata.joints.length);
-                lines.push(`${tipIndent}\u2514\u2500\u2500 <span class="fixed">${fname}_tip</span> [fixed]`);
+                let tipCmt = '';
+                if (!explained.tip) {
+                    tipCmt = cmt('\u6307\u5C16\u662F\u672B\u7AEF\u6267\u884C\u5668 (end-effector)\uFF0C\u65E0\u81EA\u7531\u5EA6');
+                    explained.tip = true;
+                }
+                lines.push(`${tipIndent}\u2514\u2500\u2500 <span class="fixed">${fname}_tip</span> [fixed]${tipCmt}`);
                 const coilOff = CONFIG.sensors.coils[fname].offset_mm;
-                lines.push(`${tipIndent}    \u2514\u2500\u2500 <span class="sensor">${CONFIG.sensors.coils[fname].name}</span> [fixed, offset: (${coilOff.join(', ')}) mm]`);
+                let coilCmt = '';
+                if (!explained.coil) {
+                    coilCmt = cmt('EMF \u7EBF\u5708\u56FA\u5B9A\u5728\u6307\u7532\u4E0A\uFF0C\u968F\u6307\u5C16\u8FD0\u52A8\uFF0C\u7528\u4E8E\u78C1\u5B9A\u4F4D');
+                    explained.coil = true;
+                }
+                lines.push(`${tipIndent}    \u2514\u2500\u2500 <span class="sensor">${CONFIG.sensors.coils[fname].name}</span> [fixed, offset: (${coilOff.join(', ')}) mm]${coilCmt}`);
             });
+
+            // Annotations
+            lines.push('');
+            lines.push('<span style="color:var(--dim);font-size:9px">\u6CE8:</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">[1] thumb_mcp / thumb_ip \u662F thumb_mcp_flex / thumb_ip_flex \u7684\u7B80\u79F0\u3002</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    \u62C7\u6307\u4EC5\u6709\u4E00\u4E2A MCP \u548C\u4E00\u4E2A IP \u5173\u8282\uFF0C\u5747\u4E3A\u5C48\u4F38\u8F74\uFF0C\u7701\u7565 _flex \u540E\u7F00\u4E0D\u4F1A\u4EA7\u751F\u6B67\u4E49\u3002</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    \u56DB\u6307\u7684 MCP \u56E0\u540C\u65F6\u5B58\u5728 abd \u548C flex \u4E24\u4E2A\u81EA\u7531\u5EA6\uFF0C\u6545\u5FC5\u987B\u5199\u5168\u540D\u4EE5\u533A\u5206\u3002</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">[2] \u89E3\u5256\u5B66\u4E0A\uFF0Cabd\uFF08\u5916\u5C55/\u5185\u6536\uFF09\u4E0E flex\uFF08\u5C48\u4F38\uFF09\u53D1\u751F\u5728\u540C\u4E00\u4E2A\u5173\u8282\u9762\u4E0A\uFF08MCP = \u9AC1\u72B6\u5173\u8282 condyloid, 2-DOF\uFF1B</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    CMC = \u978D\u72B6\u5173\u8282 saddle, 2-DOF\uFF09\u3002\u5C06\u5176\u62C6\u4E3A\u4E24\u4E2A\u4E32\u8054\u7684 revolute joint \u65F6\uFF0C\u8C01\u5728\u524D\uFF08\u66F4\u9760\u8FD1 root\uFF09\u3001\u8C01\u5728\u540E\uFF0C</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    \u662F\u5EFA\u6A21\u8005\u7684\u9009\u62E9\uFF0C\u4E0D\u662F\u89E3\u5256\u5B66\u7684\u56FA\u6709\u987A\u5E8F\u3002\u672C\u6A21\u578B\u9009\u62E9 flex \u5728\u524D\u3001abd \u5728\u540E\uFF0C\u56DB\u6307\u987A\u5E8F\u4E3A flex\u2192abd\u2192pip\u2192dip\u3002</span>');
 
             document.getElementById('treeOutput').innerHTML = lines.join('\n');
         }
@@ -1279,7 +1440,6 @@
             buildFingerChain(fname);
             updateChain(fname);
         });
-        // Defer matrix display update to after DOM elements are ready
         setTimeout(() => {
             FINGER_ORDER.forEach(fname => updateMatrixDisplays(fname));
         }, 50);
@@ -1299,7 +1459,6 @@
             popup.classList.remove('visible');
         });
 
-        // Make popup draggable by title
         popup.addEventListener('mousedown', (e) => {
             if (e.target.classList.contains('popup-close')) return;
             popupDragState = {
@@ -1315,7 +1474,6 @@
         });
         document.addEventListener('mouseup', () => { popupDragState = null; });
 
-        // Detect click (not drag) on the 3D canvas
         let mouseDownPos = null;
         canvas.addEventListener('mousedown', (e) => {
             mouseDownPos = { x: e.clientX, y: e.clientY };
@@ -1324,7 +1482,7 @@
             if (!mouseDownPos) return;
             const dx = e.clientX - mouseDownPos.x;
             const dy = e.clientY - mouseDownPos.y;
-            if (dx * dx + dy * dy > 16) return; // was a drag, not a click
+            if (dx * dx + dy * dy > 16) return;
 
             const rect = canvas.getBoundingClientRect();
             mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -1358,7 +1516,7 @@
                 const fdata = model[data.finger];
                 const j = fdata.joints[data.jointIdx];
                 const ch = '#' + fdata.color.toString(16).padStart(6, '0');
-                title = `${fdata.label.zh} ${fdata.label.en} — J${data.jointIdx + 1} ${j.name}`;
+                title = `${fdata.label.zh} ${fdata.label.en} — (J${globalJointId(data.finger, data.jointIdx)}) ${j.name}`;
 
                 const axLabel = Math.abs(j.axis[2]) > 0.5 ? 'Z (twist)' :
                     Math.abs(j.axis[1]) > 0.5 ? 'Y (abd)' : 'X (flex)';
@@ -1408,7 +1566,6 @@
             popupTitle.textContent = title;
             popupContent.innerHTML = html;
 
-            // Position popup near click, but keep within viewport
             const pw = 320, ph = 300;
             let left = cx + 12, top = cy - 20;
             if (left + pw > window.innerWidth) left = cx - pw - 12;
@@ -1446,30 +1603,19 @@
         let animTime = 0;
         const animBtn = document.getElementById('btnAnim');
 
-        // Animation keyframes (time 0→1):
-        // 0.00–0.25: spread (abd joints open outward)
-        // 0.25–0.50: hold spread
-        // 0.50–0.85: grasp (flex joints bend)
-        // 0.85–1.00: release back to T-pose
         function getAnimPose(t) {
-            // Returns { abd, flex } multipliers in [0, 1]
             let abd = 0, flex = 0;
             if (t < 0.25) {
-                // Spread open
                 abd = t / 0.25;
             } else if (t < 0.40) {
-                // Hold spread, start closing
                 abd = 1.0 - (t - 0.25) / 0.15 * 0.5;
                 flex = (t - 0.25) / 0.15 * 0.3;
             } else if (t < 0.70) {
-                // Full grasp
                 abd = 0.5 - (t - 0.40) / 0.30 * 0.5;
                 flex = 0.3 + (t - 0.40) / 0.30 * 0.7;
             } else if (t < 0.85) {
-                // Hold grasp
                 flex = 1.0;
             } else {
-                // Release
                 const r = (t - 0.85) / 0.15;
                 flex = 1.0 - r;
             }
@@ -1477,28 +1623,31 @@
         }
 
         function applyAnimPose(pose) {
-            const maxAbd = 0.35;    // max abduction angle (rad)
-            const maxFlex = 1.2;    // max flexion angle (rad)
+            const maxAbd = 0.35;
+            const maxFlex = 1.2;
             const thumbMaxFlex = 0.8;
 
             FINGER_ORDER.forEach(fname => {
                 const fdata = model[fname];
                 fdata.joints.forEach((j, ji) => {
                     if (fname === 'thumb') {
-                        // Thumb: cmc_rot stays at default, flex joints bend
-                        if (ji === 0) return; // cmc_rot keep default
-                        if (ji === 2) {
-                            // cmc_abd: spread outward (negative for thumb = abduction)
+                        // WG110v11 thumb: no cmc_rot
+                        // ji=0: CMC Flex (X axis) — flex joint
+                        // ji=1: CMC Abd (Y axis) — spread
+                        // ji=2: MCP (X axis) — flex
+                        // ji=3: IP (X axis) — flex
+                        if (ji === 1) {
+                            // CMC Abd: spread outward (negative for thumb = abduction)
                             j.angle = -pose.abd * maxAbd;
                         } else if (j.axis[0] > 0.5) {
-                            // flex joints
+                            // flex joints (ji=0, 2, 3)
                             j.angle = pose.flex * thumbMaxFlex;
                         }
                     } else {
-                        // Other fingers
+                        // Four fingers: flex→abd order
+                        // Axis detection still works: axis[1]>0.5 = abd, axis[0]>0.5 = flex
                         if (j.axis[1] > 0.5) {
                             // Y-axis = abd joint: spread
-                            // Index/middle spread positive (radial), ring/pinky negative (ulnar)
                             const sign = (fname === 'index' || fname === 'middle') ? -1 : 1;
                             j.angle = sign * pose.abd * maxAbd;
                         } else if (j.axis[0] > 0.5) {
@@ -1511,7 +1660,7 @@
                 updateMatrixDisplays(fname);
             });
 
-            // Update slider UI using cached refs (display in degrees)
+            // Update slider UI
             FINGER_ORDER.forEach(fname => {
                 model[fname].joints.forEach((j, ji) => {
                     const angleDeg = j.angle / DEG;
@@ -1522,6 +1671,31 @@
                 });
             });
         }
+
+        document.getElementById('btnZero').addEventListener('click', () => {
+            if (animRunning) {
+                animRunning = false;
+                animBtn.textContent = 'Play Spread+Grasp';
+                animBtn.style.background = 'var(--card)';
+                animBtn.style.color = 'var(--accent)';
+            }
+            FINGER_ORDER.forEach(fname => {
+                model[fname].joints.forEach((j, ji) => {
+                    j.angle = 0;
+                });
+                updateChain(fname);
+                updateMatrixDisplays(fname);
+            });
+            FINGER_ORDER.forEach(fname => {
+                model[fname].joints.forEach((j, ji) => {
+                    const slider = sliderRefs[fname]?.[ji];
+                    if (slider) slider.value = '0.0';
+                    const numInp = numInputRefs[fname]?.[ji];
+                    if (numInp) numInp.value = '0.0';
+                    updateZeroStar(fname, ji);
+                });
+            });
+        });
 
         animBtn.addEventListener('click', () => {
             animRunning = !animRunning;
@@ -1535,7 +1709,7 @@
             requestAnimationFrame(animate);
 
             if (animRunning) {
-                animTime += 0.004; // ~4 seconds per cycle at 60fps
+                animTime += 0.004;
                 if (animTime > 1) animTime = 0;
                 applyAnimPose(getAnimPose(animTime));
             }
