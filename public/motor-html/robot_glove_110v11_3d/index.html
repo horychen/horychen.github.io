@@ -505,15 +505,15 @@
                 emfBase: {
                     name: "EMF Sensor Base",
                     parent: "wrist",
-                    offset_mm: [0, 12, 5],
-                    description: "EMF 磁传感器基站，固定在手腕手背侧上方"
+                    offset_mm: [4, -12, -50],
+                    description: "EMF 磁传感器基站，固定在手背正中心上方"
                 },
                 coils: {
-                    thumb:  { name: "Coil 1", parent: "thumb_tip",  offset_mm: [0, 8, 0] },
-                    index:  { name: "Coil 2", parent: "index_tip",  offset_mm: [0, 8, 0] },
-                    middle: { name: "Coil 3", parent: "middle_tip", offset_mm: [0, 8, 0] },
-                    ring:   { name: "Coil 4", parent: "ring_tip",   offset_mm: [0, 8, 0] },
-                    pinky:  { name: "Coil 5", parent: "pinky_tip",  offset_mm: [0, 8, 0] }
+                    thumb:  { name: "Sensor Coil 1", parent: "thumb_tip",  offset_mm: [0, 8, 0] },
+                    index:  { name: "Sensor Coil 2", parent: "index_tip",  offset_mm: [0, 8, 0] },
+                    middle: { name: "Sensor Coil 3", parent: "middle_tip", offset_mm: [0, 8, 0] },
+                    ring:   { name: "Sensor Coil 4", parent: "ring_tip",   offset_mm: [0, 8, 0] },
+                    pinky:  { name: "Sensor Coil 5", parent: "pinky_tip",  offset_mm: [0, 8, 0] }
                 }
             },
             colors: {
@@ -1112,7 +1112,7 @@
 
         // EMF Sensor Base
         const sensorBase = createSensorBase();
-        sensorBase.position.set(0, -12, 5);
+        sensorBase.position.set(4, -12, -50);
         sensorBase.rotation.x = Math.PI;
         sensorBase.children.forEach(c => {
             if (c.isMesh) c.userData = { clickable: true, type: 'emfBase' };
@@ -1492,6 +1492,13 @@
             lines.push('<span style="color:var(--dim);font-size:9px">[2] \u89E3\u5256\u5B66\u4E0A\uFF0Cabd\uFF08\u5916\u5C55/\u5185\u6536\uFF09\u4E0E flex\uFF08\u5C48\u4F38\uFF09\u53D1\u751F\u5728\u540C\u4E00\u4E2A\u5173\u8282\u9762\u4E0A\uFF08MCP = \u9AC1\u72B6\u5173\u8282 condyloid, 2-DOF\uFF1B</span>');
             lines.push('<span style="color:var(--dim);font-size:9px">    CMC = \u978D\u72B6\u5173\u8282 saddle, 2-DOF\uFF09\u3002\u5C06\u5176\u62C6\u4E3A\u4E24\u4E2A\u4E32\u8054\u7684 revolute joint \u65F6\uFF0C\u8C01\u5728\u524D\uFF08\u66F4\u9760\u8FD1 root\uFF09\u3001\u8C01\u5728\u540E\uFF0C</span>');
             lines.push('<span style="color:var(--dim);font-size:9px">    \u662F\u5EFA\u6A21\u8005\u7684\u9009\u62E9\uFF0C\u4E0D\u662F\u89E3\u5256\u5B66\u7684\u56FA\u6709\u987A\u5E8F\u3002\u672C\u6A21\u578B\u9009\u62E9 flex \u5728\u524D\u3001abd \u5728\u540E\uFF0C\u56DB\u6307\u987A\u5E8F\u4E3A flex\u2192abd\u2192pip\u2192dip\u3002</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">[3] v11 \u7684\u62C7\u6307\u4ECE v10 \u7684 5-DOF \u7CBE\u7B80\u4E3A 4-DOF\uFF0C\u5220\u9664\u4E86 cmc_rot\uFF08\u8F74\u5411\u65CB\u8F6C\uFF09\u5173\u8282\u3002\u62C7\u6307 CMC \u5173\u8282\uFF08\u7B2C\u4E00\u8155\u638C\u5173\u8282\uFF09\u662F\u978D\u72B6\u5173\u8282 (saddle joint, 2-DOF:</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">    flex/ext + abd/add)\uFF0C\u5176\u8F74\u5411\u65CB\u8F6C\uFF08\u65CB\u524D pronation / \u65CB\u540E supination\uFF09\u662F\u88AB\u52A8\u8026\u5408\u8FD0\u52A8\uFF0C</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">    \u5E76\u975E\u4EBA\u7C7B\u53EF\u4E3B\u52A8\u72EC\u7ACB\u63A7\u5236\u7684\u81EA\u7531\u5EA6\u3002\u56E0\u6B64 cmc_rot \u5728\u6A21\u578B\u4E2D\u4EC5\u63D0\u4F9B\u4E00\u4E2A\u56FA\u5B9A\u65CB\u8F6C\u89D2\u5EA6\u503C\uFF08\u56E0\u4EBA\u800C\u5F02\uFF09\uFF1A</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">      WG110 (Glove \u4E00\u4EE3) = 45\u00B0 (0.785 rad)</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">      WH110 (Hand \u4E00\u4EE3)  = 36\u00B0 (0.628 rad)</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">      WH120 (Hand \u4E8C\u4EE3)  = 20\u00B0 (0.349 rad)</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">    \u8BE5\u5173\u8282\u88AB\u9501\u5B9A\u4E3A\u5E38\u91CF\uFF0C\u4E0D\u53C2\u4E0E IK \u6C42\u89E3\u3002v11 \u5C06\u5176\u878D\u5165 palmOffset \u7684\u65CB\u8F6C\u5206\u91CF\u4E2D\uFF0C\u4E0D\u518D\u4F5C\u4E3A\u72EC\u7ACB\u5173\u8282\u5EFA\u6A21\u3002</span>');
 
             document.getElementById('treeOutput').innerHTML = lines.join('\n');
         }
