@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WUJI Glove 110v12 — 3D 运动学模型 (REP-155)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg: #f7f5f2;
+            --card: #ffffff;
+            --panel: #faf8f5;
+            --border: #e5e0d8;
+            --text: #2d2a26;
+            --dim: #8a847b;
+            --accent: #c46a48;
+            --accent-light: #f0e6df;
+            --font: 'Inter', system-ui, -apple-system, sans-serif;
+            --c-thumb: #c47272;
+            --c-index: #c49a6e;
+            --c-middle: #7ea86e;
+            --c-ring: #5e8bb0;
+            --c-pinky: #8a6aaa;
+            --c-wrist: #5ea8a8;
+            --c-tip: #b0a050;
+            --c-sensor: #d07878;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box }
+
+        body {
+            background: var(--bg); color: var(--text); font-family: var(--font);
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            -webkit-font-smoothing: antialiased
+        }
+
+        .header {
+            padding: 10px 20px; background: var(--card); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04)
+        }
+        .header h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.3px }
+        .header h1 span { color: var(--accent); font-weight: 700 }
+        .badge {
+            padding: 2px 8px; border-radius: 20px; font-size: 9px; font-weight: 600;
+            background: var(--accent-light); color: var(--accent)
+        }
+
+        .main { display: flex; flex: 1; overflow: hidden }
+
+        .cards-panel {
+            width: 340px; min-width: 280px; overflow-y: auto; overflow-x: hidden;
+            background: var(--panel); border-right: 1px solid var(--border);
+            padding: 8px; flex-shrink: 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent
+        }
+
+        .center-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); min-width: 0 }
+        .view-3d { flex: 1 1 0; position: relative; min-height: 180px; max-height: 55vh }
+        #canvas3d { width: 100%; height: 100%; display: block }
+
+        .tree-section {
+            background: var(--card); border-top: 1px solid var(--border);
+            padding: 10px 16px; flex: 0 1 auto; overflow-y: auto; flex-shrink: 1;
+            scrollbar-width: thin; scrollbar-color: var(--border) transparent
+        }
+
+        .ortho-col {
+            width: 180px; flex-shrink: 0; display: flex; flex-direction: column;
+            border-left: 1px solid var(--border); background: var(--bg)
+        }
+        .ortho-wrap { flex: 1; position: relative; border-bottom: 1px solid var(--border); background: var(--bg) }
+        .ortho-wrap:last-child { border-bottom: none }
+        .ortho-wrap canvas { width: 100%; height: 100%; display: block }
+        .ortho-label {
+            position: absolute; top: 4px; left: 8px; font-size: 9px; font-weight: 600;
+            color: var(--dim); z-index: 2; pointer-events: none
+        }
+
+        /* ── Mobile layout ── */
+        @media (max-width: 768px) {
+            body { overflow: auto; height: auto; min-height: 100vh }
+            .header { flex-wrap: wrap; padding: 8px 12px; gap: 6px }
+            .header h1 { font-size: 13px; flex-basis: 100% }
+            .main { flex-direction: column; overflow: visible }
+            .cards-panel {
+                width: 100%; min-width: unset; max-height: 45vh;
+                border-right: none; border-bottom: 1px solid var(--border);
+                order: 2
+            }
+            .center-col { order: 1; min-height: 0 }
+            .view-3d { min-height: 260px; max-height: 50vh; flex: none; height: 40vh }
+            .tree-section { max-height: 200px }
+            .ortho-col {
+                width: 100%; flex-direction: row; height: 140px;
+                border-left: none; border-top: 1px solid var(--border);
+                order: 3
+            }
+            .ortho-wrap { border-bottom: none; border-right: 1px solid var(--border) }
+            .ortho-wrap:last-child { border-right: none }
+            .node-popup { max-width: 90vw; min-width: 200px }
+            .jc-slider { width: 50px }
+            .jc-input { width: 42px; font-size: 8px }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 { font-size: 12px }
+            .badge { font-size: 8px; padding: 1px 6px }
+            .view-3d { height: 35vh; min-height: 220px }
+            .ortho-col { height: 110px }
+            .cards-panel { max-height: 50vh }
+            .help-box { font-size: 8px }
+            .finger-header { font-size: 10px; padding: 5px 8px }
+        }
+        .tree-section h3 { font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--accent) }
+        .tree-pre {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 10px; line-height: 1.6; color: var(--text); white-space: pre; tab-size: 2
+        }
+        .tree-pre .sensor { color: var(--c-sensor); font-weight: 600 }
+        .tree-pre .joint { color: #6a8a50 }
+        .tree-pre .fixed { color: var(--dim) }
+
+        /* Cards */
+        .finger-section {
+            margin-bottom: 6px; border: 1px solid var(--border); border-radius: 8px;
+            overflow: hidden; background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,0.03)
+        }
+        .finger-header {
+            padding: 6px 10px; cursor: pointer; display: flex; align-items: center;
+            gap: 7px; font-size: 11px; font-weight: 600; user-select: none
+        }
+        .finger-header:hover { background: rgba(196,106,72,0.04) }
+        .finger-header .arrow { transition: transform .2s; font-size: 9px; color: var(--dim) }
+        .finger-header .arrow.open { transform: rotate(90deg) }
+        .finger-body { padding: 3px 6px 6px; display: none }
+        .finger-body.open { display: block }
+
+        .joint-card {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+            padding: 7px 9px; margin-bottom: 4px; font-size: 10px; transition: all .15s
+        }
+        .joint-card:hover { border-color: var(--accent); box-shadow: 0 1px 4px rgba(196,106,72,0.08) }
+
+        .jc-header { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; flex-wrap: wrap }
+        .jc-name { font-weight: 700; font-size: 11px }
+        .jc-cn { color: var(--dim); font-size: 9.5px }
+        .jc-badge { padding: 1px 6px; border-radius: 4px; font-size: 8px; font-weight: 600 }
+        .jc-sdk { color: var(--dim); font-size: 8px; margin-left: auto; font-style: italic; opacity: 0.6 }
+
+        .jc-row { display: flex; align-items: center; gap: 4px; margin-bottom: 3px }
+        .jc-label { color: var(--dim); font-weight: 500; width: 50px; flex-shrink: 0; font-size: 9px }
+
+        .jc-input {
+            background: var(--card); border: 1px solid var(--border); border-radius: 4px;
+            color: var(--text); font-family: var(--font); font-size: 9px; padding: 3px 5px;
+            width: 48px; text-align: right; font-variant-numeric: tabular-nums;
+            outline: none; transition: border .15s
+        }
+        .jc-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(196,106,72,0.12) }
+        .jc-unit { color: var(--dim); font-size: 8px; width: 50px }
+        .jc-sign { color: #6a8a50; font-size: 8px; margin-top: 1px }
+        .jc-slider { width: 68px; accent-color: var(--accent); height: 14px }
+        .jc-zero-star { color: #e8a020; font-size: 11px; font-weight: 700; margin-left: 1px; visibility: hidden }
+        .jc-zero-star.active { visibility: visible }
+        .jc-limit { color: var(--dim); font-size: 7.5px; white-space: nowrap; opacity: 0.7 }
+        .jc-desc {
+            color: var(--dim); font-size: 8.5px; line-height: 1.4; margin-top: 3px;
+            padding: 4px 6px; background: rgba(0,0,0,0.015); border-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.03)
+        }
+
+        /* Matrix display */
+        .jc-matrix-wrap {
+            margin-top: 4px; padding: 4px 0;
+        }
+        .jc-matrix-toggle {
+            font-size: 8px; color: var(--accent); cursor: pointer; user-select: none;
+            font-weight: 600; margin-bottom: 3px; display: inline-block;
+        }
+        .jc-matrix-toggle:hover { text-decoration: underline }
+        .jc-matrix-body { display: none }
+        .jc-matrix-body.open { display: block }
+        .jc-matrix {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 8.5px; line-height: 1.5; color: var(--text);
+            background: var(--card); border: 1px solid var(--border); border-radius: 4px;
+            padding: 4px 6px; white-space: pre; overflow-x: auto;
+            margin-bottom: 3px;
+        }
+        .jc-spatial {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 8.5px; line-height: 1.4; color: var(--text);
+            background: rgba(94,139,176,0.06); border: 1px solid rgba(94,139,176,0.15);
+            border-radius: 4px; padding: 4px 6px; margin-top: 2px;
+        }
+        .jc-spatial .label { color: var(--dim); font-size: 7.5px }
+
+        .help-box {
+            margin: 4px 0 8px; padding: 8px 10px; background: var(--card);
+            border: 1px solid var(--border); border-radius: 6px; font-size: 9px;
+            line-height: 1.6; color: var(--dim); box-shadow: 0 1px 2px rgba(0,0,0,0.03)
+        }
+        .help-box strong { color: var(--text); font-size: 10px }
+
+        .coord-label {
+            position: absolute; top: 8px; left: 10px; font-size: 9px; color: var(--dim);
+            background: rgba(255,255,255,0.8); padding: 3px 8px; border-radius: 4px;
+            z-index: 5; backdrop-filter: blur(4px); border: 1px solid var(--border)
+        }
+        .hud-bottom {
+            position: absolute; bottom: 0; left: 0; right: 0; padding: 5px 12px;
+            background: linear-gradient(0deg, rgba(247,245,242,0.9), transparent);
+            font-size: 9px; color: var(--dim)
+        }
+
+        .link-len { color: #8a6a50; font-size: 8px; font-weight: 500 }
+
+        /* Click popup */
+        .node-popup {
+            position: fixed; z-index: 100; background: var(--card);
+            border: 1px solid var(--border); border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12); padding: 10px 12px;
+            max-width: 340px; min-width: 240px; font-size: 10px;
+            pointer-events: auto; display: none;
+        }
+        .node-popup.visible { display: block }
+        .node-popup .popup-close {
+            position: absolute; top: 4px; right: 8px; cursor: pointer;
+            font-size: 14px; color: var(--dim); line-height: 1
+        }
+        .node-popup .popup-close:hover { color: var(--accent) }
+        .node-popup .popup-title {
+            font-weight: 700; font-size: 12px; margin-bottom: 6px;
+            padding-right: 20px; color: var(--accent)
+        }
+        .node-popup .popup-row {
+            display: flex; gap: 4px; margin-bottom: 2px; align-items: baseline
+        }
+        .node-popup .popup-label {
+            color: var(--dim); font-size: 9px; font-weight: 500; width: 40px; flex-shrink: 0
+        }
+        .node-popup .popup-val {
+            font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 9px
+        }
+        .node-popup .popup-matrix {
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 8px; line-height: 1.5; white-space: pre;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 4px; padding: 4px 6px; margin: 4px 0
+        }
+        .node-popup .popup-spatial {
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 8px; background: rgba(94,139,176,0.06);
+            border: 1px solid rgba(94,139,176,0.15);
+            border-radius: 4px; padding: 4px 6px; margin: 2px 0
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1><span>WUJI</span> Glove 110v12 — 3D 运动学模型 (REP-155)</h1>
+        <span class="badge">Three.js</span>
+        <span class="badge">REP-155 Z=Proximal</span>
+        <span class="badge">20+1 DOF + 6 Sensors</span>
+        <button id="btnAnim" style="margin-left:auto;padding:3px 12px;border-radius:12px;border:1px solid var(--border);
+            background:var(--accent);color:#fff;font-size:10px;font-weight:600;cursor:pointer;
+            font-family:var(--font);transition:all .15s">
+            Stop Animation
+        </button>
+        <button id="btnZero" style="padding:3px 12px;border-radius:12px;border:1px solid var(--border);
+            background:var(--card);color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;
+            font-family:var(--font);transition:all .15s">
+            Reset Zero
+        </button>
+    </div>
+
+    <div class="main">
+        <div class="cards-panel" id="cardsPanel">
+            <div class="help-box">
+                <strong>WUJI Glove 110v12 REP-155</strong><br>
+                <strong style="color:#ff3333">-X</strong> Radial (桡侧/手刀砍你) &middot;
+                <strong style="color:#3388ff">-Z</strong> Proximal (近端/指尖戳你) &middot;
+                <strong style="color:#33cc33">+Y</strong> 右手系 Y=X&times;Z (掌侧/抓你) <br>
+                20 active + 1 coupled DOF + 6 Sensors &middot; 圆柱体 = 旋转关节（轴向=旋转轴）&middot; 单击3D节点弹出信息<br>
+                $T_{i+1} = T_i \cdot R(\hat{\omega}_i, \theta_i) \cdot \text{Trans}(d_x, d_y, d_z)$
+            </div>
+            <div class="finger-section" id="couplingPanel">
+                <div class="finger-header" style="background:rgba(176,160,80,0.06)">
+                    <span class="arrow">&#9654;</span>
+                    <span style="color:#b0a050;font-weight:700">Thumb CMC Coupling</span>
+                    <span style="color:var(--dim);font-size:9px;margin-left:auto">Screw-home model</span>
+                </div>
+                <div class="finger-body">
+                    <div class="joint-card" style="border-left:3px solid #b0a05030">
+                        <div style="font-size:9px;color:var(--dim);line-height:1.6;margin-bottom:6px">
+                            <b style="color:var(--text)">θ_rot = K_FLEX × θ_flex + K_ABD × θ_abd + K_CROSS × θ_flex × θ_abd</b><br>
+                            D'Agostino 2017 screw-home mechanism &middot; Hollister 1992 (124° axis angle) &middot; Cooney 1981 (~17° ROM)
+                        </div>
+                        <div class="jc-row"><span class="jc-label" style="width:60px">K_FLEX</span>
+                            <input type="range" class="jc-slider" id="sliderKFlex" min="0" max="1.0" step="0.01" value="0.22" style="width:100px">
+                            <input class="jc-input" id="inputKFlex" value="0.22" style="width:50px">
+                            <span class="jc-unit" style="width:auto">方案2: 等贡献</span></div>
+                        <div class="jc-row"><span class="jc-label" style="width:60px">K_ABD</span>
+                            <input type="range" class="jc-slider" id="sliderKAbd" min="0" max="1.0" step="0.01" value="0.22" style="width:100px">
+                            <input class="jc-input" id="inputKAbd" value="0.22" style="width:50px">
+                            <span class="jc-unit" style="width:auto">方案2: 等贡献</span></div>
+                        <div class="jc-row"><span class="jc-label" style="width:60px">K_CROSS</span>
+                            <input type="range" class="jc-slider" id="sliderKCross" min="-0.5" max="0.5" step="0.01" value="0.0" style="width:100px">
+                            <input class="jc-input" id="inputKCross" value="0.00" style="width:50px">
+                            <span class="jc-unit" style="width:auto">(0=off)</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="center-col">
+            <div class="view-3d">
+                <canvas id="canvas3d"></canvas>
+                <div class="coord-label">
+                    <span style="color:#ff3333">-X</span> Radial &middot;
+                    <span style="color:#3388ff">-Z</span> Proximal &middot;
+                    <span style="color:#33cc33">+Y</span> Right-hand
+                </div>
+                <div class="hud-bottom">左键旋转 &middot; 右键平移 &middot; 滚轮缩放 &middot; 单击节点弹出信息</div>
+            </div>
+            <div class="tree-section" id="treeSection">
+                <h3>Kinematic Tree <span style="font-weight:400;font-size:9px;color:var(--dim)">(所有节点名仅代表旋转轴，其语义与正方向无关)</span></h3>
+                <div style="font-size:9px;line-height:1.6;color:var(--dim);margin-bottom:6px;padding:4px 8px;
+                    background:rgba(0,0,0,0.02);border-radius:4px;border:1px solid rgba(0,0,0,0.04)">
+                    <b style="color:var(--text)">XYZ 正方向助记 (右手 REP-155)</b><br>
+                    <span style="color:#e44"><b>-X</b> 手刀砍你</span> (radial/桡侧，-X=拇指所在方向) &middot;
+                    <span style="color:#48e"><b>-Z</b> 指尖戳你喉咙</span> (proximal/近端，骨骼从远端→近端，-Z=指尖方向) &middot;
+                    <span style="color:#4b4"><b>+Y</b> 抓你</span> (ventral/掌侧，手指弯曲方向，Y=X&times;Z)
+                </div>
+                <div class="tree-pre" id="treeOutput"></div>
+                <div id="mediapipeSection" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+                    <h3 style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--accent)">MediaPipe Hand Landmarks 对比
+                        <span style="font-weight:400;font-size:9px;color:var(--dim)">(21 landmarks, 纯位置, 无关节角度)</span></h3>
+                    <div class="tree-pre" style="margin-bottom:8px">WRIST (0)
+├── THUMB:  CMC(1) → MCP(2) → IP(3)  → TIP(4)
+├── INDEX:  MCP(5) → PIP(6) → DIP(7) → TIP(8)
+├── MIDDLE: MCP(9) → PIP(10)→ DIP(11)→ TIP(12)
+├── RING:   MCP(13)→ PIP(14)→ DIP(15)→ TIP(16)
+└── PINKY:  MCP(17)→ PIP(18)→ DIP(19)→ TIP(20)</div>
+                    <table style="width:100%;border-collapse:collapse;font-size:9px;line-height:1.5;margin-bottom:6px">
+                        <thead>
+                            <tr style="background:rgba(0,0,0,0.03);text-align:left">
+                                <th style="padding:3px 6px;border:1px solid var(--border);font-weight:600;color:var(--text)">维度</th>
+                                <th style="padding:3px 6px;border:1px solid var(--border);font-weight:600;color:var(--accent)">WG110v12 (本模型)</th>
+                                <th style="padding:3px 6px;border:1px solid var(--border);font-weight:600;color:#5e8bb0">MediaPipe</th>
+                            </tr>
+                        </thead>
+                        <tbody style="color:var(--dim)">
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">输出表征</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">20 个关节角度 (θ) + 1 coupled</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">21 个 3D 坐标 (x,y,z)</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">拇指</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">4-DOF + 1 coupled: rot(Z)+flex+abd+mcp+ip</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">4 landmarks: CMC→MCP→IP→TIP</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">四指</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">4-DOF: flex+abd+pip+dip</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">4 landmarks: MCP→PIP→DIP→TIP</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">Abd/Flex</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">拆为两个串联 revolute</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">不拆分，直接给 MCP 位置</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">掌骨</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">显式建模 (fixed offset)</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">隐含在 WRIST→MCP 连线中</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">传感器</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">EMF 磁传感器</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">RGB 摄像头 + 深度估计</td></tr>
+                            <tr><td style="padding:2px 6px;border:1px solid var(--border)">坐标系</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">REP-155 (X=radial, Z=prox)</td>
+                                <td style="padding:2px 6px;border:1px solid var(--border)">图像坐标 / 世界坐标</td></tr>
+                        </tbody>
+                    </table>
+                    <div style="font-size:8.5px;line-height:1.5;color:var(--dim);padding:4px 8px;
+                        background:rgba(94,139,176,0.06);border:1px solid rgba(94,139,176,0.15);border-radius:4px">
+                        <b style="color:var(--text)">从 MediaPipe 驱动 WG110v12</b>：MediaPipe 输出关键点位置，WG110v12 需要关节角度。
+                        桥接两者需要<b style="color:#5e8bb0">逆运动学 (IK) 求解器</b>：给定 21 个 3D 坐标 → 反解 20 个关节角。
+                        MediaPipe 无需处理 abd/flex 拆分歧义，正是因为它只输出位置，不涉及角度分解。
+                    </div>
+                    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
+                        <div style="flex:1;min-width:200px">
+                            <div style="font-size:9px;font-weight:600;color:var(--dim);margin-bottom:4px">MediaPipe Hand Landmarks (21 keypoints)</div>
+                            <img src="https://ai.google.dev/static/mediapipe/images/solutions/hand-landmarks.png"
+                                alt="MediaPipe Hand Landmarks — 21 个关键点编号示意图"
+                                style="width:100%;border-radius:6px;border:1px solid var(--border);background:#fff"
+                                onerror="this.parentElement.innerHTML='<div style=\'padding:12px;background:var(--bg);border:1px dashed var(--border);border-radius:6px;font-size:9px;color:var(--dim);text-align:center\'>MediaPipe 参考图加载失败<br>请访问 <a href=\'https://ai.google.dev/mediapipe/solutions/vision/hand_landmarker\' target=\'_blank\'>Google MediaPipe 文档</a></div>'">
+                            <div style="font-size:8px;color:var(--dim);margin-top:2px;line-height:1.4">
+                                来源: <a href="https://ai.google.dev/mediapipe/solutions/vision/hand_landmarker" target="_blank"
+                                    style="color:#5e8bb0">Google MediaPipe</a> · 绿线 = 骨骼连接 · 红点 = landmark 编号
+                            </div>
+                        </div>
+                        <div style="flex:1;min-width:200px">
+                            <div style="font-size:9px;font-weight:600;color:var(--dim);margin-bottom:4px">手部关节运动方向 (解剖学参考)</div>
+                            <img src="../assets/hand_anatomy_movements.jpg"
+                                alt="手部解剖学运动方向 — Adduction/Abduction, Flexion/Extension, Opposition/Retroposition"
+                                style="width:100%;border-radius:6px;border:1px solid var(--border);background:#fff"
+                                onerror="this.parentElement.innerHTML='<div style=\'padding:12px;background:var(--bg);border:1px dashed var(--border);border-radius:6px;font-size:9px;color:var(--dim);text-align:center\'>解剖学参考图未找到<br>请将图片保存至 <code>assets/hand_anatomy_movements.jpg</code></div>'">
+                            <div style="font-size:8px;color:var(--dim);margin-top:2px;line-height:1.4">
+                                A: Adduction/Abduction (内收/外展) · B: Flexion/Extension (屈伸) · C: Thumb flex/ext · D: Opposition/Retroposition (对掌)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="urdfTableSection" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+                    <h3 style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--accent)">URDF 关节速查表
+                        <span style="font-weight:400;font-size:9px;color:var(--dim)">(default_right_hand_v12.urdf, 由 urdf2table.py 导出)</span></h3>
+                    <div style="font-size:9px;font-weight:600;color:var(--dim);margin-bottom:4px">Fixed Joints（掌骨固定偏移 + 指尖）</div>
+                    <table style="width:100%;border-collapse:collapse;font-size:8.5px;line-height:1.5;margin-bottom:8px">
+                        <thead>
+                            <tr style="background:rgba(0,0,0,0.03);text-align:left">
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">Name</th>
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">Parent</th>
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">Child</th>
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">Origin XYZ (m)</th>
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">Origin RPY (rad)</th>
+                            </tr>
+                        </thead>
+                        <tbody style="color:var(--dim);font-family:'Cascadia Code','Fira Code',monospace">
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-thumb)">thumb_metacarpal_fixed</td><td style="padding:1px 4px;border:1px solid var(--border)">wrist</td><td style="padding:1px 4px;border:1px solid var(--border)">thumb_metacarpal</td><td style="padding:1px 4px;border:1px solid var(--border)">(0.0329, 0.0355, -0.0241)</td><td style="padding:1px 4px;border:1px solid var(--border)">(0, -0.4301, 0)</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-thumb)">thumb_tip_fixed</td><td style="padding:1px 4px;border:1px solid var(--border)">thumb_distal</td><td style="padding:1px 4px;border:1px solid var(--border)">thumb_tip</td><td style="padding:1px 4px;border:1px solid var(--border)">(0, 0, -0.0332)</td><td style="padding:1px 4px;border:1px solid var(--border)"></td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-index)">index_finger_metacarpal_fixed</td><td style="padding:1px 4px;border:1px solid var(--border)">wrist</td><td style="padding:1px 4px;border:1px solid var(--border)">index_finger_metacarpal</td><td style="padding:1px 4px;border:1px solid var(--border)">(0.0322, 0, -0.0881)</td><td style="padding:1px 4px;border:1px solid var(--border)">(0, 0, 0)</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-index)">index_finger_tip_fixed</td><td style="padding:1px 4px;border:1px solid var(--border)">index_finger_distal</td><td style="padding:1px 4px;border:1px solid var(--border)">index_finger_tip</td><td style="padding:1px 4px;border:1px solid var(--border)">(0, 0, -0.0241)</td><td style="padding:1px 4px;border:1px solid var(--border)"></td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-middle)">middle_finger_metacarpal_fixed</td><td style="padding:1px 4px;border:1px solid var(--border)">wrist</td><td style="padding:1px 4px;border:1px solid var(--border)">middle_finger_metacarpal</td><td style="padding:1px 4px;border:1px solid var(--border)">(0.0137, 0, -0.0947)</td><td style="padding:1px 4px;border:1px solid var(--border)">(0, 0, 0)</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-middle)">middle_finger_tip_fixed</td><td style="padding:1px 4px;border:1px solid var(--border)">middle_finger_distal</td><td style="padding:1px 4px;border:1px solid var(--border)">middle_finger_tip</td><td style="padding:1px 4px;border:1px solid var(--border)">(0, 0, -0.0259)</td><td style="padding:1px 4px;border:1px solid var(--border)"></td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-ring)">ring_finger_metacarpal_fixed</td><td style="padding:1px 4px;border:1px solid var(--border)">wrist</td><td style="padding:1px 4px;border:1px solid var(--border)">ring_finger_metacarpal</td><td style="padding:1px 4px;border:1px solid var(--border)">(-0.0067, 0, -0.0817)</td><td style="padding:1px 4px;border:1px solid var(--border)">(0, 0, 0)</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-ring)">ring_finger_tip_fixed</td><td style="padding:1px 4px;border:1px solid var(--border)">ring_finger_distal</td><td style="padding:1px 4px;border:1px solid var(--border)">ring_finger_tip</td><td style="padding:1px 4px;border:1px solid var(--border)">(0, 0, -0.0247)</td><td style="padding:1px 4px;border:1px solid var(--border)"></td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-pinky)">pinky_metacarpal_fixed</td><td style="padding:1px 4px;border:1px solid var(--border)">wrist</td><td style="padding:1px 4px;border:1px solid var(--border)">pinky_metacarpal</td><td style="padding:1px 4px;border:1px solid var(--border)">(-0.0232, 0, -0.0688)</td><td style="padding:1px 4px;border:1px solid var(--border)">(0, 0, 0)</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-pinky)">pinky_tip_fixed</td><td style="padding:1px 4px;border:1px solid var(--border)">pinky_distal</td><td style="padding:1px 4px;border:1px solid var(--border)">pinky_tip</td><td style="padding:1px 4px;border:1px solid var(--border)">(0, 0, -0.0194)</td><td style="padding:1px 4px;border:1px solid var(--border)"></td></tr>
+                        </tbody>
+                    </table>
+                    <div style="font-size:9px;font-weight:600;color:var(--dim);margin-bottom:4px">Revolute Joints（20 active DOF + 1 coupled passive）</div>
+                    <table style="width:100%;border-collapse:collapse;font-size:8.5px;line-height:1.5;margin-bottom:6px">
+                        <thead>
+                            <tr style="background:rgba(0,0,0,0.03);text-align:left">
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">ID</th>
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">Joint Name</th>
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">Parent → Child</th>
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">Origin Z (m)</th>
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">Axis</th>
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">Lower</th>
+                                <th style="padding:2px 4px;border:1px solid var(--border);font-weight:600">Upper</th>
+                            </tr>
+                        </thead>
+                        <tbody style="color:var(--dim);font-family:'Cascadia Code','Fira Code',monospace">
+                            <tr style="background:rgba(176,160,80,0.06)"><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600;color:#b0a050">C</td><td style="padding:1px 4px;border:1px solid var(--border);color:#b0a050">thumb_cmc_rot <span style="font-size:7px;color:var(--dim)">[coupled, mimic=flex×0.22]</span></td><td style="padding:1px 4px;border:1px solid var(--border)">thumb_metacarpal → proximal_rot</td><td style="padding:1px 4px;border:1px solid var(--border)">0 <span style="font-size:7px;color:var(--dim)">rpy=(0,0,0.7854)</span></td><td style="padding:1px 4px;border:1px solid var(--border);color:#b0a050;font-weight:600">Z</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.175</td><td style="padding:1px 4px;border:1px solid var(--border)">0.873</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">0</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-thumb)">thumb_cmc_flex</td><td style="padding:1px 4px;border:1px solid var(--border)">proximal_rot → proximal_abd</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.349</td><td style="padding:1px 4px;border:1px solid var(--border)">0.873</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">1</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-thumb)">thumb_cmc_abd</td><td style="padding:1px 4px;border:1px solid var(--border)">proximal_abd → proximal</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border);color:#7ea86e;font-weight:600">Y</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.175</td><td style="padding:1px 4px;border:1px solid var(--border)">0.698</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">2</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-thumb)">thumb_mcp</td><td style="padding:1px 4px;border:1px solid var(--border)">proximal → middle</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.0407</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border)">1.222</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">3</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-thumb)">thumb_ip</td><td style="padding:1px 4px;border:1px solid var(--border)">middle → distal</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.0346</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border)">1.396</td></tr>
+                            <tr style="border-top:2px solid var(--border)"><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">4</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-index)">index_finger_mcp_flex</td><td style="padding:1px 4px;border:1px solid var(--border)">index_metacarpal → proximal_abd</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.175</td><td style="padding:1px 4px;border:1px solid var(--border)">1.571</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">5</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-index)">index_finger_mcp_abd</td><td style="padding:1px 4px;border:1px solid var(--border)">proximal_abd → proximal</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border);color:#7ea86e;font-weight:600">Y</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.524</td><td style="padding:1px 4px;border:1px solid var(--border)">0.524</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">6</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-index)">index_finger_pip</td><td style="padding:1px 4px;border:1px solid var(--border)">proximal → middle</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.0387</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border)">1.745</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">7</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-index)">index_finger_dip</td><td style="padding:1px 4px;border:1px solid var(--border)">middle → distal</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.026</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border)">1.222</td></tr>
+                            <tr style="border-top:2px solid var(--border)"><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">8</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-middle)">middle_finger_mcp_flex</td><td style="padding:1px 4px;border:1px solid var(--border)">middle_metacarpal → proximal_abd</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.175</td><td style="padding:1px 4px;border:1px solid var(--border)">1.571</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">9</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-middle)">middle_finger_mcp_abd</td><td style="padding:1px 4px;border:1px solid var(--border)">proximal_abd → proximal</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border);color:#7ea86e;font-weight:600">Y</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.524</td><td style="padding:1px 4px;border:1px solid var(--border)">0.524</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">10</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-middle)">middle_finger_pip</td><td style="padding:1px 4px;border:1px solid var(--border)">proximal → middle</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.0425</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border)">1.745</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">11</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-middle)">middle_finger_dip</td><td style="padding:1px 4px;border:1px solid var(--border)">middle → distal</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.0286</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border)">1.222</td></tr>
+                            <tr style="border-top:2px solid var(--border)"><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">12</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-ring)">ring_finger_mcp_flex</td><td style="padding:1px 4px;border:1px solid var(--border)">ring_metacarpal → proximal_abd</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.175</td><td style="padding:1px 4px;border:1px solid var(--border)">1.571</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">13</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-ring)">ring_finger_mcp_abd</td><td style="padding:1px 4px;border:1px solid var(--border)">proximal_abd → proximal</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border);color:#7ea86e;font-weight:600">Y</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.524</td><td style="padding:1px 4px;border:1px solid var(--border)">0.524</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">14</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-ring)">ring_finger_pip</td><td style="padding:1px 4px;border:1px solid var(--border)">proximal → middle</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.0407</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border)">1.745</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">15</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-ring)">ring_finger_dip</td><td style="padding:1px 4px;border:1px solid var(--border)">middle → distal</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.0273</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border)">1.222</td></tr>
+                            <tr style="border-top:2px solid var(--border)"><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">16</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-pinky)">pinky_mcp_flex</td><td style="padding:1px 4px;border:1px solid var(--border)">pinky_metacarpal → proximal_abd</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.175</td><td style="padding:1px 4px;border:1px solid var(--border)">1.571</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">17</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-pinky)">pinky_mcp_abd</td><td style="padding:1px 4px;border:1px solid var(--border)">proximal_abd → proximal</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border);color:#7ea86e;font-weight:600">Y</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.524</td><td style="padding:1px 4px;border:1px solid var(--border)">0.524</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">18</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-pinky)">pinky_pip</td><td style="padding:1px 4px;border:1px solid var(--border)">proximal → middle</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.0321</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border)">1.745</td></tr>
+                            <tr><td style="padding:1px 4px;border:1px solid var(--border);font-weight:600">19</td><td style="padding:1px 4px;border:1px solid var(--border);color:var(--c-pinky)">pinky_dip</td><td style="padding:1px 4px;border:1px solid var(--border)">middle → distal</td><td style="padding:1px 4px;border:1px solid var(--border)">-0.0215</td><td style="padding:1px 4px;border:1px solid var(--border);color:#5e8bb0;font-weight:600">X</td><td style="padding:1px 4px;border:1px solid var(--border)">0</td><td style="padding:1px 4px;border:1px solid var(--border)">1.222</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="ortho-col">
+            <div class="ortho-wrap"><canvas id="cvFront"></canvas>
+                <div class="ortho-label">Front (X-Y)</div>
+            </div>
+            <div class="ortho-wrap"><canvas id="cvTop"></canvas>
+                <div class="ortho-label">Top (X-Z)</div>
+            </div>
+            <div class="ortho-wrap"><canvas id="cvSide"></canvas>
+                <div class="ortho-label">Side (Y-Z)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="node-popup" id="nodePopup">
+        <span class="popup-close" id="popupClose">&times;</span>
+        <div class="popup-title" id="popupTitle"></div>
+        <div id="popupContent"></div>
+    </div>
+
+    <script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+  }
+}
+</script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ══════════════════════════════════════════════════════
+        //  EMBEDDED CONFIG — WG110v12 (20 active DOF + 1 coupled passive)
+        //  +Z = proximal (toward wrist), -Z = distal (toward fingertips)
+        //  Thumb: cmc_rot(Z,coupled) → cmc_flex(X) → cmc_abd(Y) → mcp(X) → ip(X)
+        //  Four fingers: flex→abd order (MCP Flex first, then MCP Abd)
+        // ══════════════════════════════════════════════════════
+        const CONFIG = {
+            metadata: {
+                name: "WUJI Glove 110v12",
+                hand: "right",
+                totalDOF: 20,
+                coordinateSystem: {
+                    standard: "REP-155",
+                    X: "radial (桡侧)",
+                    Y: "right-hand rule (X×Z)",
+                    Z: "proximal (近端)"
+                }
+            },
+            sensors: {
+                emfBase: {
+                    name: "EMF Sensor Base",
+                    parent: "wrist",
+                    offset_mm: [4, -12, -50],
+                    description: "EMF 磁传感器基站，固定在手背正中心上方"
+                },
+                coils: {
+                    thumb:  { name: "Sensor Coil 1", parent: "thumb_tip",  offset_mm: [0, 8, 0] },
+                    index:  { name: "Sensor Coil 2", parent: "index_tip",  offset_mm: [0, 8, 0] },
+                    middle: { name: "Sensor Coil 3", parent: "middle_tip", offset_mm: [0, 8, 0] },
+                    ring:   { name: "Sensor Coil 4", parent: "ring_tip",   offset_mm: [0, 8, 0] },
+                    pinky:  { name: "Sensor Coil 5", parent: "pinky_tip",  offset_mm: [0, 8, 0] }
+                }
+            },
+            colors: {
+                thumb: 0xc47272, index: 0xc49a6e, middle: 0x7ea86e,
+                ring: 0x5e8bb0, pinky: 0x8a6aaa,
+                wrist: 0x5ea8a8, tip: 0xb0a050, sensor: 0xd07878
+            },
+            fingers: {
+                thumb: {
+                    label: { en: "Thumb", zh: "拇指" },
+                    sdk: "thumb",
+                    color: 0xc47272,
+                    palmOffset: { position_mm: [33, 36, -24], rotationEulerDeg: [0, -24.6, 0] },
+                    joints: [
+                        { index: 0, name: "CMC Rot", nameCN: "腕掌关节 轴旋", sdk: "cmc_rot",
+                          type: "revolute", axis: [0,0,1], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "耦合从动: θ=f(flex,abd)",
+                          limitLower_rad: -0.1745, limitUpper_rad: 0.8727,
+                          coupled: true, originOffset_rad: 0.7854 },
+                        { index: 1, name: "CMC Flex", nameCN: "腕掌关节 屈伸", sdk: "cmc_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.3491, limitUpper_rad: 0.8727 },
+                        { index: 2, name: "CMC Abd", nameCN: "腕掌关节 外展", sdk: "cmc_abd",
+                          type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-40.7], signConvention: "0=展开, +=内收",
+                          limitLower_rad: -0.1745, limitUpper_rad: 0.6981 },
+                        { index: 3, name: "MCP", nameCN: "掌指关节 屈伸", sdk: "mcp",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-34.6], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.2217 },
+                        { index: 4, name: "IP", nameCN: "指间关节 屈伸", sdk: "ip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-33.2], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.3963 }
+                    ]
+                },
+                index: {
+                    label: { en: "Index", zh: "食指" },
+                    sdk: "index_finger",
+                    color: 0xc49a6e,
+                    palmOffset: { position_mm: [32, 0, -88], rotationEulerDeg: [0,0,0] },
+                    joints: [
+                        { index: 0, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { index: 1, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                          type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收",
+                          limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
+                        { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-38.7], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.7453 },
+                        { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-24.1], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.2217 }
+                    ]
+                },
+                middle: {
+                    label: { en: "Middle", zh: "中指" },
+                    sdk: "middle_finger",
+                    color: 0x7ea86e,
+                    palmOffset: { position_mm: [14, 0, -95], rotationEulerDeg: [0,0,0] },
+                    joints: [
+                        { index: 0, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { index: 1, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                          type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收",
+                          limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
+                        { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-42.5], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.7453 },
+                        { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-28.6], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.2217 }
+                    ]
+                },
+                ring: {
+                    label: { en: "Ring", zh: "无名指" },
+                    sdk: "ring_finger",
+                    color: 0x5e8bb0,
+                    palmOffset: { position_mm: [-7, 0, -82], rotationEulerDeg: [0,0,0] },
+                    joints: [
+                        { index: 0, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { index: 1, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                          type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收",
+                          limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
+                        { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-40.7], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.7453 },
+                        { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-27.3], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.2217 }
+                    ]
+                },
+                pinky: {
+                    label: { en: "Pinky", zh: "小指" },
+                    sdk: "pinky",
+                    color: 0x8a6aaa,
+                    palmOffset: { position_mm: [-23, 0, -69], rotationEulerDeg: [0,0,0] },
+                    joints: [
+                        { index: 0, name: "MCP Flex", nameCN: "掌指关节 屈伸", sdk: "mcp_flex",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { index: 1, name: "MCP Abd", nameCN: "掌指关节 侧摆", sdk: "mcp_abd",
+                          type: "revolute", axis: [0,1,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,0], signConvention: "0=中立, +=内收",
+                          limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
+                        { index: 2, name: "PIP", nameCN: "近端指间关节 屈伸", sdk: "pip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-32.1], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.7453 },
+                        { index: 3, name: "DIP", nameCN: "远端指间关节 屈伸", sdk: "dip",
+                          type: "revolute", axis: [1,0,0], defaultAngle_rad: 0,
+                          link_mm: [0,0,-21.5], signConvention: "0=伸直, +=弯曲",
+                          limitLower_rad: 0, limitUpper_rad: 1.2217 }
+                    ]
+                }
+            }
+        };
+
+        // ══════════════════════════════════════════════════════
+        //  RUNTIME MODEL (mutable copy from CONFIG)
+        // ══════════════════════════════════════════════════════
+        const DEG = Math.PI / 180;
+        const FINGER_ORDER = ['thumb', 'index', 'middle', 'ring', 'pinky'];
+        const BG_COLOR = 0xf7f5f2;
+
+        // Global joint ID offset per finger: thumb=0(4), index=4(4), middle=8(4), ring=12(4), pinky=16(4) → 20 DOF
+        const FINGER_GLOBAL_ID_OFFSET = { thumb: 0, index: 4, middle: 8, ring: 12, pinky: 16 };
+        // globalJointId moved to coupling section above
+
+        // Deep clone config fingers into a mutable model with runtime angles
+        const model = {};
+        for (const fn of FINGER_ORDER) {
+            const src = CONFIG.fingers[fn];
+            model[fn] = {
+                color: src.color,
+                label: src.label,
+                sdk: src.sdk,
+                palmOffset: {
+                    pos: [...src.palmOffset.position_mm],
+                    rotDeg: [...src.palmOffset.rotationEulerDeg]
+                },
+                joints: src.joints.map(j => ({
+                    ...j,
+                    axis: [...j.axis],
+                    link: [...j.link_mm],
+                    angle: j.defaultAngle_rad,
+                    limitLower: j.limitLower_rad ?? -Math.PI,
+                    limitUpper: j.limitUpper_rad ?? Math.PI,
+                    coupled: j.coupled || false,
+                    originOffset: j.originOffset_rad || 0
+                }))
+            };
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  THUMB CMC ROT COUPLING MODEL
+        //  Based on D'Agostino 2017 screw-home mechanism data
+        //  and Hollister 1992 non-orthogonal axis geometry (124° angle)
+        //  θ_rot = k_flex × θ_flex + k_abd × θ_abd + k_cross × θ_flex × θ_abd
+        // ══════════════════════════════════════════════════════
+        const couplingParams = {
+            K_FLEX:  0.22,   // 屈曲耦合系数 — 方案2: flex/abd等贡献 (13.6°/(30.7°+30.5°) split equally)
+            K_ABD:   0.22,   // 外展耦合系数 — 方案2: flex/abd等贡献
+            K_CROSS: 0.0     // 交叉项 (初始=0，待标定)
+        };
+
+        function computeThumbCmcRot(flex_rad, abd_rad) {
+            return couplingParams.K_FLEX * flex_rad
+                 + couplingParams.K_ABD * abd_rad
+                 + couplingParams.K_CROSS * flex_rad * abd_rad;
+        }
+
+        function updateThumbCoupling() {
+            const thumbJoints = model.thumb.joints;
+            const flexJoint = thumbJoints[1];  // thumb_cmc_flex
+            const abdJoint  = thumbJoints[2];  // thumb_cmc_abd
+            const rotJoint  = thumbJoints[0];  // thumb_cmc_rot (coupled)
+            if (rotJoint.coupled) {
+                let rot = computeThumbCmcRot(flexJoint.angle, abdJoint.angle);
+                rot = Math.max(rotJoint.limitLower, Math.min(rotJoint.limitUpper, rot));
+                rotJoint.angle = rot;
+            }
+        }
+
+        // Global joint ID: coupled joints have no global ID; active DOFs numbered 0-19
+        function globalJointId(fname, ji) {
+            if (fname === 'thumb') {
+                if (ji === 0) return -1; // coupled, no global ID
+                return FINGER_GLOBAL_ID_OFFSET.thumb + ji - 1;
+            }
+            return FINGER_GLOBAL_ID_OFFSET[fname] + ji;
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  MATRIX MATH UTILITIES
+        // ══════════════════════════════════════════════════════
+
+        function rodrigues(omega, theta) {
+            const c = Math.cos(theta), s = Math.sin(theta), t = 1 - c;
+            const [x, y, z] = omega;
+            return [
+                c + x*x*t,     x*y*t - z*s,   x*z*t + y*s,
+                y*x*t + z*s,   c + y*y*t,      y*z*t - x*s,
+                z*x*t - y*s,   z*y*t + x*s,    c + z*z*t
+            ];
+        }
+
+        function mat3mulVec(R, v) {
+            return [
+                R[0]*v[0] + R[1]*v[1] + R[2]*v[2],
+                R[3]*v[0] + R[4]*v[1] + R[5]*v[2],
+                R[6]*v[0] + R[7]*v[1] + R[8]*v[2]
+            ];
+        }
+
+        function buildLocalT(axis, angle, link) {
+            const R = rodrigues(axis, angle);
+            const p = mat3mulVec(R, link);
+            return [
+                R[0], R[1], R[2], p[0],
+                R[3], R[4], R[5], p[1],
+                R[6], R[7], R[8], p[2],
+                0,    0,    0,    1
+            ];
+        }
+
+        function se3Log(T) {
+            const R = [T[0], T[1], T[2], T[4], T[5], T[6], T[8], T[9], T[10]];
+            const p = [T[3], T[7], T[11]];
+
+            const tr = R[0] + R[4] + R[8];
+            const ct = Math.max(-1, Math.min(1, (tr - 1) / 2));
+
+            if (ct > 0.9999) {
+                return [0, 0, 0, p[0], p[1], p[2]];
+            }
+
+            const theta = Math.acos(ct);
+            const sth = Math.sin(theta);
+
+            const w = [
+                (R[5] - R[7]) / (2 * sth),
+                (R[6] - R[2]) / (2 * sth),
+                (R[1] - R[3]) / (2 * sth)
+            ];
+
+            const a = 1 / theta;
+            const b = 1 / (2 * Math.tan(theta / 2));
+            const c = a - b;
+
+            const ww = [
+                w[0]*w[0]-1, w[0]*w[1],   w[0]*w[2],
+                w[1]*w[0],   w[1]*w[1]-1, w[1]*w[2],
+                w[2]*w[0],   w[2]*w[1],   w[2]*w[2]-1
+            ];
+
+            const Gi = [
+                a + c*ww[0],         w[2]/2 + c*ww[1],  -w[1]/2 + c*ww[2],
+                -w[2]/2 + c*ww[3],   a + c*ww[4],        w[0]/2 + c*ww[5],
+                w[1]/2 + c*ww[6],   -w[0]/2 + c*ww[7],   a + c*ww[8]
+            ];
+
+            const v = mat3mulVec(Gi, p);
+
+            return [w[0]*theta, w[1]*theta, w[2]*theta, v[0], v[1], v[2]];
+        }
+
+        function formatNum(n, w) {
+            const s = n.toFixed(3);
+            return s.padStart(w || 7);
+        }
+
+        function formatMatrix4x4(T) {
+            const rows = [];
+            for (let r = 0; r < 4; r++) {
+                const vals = [];
+                for (let c = 0; c < 4; c++) {
+                    vals.push(formatNum(T[r * 4 + c]));
+                }
+                rows.push(vals.join(' '));
+            }
+            return rows.join('\n');
+        }
+
+        function formatSpatialVec(sv) {
+            const ang = sv.slice(0, 3).map(v => v.toFixed(3)).join(', ');
+            const lin = sv.slice(3, 6).map(v => v.toFixed(3)).join(', ');
+            return `[${ang} | ${lin}]`;
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  THREE.JS SETUP
+        // ══════════════════════════════════════════════════════
+        const canvas = document.getElementById('canvas3d');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setClearColor(BG_COLOR);
+        renderer.shadowMap.enabled = true;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.4;
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(BG_COLOR);
+
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 2000);
+        camera.position.set(120, 100, 30);
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+        controls.addEventListener('change', () => { sceneDirty = true; });
+        controls.target.set(0, 10, -60);
+
+        // Ortho views
+        const orthoRenderers = [];
+        const orthoCameras = [];
+        const orthoCanvasIds = ['cvFront', 'cvTop', 'cvSide'];
+        const orthoSize = 140;
+        const center3D = new THREE.Vector3(0, 10, -55);
+        const orthoViews = [
+            { dir: [0, 0, 1], up: [0, 1, 0] },
+            { dir: [0, -1, 0], up: [0, 0, 1] },
+            { dir: [1, 0, 0], up: [0, 1, 0] }
+        ];
+        orthoCanvasIds.forEach((cid, i) => {
+            const cv = document.getElementById(cid);
+            const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
+            r.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            r.setClearColor(BG_COLOR);
+            orthoRenderers.push(r);
+            const cam = new THREE.OrthographicCamera(-orthoSize, orthoSize, orthoSize, -orthoSize, 0.1, 2000);
+            cam.position.copy(center3D.clone().add(new THREE.Vector3(...orthoViews[i].dir).multiplyScalar(400)));
+            cam.up.set(...orthoViews[i].up);
+            cam.lookAt(center3D);
+            orthoCameras.push(cam);
+        });
+
+        // Lighting
+        scene.add(new THREE.AmbientLight(0xf0ece4, 1.2));
+        const dl = new THREE.DirectionalLight(0xffeedd, 1.5);
+        dl.position.set(80, 150, 100); dl.castShadow = true; scene.add(dl);
+        scene.add(new THREE.DirectionalLight(0xddeeff, 0.7).translateX(-80).translateY(80));
+        scene.add(new THREE.HemisphereLight(0xf0ece4, 0xd0ccba, 0.5));
+
+        // Subtle grid
+        const grid = new THREE.GridHelper(300, 30, 0xe0dbd4, 0xeae5de);
+        grid.position.y = -1;
+        grid.material.opacity = 0.3;
+        grid.material.transparent = true;
+        scene.add(grid);
+
+        function metalMat(c, r) {
+            return new THREE.MeshStandardMaterial({ color: c, metalness: 0.4, roughness: r || 0.45 });
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  3D PRIMITIVES
+        // ══════════════════════════════════════════════════════
+
+        function createAxes(size) {
+            const g = new THREE.Group();
+            const headLen = size * 0.3;
+            const headW = size * 0.15;
+            const axes = [
+                { dir: new THREE.Vector3(1,0,0), color: 0xff3333 },
+                { dir: new THREE.Vector3(0,1,0), color: 0x33cc33 },
+                { dir: new THREE.Vector3(0,0,1), color: 0x3388ff },
+            ];
+            for (const a of axes) {
+                const arrow = new THREE.ArrowHelper(a.dir, new THREE.Vector3(), size, a.color, headLen, headW);
+                arrow.line.material.linewidth = 2;
+                g.add(arrow);
+            }
+            return g;
+        }
+
+        const JR = 3.5, JH = 9, LR = 1.8;
+
+        function createJointMesh(color, axis, fingerName, jointIdx) {
+            const g = new THREE.Group();
+            const cyl = new THREE.Mesh(new THREE.CylinderGeometry(JR, JR, JH, 20), metalMat(color, 0.35));
+            const ax = Math.abs(axis[0]) > 0.5, ay = Math.abs(axis[1]) > 0.5;
+            if (ax) cyl.rotation.z = Math.PI / 2;
+            else if (!ay) cyl.rotation.x = Math.PI / 2;
+            cyl.castShadow = true;
+            cyl.userData = { clickable: true, type: 'joint', finger: fingerName, jointIdx };
+            g.add(cyl);
+            const dot = new THREE.Mesh(new THREE.SphereGeometry(1.2, 10, 10),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.5 }));
+            dot.userData = { clickable: true, type: 'joint', finger: fingerName, jointIdx };
+            g.add(dot);
+            g.add(createAxes(12));
+            return g;
+        }
+
+        function createBone(lv, col) {
+            const len = lv.length();
+            if (len < 0.5) return null;
+            const m = new THREE.Mesh(new THREE.CylinderGeometry(LR, LR, len, 10), metalMat(col, 0.5));
+            m.castShadow = true;
+            m.position.copy(lv.clone().multiplyScalar(0.5));
+            const up = new THREE.Vector3(0, 1, 0), dir = lv.clone().normalize();
+            if (Math.abs(up.dot(dir)) < 0.999) m.quaternion.setFromUnitVectors(up, dir);
+            return m;
+        }
+
+        // Thenar eminence (大鱼际): fleshy mound wrapping thumb CMC Abd link (第一掌骨)
+        function createThenarMesh(lv) {
+            const len = lv.length();
+            if (len < 0.5) return null;
+
+            const g = new THREE.Group();
+
+            const inner = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.0, 1.0, len, 8),
+                new THREE.MeshStandardMaterial({ color: 0xc47272, metalness: 0.4, roughness: 0.45, transparent: true, opacity: 0.6 }));
+            inner.castShadow = false;
+            g.add(inner);
+
+            const pts = [];
+            const N = 20;
+            for (let i = 0; i <= N; i++) {
+                const t = i / N;
+                const bulge = Math.sin(Math.PI * (t * 0.85 + 0.08));
+                const taper = 1.15 - 0.5 * t;
+                const r = 7.5 * bulge * taper;
+                pts.push(new THREE.Vector2(Math.max(r, 0.3), (t - 0.5) * len));
+            }
+            const fleshGeo = new THREE.LatheGeometry(pts, 14);
+            const fleshMat = new THREE.MeshPhysicalMaterial({
+                color: 0xe8b8a0,
+                metalness: 0.02,
+                roughness: 0.85,
+                transparent: true,
+                opacity: 0.35,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            const flesh = new THREE.Mesh(fleshGeo, fleshMat);
+            g.add(flesh);
+
+            const labelCanvas = document.createElement('canvas');
+            labelCanvas.width = 128; labelCanvas.height = 40;
+            const ctx = labelCanvas.getContext('2d');
+            ctx.font = '600 22px Inter, system-ui, sans-serif';
+            ctx.fillStyle = '#c47272';
+            ctx.textAlign = 'center';
+            ctx.fillText('大鱼际', 64, 26);
+            const labelTex = new THREE.CanvasTexture(labelCanvas);
+            const labelMat = new THREE.SpriteMaterial({ map: labelTex, depthTest: false, transparent: true, opacity: 0.8 });
+            const label = new THREE.Sprite(labelMat);
+            label.scale.set(16, 5, 1);
+            label.position.set(8, 0, 0);
+            g.add(label);
+
+            g.position.copy(lv.clone().multiplyScalar(0.5));
+            const up = new THREE.Vector3(0, 1, 0), dir = lv.clone().normalize();
+            if (Math.abs(up.dot(dir)) < 0.999) g.quaternion.setFromUnitVectors(up, dir);
+            return g;
+        }
+
+        function disposeMesh(mesh) {
+            if (!mesh) return;
+            if (mesh.geometry) mesh.geometry.dispose();
+            if (mesh.material) mesh.material.dispose();
+        }
+
+        function rebuildBone(fname, ji) {
+            const fdata = model[fname];
+            const node = fingerObjects[fname]?.chainNodes[ji];
+            if (!node) return;
+            const j = fdata.joints[ji];
+            if (node.bone) {
+                node.pivot.remove(node.bone);
+                if (node.bone.isGroup) {
+                    node.bone.traverse(c => { if (c.isMesh) disposeMesh(c); });
+                } else { disposeMesh(node.bone); }
+            }
+            const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
+            const nb = node.isThenar ? createThenarMesh(lv) : createBone(lv, fdata.color);
+            node.boneBaseLen = lv.length();
+            if (nb) { node.pivot.add(nb); node.bone = nb; }
+            else { node.bone = null; }
+        }
+
+        function createSensorBase() {
+            const g = new THREE.Group();
+            g.add(new THREE.Mesh(new THREE.BoxGeometry(20, 5, 14),
+                new THREE.MeshPhysicalMaterial({ color: 0xd07878, metalness: 0.3, roughness: 0.4, transparent: true, opacity: 0.85 })));
+            const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 8, 8),
+                new THREE.MeshStandardMaterial({ color: 0xaa5555, metalness: 0.5, roughness: 0.3 }));
+            ant.position.y = 6.5; g.add(ant);
+            g.add(createAxes(6));
+            return g;
+        }
+
+        function createCoil() {
+            const g = new THREE.Group();
+            g.add(new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 2, 16),
+                new THREE.MeshPhysicalMaterial({ color: 0xd07878, metalness: 0.3, roughness: 0.4, transparent: true, opacity: 0.85 })));
+            g.add(new THREE.Mesh(new THREE.TorusGeometry(2, 0.4, 8, 16),
+                new THREE.MeshStandardMaterial({ color: 0xaa5555, metalness: 0.5, roughness: 0.3 })));
+            return g;
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  BUILD FINGER CHAINS
+        // ══════════════════════════════════════════════════════
+        const _vec3A = new THREE.Vector3();
+        const _vec3B = new THREE.Vector3();
+        const _quatA = new THREE.Quaternion();
+        let sceneDirty = true;
+
+        const fingerObjects = {};
+        const jointLocalT = {};
+        const jointSpatialVec = {};
+
+        function buildFingerChain(fname) {
+            const fdata = model[fname];
+            const group = new THREE.Group();
+            const po = fdata.palmOffset;
+            group.position.set(po.pos[0], po.pos[1], po.pos[2]);
+            if (po.rotDeg)
+                group.rotation.set(po.rotDeg[0] * DEG, po.rotDeg[1] * DEG, po.rotDeg[2] * DEG, 'XYZ');
+
+            const chainNodes = [];
+            let parentObj = group;
+
+            fdata.joints.forEach((j, ji) => {
+                const pivot = new THREE.Group();
+                parentObj.add(pivot);
+                pivot.add(createJointMesh(fdata.color, j.axis, fname, ji));
+
+                const child = new THREE.Group();
+                child.position.set(j.link[0], j.link[1], j.link[2]);
+                pivot.add(child);
+
+                const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
+                const isThenar = (fname === 'thumb' && ji === 2); // CMC Abd = 大鱼际 (index 2 in WG110v12, after cmc_rot)
+                const bone = isThenar ? createThenarMesh(lv) : createBone(lv, fdata.color);
+                const boneBaseLen = lv.length();
+                if (bone) pivot.add(bone);
+
+                chainNodes.push({ pivot, child, bone, boneBaseLen, isThenar });
+                parentObj = child;
+            });
+
+            // Fingertip with nail
+            const tipMesh = new THREE.Mesh(
+                new THREE.SphereGeometry(2.5, 14, 14),
+                new THREE.MeshPhysicalMaterial({
+                    color: CONFIG.colors.tip, emissive: CONFIG.colors.tip, emissiveIntensity: 0.15,
+                    metalness: 0.3, roughness: 0.3
+                }));
+            tipMesh.scale.set(1, 0.7, 1);
+            tipMesh.userData = { clickable: true, type: 'tip', finger: fname };
+            parentObj.add(tipMesh);
+
+            const nailShape = new THREE.Shape();
+            const nw = 2.8, nl = 4.5, nr = 1.2;
+            nailShape.moveTo(-nw + nr, -nl);
+            nailShape.lineTo(nw - nr, -nl);
+            nailShape.quadraticCurveTo(nw, -nl, nw, -nl + nr);
+            nailShape.lineTo(nw, nl - nr);
+            nailShape.quadraticCurveTo(nw, nl, nw - nr, nl);
+            nailShape.lineTo(-nw + nr, nl);
+            nailShape.quadraticCurveTo(-nw, nl, -nw, nl - nr);
+            nailShape.lineTo(-nw, -nl + nr);
+            nailShape.quadraticCurveTo(-nw, -nl, -nw + nr, -nl);
+            const nailGeo = new THREE.ExtrudeGeometry(nailShape, { depth: 0.6, bevelEnabled: false });
+            const nailMesh = new THREE.Mesh(nailGeo,
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xf0d0c0, metalness: 0.1, roughness: 0.3,
+                    clearcoat: 0.8, clearcoatRoughness: 0.2
+                }));
+            nailMesh.rotation.x = -Math.PI / 2;
+            nailMesh.position.set(0, -2, 0);
+            nailMesh.userData = { clickable: true, type: 'tip', finger: fname };
+            parentObj.add(nailMesh);
+
+            const coil = createCoil();
+            coil.position.set(0, -5, 0);
+            coil.children.forEach(c => {
+                if (c.isMesh) c.userData = { clickable: true, type: 'coil', finger: fname };
+            });
+            parentObj.add(coil);
+
+            scene.add(group);
+            fingerObjects[fname] = { group, chainNodes, tipParent: parentObj };
+
+            jointLocalT[fname] = [];
+            jointSpatialVec[fname] = [];
+        }
+
+        function updateChain(fname) {
+            const fdata = model[fname];
+            const fobj = fingerObjects[fname];
+            if (!fobj) return;
+            sceneDirty = true;
+
+            // Compute coupling before FK
+            if (fname === 'thumb') updateThumbCoupling();
+
+            const po = fdata.palmOffset;
+            fobj.group.position.set(po.pos[0], po.pos[1], po.pos[2]);
+
+            fdata.joints.forEach((j, ji) => {
+                const node = fobj.chainNodes[ji];
+                _vec3A.set(j.axis[0], j.axis[1], j.axis[2]).normalize();
+
+                // Apply origin offset (e.g. cmc_rot has 45° static offset)
+                const renderAngle = j.angle + (j.originOffset || 0);
+                node.pivot.setRotationFromQuaternion(
+                    _quatA.setFromAxisAngle(_vec3A, renderAngle));
+
+                node.child.position.set(j.link[0], j.link[1], j.link[2]);
+
+                const normAxis = [_vec3A.x, _vec3A.y, _vec3A.z];
+                const T = buildLocalT(normAxis, renderAngle, j.link);
+                jointLocalT[fname][ji] = T;
+                jointSpatialVec[fname][ji] = se3Log(T);
+            });
+        }
+
+        // ── Wrist Root ──
+        const wristMesh = new THREE.Mesh(new THREE.SphereGeometry(4, 20, 20), metalMat(CONFIG.colors.wrist, 0.35));
+        wristMesh.userData = { clickable: true, type: 'wrist' };
+        scene.add(wristMesh);
+        scene.add(createAxes(24));
+
+        // EMF Sensor Base
+        const sensorBase = createSensorBase();
+        sensorBase.position.set(4, -12, -50);
+        sensorBase.rotation.x = Math.PI;
+        sensorBase.children.forEach(c => {
+            if (c.isMesh) c.userData = { clickable: true, type: 'emfBase' };
+        });
+        scene.add(sensorBase);
+
+        // Metacarpal links
+        const metacarpalMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.2, roughness: 0.6 });
+        FINGER_ORDER.forEach(fname => {
+            const po = model[fname].palmOffset;
+            const target = new THREE.Vector3(po.pos[0], po.pos[1], po.pos[2]);
+            const len = target.length();
+            if (len < 0.5) return;
+
+            const bone = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, len, 8), metacarpalMat);
+            bone.position.copy(target.clone().multiplyScalar(0.5));
+            const up = new THREE.Vector3(0, 1, 0), dir = target.clone().normalize();
+            if (Math.abs(up.dot(dir)) < 0.999) bone.quaternion.setFromUnitVectors(up, dir);
+            bone.castShadow = true;
+            scene.add(bone);
+        });
+
+        // ══════════════════════════════════════════════════════
+        //  CARDS UI
+        // ══════════════════════════════════════════════════════
+        const cardsPanel = document.getElementById('cardsPanel');
+
+        const matrixDisplays = {};
+        const spatialDisplays = {};
+        const sliderRefs = {};
+        const numInputRefs = {};
+
+        function buildCards() {
+            FINGER_ORDER.forEach(fname => {
+                const fdata = model[fname];
+                const ch = '#' + fdata.color.toString(16).padStart(6, '0');
+                const sec = document.createElement('div');
+                sec.className = 'finger-section';
+
+                const hdr = document.createElement('div');
+                hdr.className = 'finger-header';
+                hdr.innerHTML = `<span class="arrow">\u25B6</span>
+                    <span style="color:${ch};font-weight:700">${fdata.label.zh} ${fdata.label.en}</span>
+                    <span style="color:var(--dim);font-size:9px;margin-left:auto">${fdata.joints.length} DOF</span>`;
+
+                const body = document.createElement('div');
+                body.className = 'finger-body';
+                hdr.addEventListener('click', () => {
+                    body.classList.toggle('open');
+                    hdr.querySelector('.arrow').classList.toggle('open');
+                });
+
+                // Palm offset card
+                const po = fdata.palmOffset;
+                const poc = document.createElement('div');
+                poc.className = 'joint-card';
+                poc.style.borderLeft = `3px solid ${ch}40`;
+                poc.innerHTML = `
+                    <div class="jc-header"><span class="jc-name" style="color:${ch}">Metacarpal</span>
+                        <span class="jc-badge" style="background:${ch}15;color:${ch}">fixed</span></div>
+                    <div class="jc-row"><span class="jc-label">pos</span>
+                        <input class="jc-input" value="${po.pos[0]}" data-f="${fname}" data-palm="px">
+                        <input class="jc-input" value="${po.pos[1]}" data-f="${fname}" data-palm="py">
+                        <input class="jc-input" value="${po.pos[2]}" data-f="${fname}" data-palm="pz">
+                        <span class="jc-unit">[x,y,z] mm</span></div>
+                    <div class="jc-desc">wrist → 指根固定偏移 (REP-155: -Z=distal)</div>`;
+                body.appendChild(poc);
+
+                // Joint cards
+                matrixDisplays[fname] = [];
+                spatialDisplays[fname] = [];
+
+                fdata.joints.forEach((j, ji) => {
+                    // Skip creating slider cards for coupled joints
+                    if (j.coupled) {
+                        // Lightweight read-only card for the coupled joint
+                        const cc2 = document.createElement('div');
+                        cc2.className = 'joint-card';
+                        cc2.style.borderLeft = `3px solid #b0a05030`;
+                        cc2.style.opacity = '0.75';
+                        const matId = `mat_${fname}_${ji}`;
+                        const svId = `sv_${fname}_${ji}`;
+                        const matBodyId = `matbody_${fname}_${ji}`;
+                        cc2.innerHTML = `
+                            <div class="jc-header">
+                                <span class="jc-name" style="color:#b0a050">CMC Rot</span>
+                                <span class="jc-cn">${j.nameCN}</span>
+                                <span class="jc-badge" style="background:#b0a05018;color:#b0a050">coupled/Z</span>
+                                <span class="jc-sdk" style="font-style:italic">θ=f(flex,abd)</span>
+                            </div>
+                            <div class="jc-row"><span class="jc-label">θ_rot</span>
+                                <span class="jc-input" id="coupledAngleDisplay" style="border:none;background:none;font-weight:600;color:#b0a050">0.0</span>
+                                <span class="jc-unit">deg (auto)</span></div>
+                            <div class="jc-sign">↳ ${j.signConvention}</div>
+                            <div class="jc-sign" style="margin-top:2px;color:var(--dim)">origin offset: ${((j.originOffset || 0) / DEG).toFixed(1)}° (静态旋前)</div>
+                            <div class="jc-matrix-wrap">
+                                <span class="jc-matrix-toggle" data-target="${matBodyId}">▶ T₀ (4×4) + ξ (6-vec)</span>
+                                <div class="jc-matrix-body" id="${matBodyId}">
+                                    <div class="jc-matrix" id="${matId}">loading...</div>
+                                    <div class="jc-spatial" id="${svId}">
+                                        <span class="label">ξ = [ωθ | v]  (se(3) exponential coordinates)</span><br>
+                                        <span class="sv-val">loading...</span>
+                                    </div>
+                                </div>
+                            </div>`;
+                        body.appendChild(cc2);
+                        if (!sliderRefs[fname]) { sliderRefs[fname] = []; numInputRefs[fname] = []; }
+                        sliderRefs[fname][ji] = null; // no slider for coupled
+                        numInputRefs[fname][ji] = null;
+                        if (!matrixDisplays[fname]) { matrixDisplays[fname] = []; spatialDisplays[fname] = []; }
+                        setTimeout(() => {
+                            matrixDisplays[fname][ji] = document.getElementById(matId);
+                            spatialDisplays[fname][ji] = document.getElementById(svId);
+                        }, 0);
+                        return; // skip normal card
+                    }
+
+                    const gid = globalJointId(fname, ji);
+                    const ax = Math.abs(j.axis[0]) > 0.5, ay = Math.abs(j.axis[1]) > 0.5, az = Math.abs(j.axis[2]) > 0.5;
+                    let bc, bt, ad;
+                    if (az) { bc = '#b0a050'; bt = 'twist/Z'; ad = 'Z'; }
+                    else if (ay) { bc = '#7ea86e'; bt = 'abd/Y'; ad = 'Y'; }
+                    else { bc = '#5e8bb0'; bt = 'flex/X'; ad = 'X'; }
+
+                    const linkLen = Math.sqrt(j.link[0]**2 + j.link[1]**2 + j.link[2]**2);
+
+                    const c = document.createElement('div');
+                    c.className = 'joint-card';
+                    c.style.borderLeft = `3px solid ${ch}30`;
+
+                    const matId = `mat_${fname}_${ji}`;
+                    const svId = `sv_${fname}_${ji}`;
+                    const matBodyId = `matbody_${fname}_${ji}`;
+
+                    c.innerHTML = `
+                        <div class="jc-header">
+                            <span class="jc-name">(J${gid}) ${j.name}</span>
+                            <span class="jc-cn">${j.nameCN}</span>
+                            <span class="jc-badge" style="background:${bc}18;color:${bc}">${bt}</span>
+                            <span class="jc-sdk">${fdata.sdk}_${j.sdk}</span>
+                        </div>
+                        <div class="jc-row"><span class="jc-label">axis \u03C9</span>
+                            <input class="jc-input" value="${j.axis[0]}" data-f="${fname}" data-j="${ji}" data-field="ax">
+                            <input class="jc-input" value="${j.axis[1]}" data-f="${fname}" data-j="${ji}" data-field="ay">
+                            <input class="jc-input" value="${j.axis[2]}" data-f="${fname}" data-j="${ji}" data-field="az">
+                            <span class="jc-unit">\u03C9 \u2208 {X,Y,Z}</span></div>
+                        <div class="jc-row"><span class="jc-label">\u03B8</span>
+                            <input type="range" class="jc-slider" min="${(j.limitLower / DEG).toFixed(1)}" max="${(j.limitUpper / DEG).toFixed(1)}" step="0.5" value="${(j.angle / DEG).toFixed(1)}"
+                                data-f="${fname}" data-j="${ji}" data-field="angle">
+                            <span class="jc-limit">${(j.limitLower / DEG).toFixed(0)}°~${(j.limitUpper / DEG).toFixed(0)}°</span>
+                            <input class="jc-input" value="${(j.angle / DEG).toFixed(1)}" data-f="${fname}" data-j="${ji}" data-field="angle-num">
+                            <span class="jc-unit">deg</span>
+                            <span class="jc-zero-star ${Math.abs(j.angle) < 0.001 ? 'active' : ''}" data-f="${fname}" data-j="${ji}">\u2605 zero</span></div>
+                        <div class="jc-row"><span class="jc-label">link vec</span>
+                            <input class="jc-input" value="${j.link[0]}" data-f="${fname}" data-j="${ji}" data-field="lx">
+                            <input class="jc-input" value="${j.link[1]}" data-f="${fname}" data-j="${ji}" data-field="ly">
+                            <input class="jc-input" value="${j.link[2]}" data-f="${fname}" data-j="${ji}" data-field="lz">
+                            <span class="jc-unit">[x,y,z] mm</span></div>
+                        <div class="jc-row">
+                            <span class="jc-label">link len</span>
+                            <span class="link-len">|d| = ${linkLen.toFixed(1)} mm</span>
+                        </div>
+                        <div class="jc-sign">\u21B3 ${j.signConvention}</div>
+                        <div class="jc-matrix-wrap">
+                            <span class="jc-matrix-toggle" data-target="${matBodyId}">\u25B6 T\u2096 (4\u00D74) + \u03BE (6-vec)</span>
+                            <div class="jc-matrix-body" id="${matBodyId}">
+                                <div class="jc-matrix" id="${matId}">loading...</div>
+                                <div class="jc-spatial" id="${svId}">
+                                    <span class="label">\u03BE = [\u03C9\u03B8 | v]  (se(3) exponential coordinates)</span><br>
+                                    <span class="sv-val">loading...</span>
+                                </div>
+                            </div>
+                        </div>`;
+
+                    body.appendChild(c);
+                    if (!sliderRefs[fname]) { sliderRefs[fname] = []; numInputRefs[fname] = []; }
+                    sliderRefs[fname][ji] = c.querySelector('input[type=range]');
+                    numInputRefs[fname][ji] = c.querySelector('input[data-field="angle-num"]');
+                    setTimeout(() => {
+                        matrixDisplays[fname][ji] = document.getElementById(matId);
+                        spatialDisplays[fname][ji] = document.getElementById(svId);
+                    }, 0);
+                });
+
+                // Coil card
+                const coilData = CONFIG.sensors.coils[fname];
+                const cc = document.createElement('div');
+                cc.className = 'joint-card';
+                cc.style.borderLeft = '3px solid #d0787840';
+                cc.innerHTML = `
+                    <div class="jc-header"><span class="jc-name" style="color:#d07878">${coilData.name}</span>
+                        <span class="jc-badge" style="background:#d0787818;color:#d07878">sensor</span></div>
+                    <div class="jc-desc">EMF \u78C1\u4F20\u611F\u5668\u63A5\u6536\u7EBF\u5708\uFF0C\u56FA\u5B9A\u5728\u6307\u7532\u4E0A\u65B9 [${coilData.offset_mm}] mm</div>`;
+                body.appendChild(cc);
+
+                sec.appendChild(hdr);
+                sec.appendChild(body);
+                cardsPanel.appendChild(sec);
+            });
+
+            // EMF Sensor Base card
+            const sbs = document.createElement('div');
+            sbs.className = 'finger-section';
+            sbs.innerHTML = `
+                <div class="finger-header" style="background:rgba(208,120,120,0.04)">
+                    <span style="color:#d07878;font-weight:700;font-size:11px">EMF Sensor Base</span>
+                    <span style="color:var(--dim);font-size:9px;margin-left:auto">\u78C1\u4F20\u611F\u5668\u57FA\u7AD9</span>
+                </div>
+                <div class="finger-body">
+                    <div class="joint-card" style="border-left:3px solid #d0787840">
+                        <div class="jc-desc">${CONFIG.sensors.emfBase.description}<br>offset: [${CONFIG.sensors.emfBase.offset_mm}] mm (REP-155)</div>
+                    </div>
+                </div>`;
+            cardsPanel.appendChild(sbs);
+
+            // Event handlers
+            cardsPanel.querySelectorAll('.jc-input').forEach(inp => {
+                inp.addEventListener('change', handleInput);
+                inp.addEventListener('input', handleInput);
+            });
+            cardsPanel.querySelectorAll('.jc-slider').forEach(s => {
+                s.addEventListener('input', handleSlider);
+            });
+            cardsPanel.querySelectorAll('.jc-matrix-toggle').forEach(t => {
+                t.addEventListener('click', () => {
+                    const target = document.getElementById(t.dataset.target);
+                    if (target) {
+                        const isOpen = target.classList.toggle('open');
+                        t.textContent = (isOpen ? '\u25BC' : '\u25B6') + t.textContent.slice(1);
+                    }
+                });
+            });
+        }
+
+        function handleInput(e) {
+            const el = e.target, fname = el.dataset.f;
+            if (!fname) return;
+            if (el.dataset.palm) {
+                const po = model[fname].palmOffset;
+                const v = parseFloat(el.value) || 0;
+                if (el.dataset.palm === 'px') po.pos[0] = v;
+                else if (el.dataset.palm === 'py') po.pos[1] = v;
+                else if (el.dataset.palm === 'pz') po.pos[2] = v;
+                updateChain(fname);
+                updateMatrixDisplays(fname);
+                return;
+            }
+            const ji = parseInt(el.dataset.j);
+            const j = model[fname].joints[ji];
+            const v = parseFloat(el.value) || 0, f = el.dataset.field;
+            if (f === 'ax') j.axis[0] = v;
+            else if (f === 'ay') j.axis[1] = v;
+            else if (f === 'az') j.axis[2] = v;
+            else if (f === 'lx') { j.link[0] = v; rebuildBone(fname, ji); }
+            else if (f === 'ly') { j.link[1] = v; rebuildBone(fname, ji); }
+            else if (f === 'lz') { j.link[2] = v; rebuildBone(fname, ji); }
+            else if (f === 'angle-num') {
+                j.angle = v * DEG;
+                const s = cardsPanel.querySelector(`input[type=range][data-f="${fname}"][data-j="${ji}"]`);
+                if (s) s.value = v;
+                updateZeroStar(fname, ji);
+            }
+            updateChain(fname);
+            updateMatrixDisplays(fname);
+        }
+
+        function handleSlider(e) {
+            const el = e.target, fname = el.dataset.f, ji = parseInt(el.dataset.j);
+            const vDeg = parseFloat(el.value);
+            model[fname].joints[ji].angle = vDeg * DEG;
+            const ni = cardsPanel.querySelector(`input[data-f="${fname}"][data-j="${ji}"][data-field="angle-num"]`);
+            if (ni) ni.value = vDeg.toFixed(1);
+            updateChain(fname);
+            updateMatrixDisplays(fname);
+            updateZeroStar(fname, ji);
+        }
+
+        function updateZeroStar(fname, ji) {
+            const star = cardsPanel.querySelector(`.jc-zero-star[data-f="${fname}"][data-j="${ji}"]`);
+            if (star) {
+                const isZero = Math.abs(model[fname].joints[ji].angle) < 0.001;
+                star.classList.toggle('active', isZero);
+            }
+        }
+
+        function updateMatrixDisplays(fname) {
+            const fdata = model[fname];
+            fdata.joints.forEach((j, ji) => {
+                const matEl = matrixDisplays[fname]?.[ji];
+                const svEl = spatialDisplays[fname]?.[ji];
+                if (!matEl || !svEl) return;
+
+                const matBody = matEl.closest('.jc-matrix-body');
+                if (matBody && !matBody.classList.contains('open')) return;
+
+                const T = jointLocalT[fname][ji];
+                if (!T) return;
+
+                matEl.textContent = formatMatrix4x4(T);
+
+                const sv = jointSpatialVec[fname][ji];
+                if (!sv) return;
+
+                const angStr = sv.slice(0, 3).map(v => v.toFixed(4)).join(', ');
+                const linStr = sv.slice(3, 6).map(v => v.toFixed(4)).join(', ');
+                svEl.innerHTML = `<span class="label">\u03BE = [\u03C9\u03B8 | v]  se(3) exponential coordinates</span><br>` +
+                    `<b>\u03C9\u03B8</b> = [${angStr}] <span class="label">rad</span><br>` +
+                    `<b>v</b>&nbsp;&nbsp; = [${linStr}] <span class="label">mm</span>`;
+            });
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  KINEMATIC TREE TEXT
+        // ══════════════════════════════════════════════════════
+        function buildTreeText() {
+            const lines = [];
+            const cmt = (s) => `<span style="color:#9a9080;font-style:italic">  # ${s}</span>`;
+
+            lines.push('<span style="color:var(--dim);font-size:9px">flex(X): +\u03B8 curl toward palm(+Y) \u2714  abd(Y): +\u03B8 adduction \u2714  link(-Z): distal toward fingertip \u2714</span>');
+            lines.push('');
+            lines.push('<span class="fixed">wrist</span> (root)' + cmt('\u8FD0\u52A8\u5B66\u6811\u7684\u6839\u8282\u70B9\uFF0C\u5168\u5C40\u539F\u70B9\uFF0C\u6240\u6709\u5750\u6807\u7684\u53C2\u8003\u7CFB'));
+            lines.push('\u251C\u2500\u2500 <span class="sensor">emf_sensor_base</span> [fixed, offset: (' +
+                CONFIG.sensors.emfBase.offset_mm.join(', ') + ') mm]' +
+                cmt('fixed = \u56FA\u5B9A\u8FDE\u63A5\uFF0C\u65E0\u81EA\u7531\u5EA6\uFF1Boffset = \u76F8\u5BF9\u7236\u8282\u70B9\u7684\u56FA\u5B9A\u504F\u79FB'));
+
+            const fingerLabels = {
+                thumb: '\u62C7\u6307', index: '\u98DF\u6307', middle: '\u4E2D\u6307',
+                ring: '\u65E0\u540D\u6307', pinky: '\u5C0F\u6307'
+            };
+            const lastFinger = FINGER_ORDER[FINGER_ORDER.length - 1];
+
+            let explained = {
+                metacarpal: false,
+                coupled: false,
+                revolute: false,
+                axis: false,
+                coLocated: false,
+                coLocated2: false,
+                link: false,
+                linkVec: false,
+                tip: false,
+                coil: false,
+                limitRange: false,
+                childInherit: false,
+                dof: false,
+            };
+
+            FINGER_ORDER.forEach(fname => {
+                const fdata = model[fname];
+                const isLast = fname === lastFinger;
+                const prefix = isLast ? '\u2514\u2500\u2500 ' : '\u251C\u2500\u2500 ';
+                const sub = isLast ? '    ' : '\u2502   ';
+                const po = fdata.palmOffset;
+                let metacarpalCmt = '';
+                if (!explained.metacarpal) {
+                    metacarpalCmt = cmt('pos = wrist\u21923D\u7A7A\u95F4\u4E2D\u6307\u6839\u7684\u56FA\u5B9A\u504F\u79FB\uFF0C\u5373\u638C\u9AA8\u7684\u51E0\u4F55\u5C3A\u5BF8');
+                    explained.metacarpal = true;
+                }
+                lines.push(`${prefix}<span class="fixed">${fname}_metacarpal</span> [fixed, pos: (${po.pos.join(', ')}) mm] ${fingerLabels[fname]}${metacarpalCmt}`);
+
+                fdata.joints.forEach((j, ji) => {
+                    const indent = sub + '    '.repeat(ji);
+                    const jt = Math.abs(j.axis[2]) > 0.5 ? 'Z' : (Math.abs(j.axis[1]) > 0.5 ? 'Y' : 'X');
+                    const isCoLocated = !j.link.some(v => v !== 0);
+                    const linkStr = isCoLocated ? ', co-located' : `, link: (${j.link.join(', ')}) mm`;
+
+                    let annotation = '';
+                    const gid = globalJointId(fname, ji);
+                    const isCoupled = j.coupled || false;
+
+                    if (isCoupled && !explained.coupled) {
+                        annotation = cmt('coupled = \u88AB\u52A8\u8026\u5408\u5173\u8282\uFF0C\u89D2\u5EA6\u7531\u5176\u4ED6\u5173\u8282\u9A71\u52A8\uFF0C\u4E0D\u8BA1\u5165\u6D3B\u52A8 DOF');
+                        explained.coupled = true;
+                    } else if (!explained.revolute) {
+                        annotation = cmt('revolute = \u65CB\u8F6C\u5173\u8282\uFF0C\u6709 1 \u4E2A\u65CB\u8F6C\u81EA\u7531\u5EA6\uFF0C\u7ED5 axis \u6307\u5B9A\u7684\u8F74\u65CB\u8F6C');
+                        explained.revolute = true;
+                    } else if (!explained.axis && jt !== 'Z') {
+                        annotation = cmt(`axis = \u65CB\u8F6C\u8F74\u5728\u5F53\u524D\u8282\u70B9\u5C40\u90E8\u5750\u6807\u7CFB\u7684\u65B9\u5411\uFF1B${jt}=flex \u5373\u5C48\u4F38`);
+                        explained.axis = true;
+                    } else if (isCoLocated && !explained.coLocated) {
+                        annotation = cmt('co-located = \u4E0E\u7236\u8282\u70B9\u4F4D\u7F6E\u91CD\u5408\uFF0C\u4E0D\u4EA7\u751F\u4F4D\u79FB\uFF0C\u4EC5\u589E\u52A0\u4E00\u4E2A\u65CB\u8F6C\u81EA\u7531\u5EA6');
+                        explained.coLocated = true;
+                    } else if (isCoLocated && !explained.coLocated2) {
+                        annotation = cmt('\u591A\u4E2A co-located \u5173\u8282\u53E0\u52A0 = \u4E00\u4E2A\u7403\u5173\u8282\u7684\u5206\u89E3\uFF0C\u6BCF\u4E2A\u63A7\u5236\u4E00\u4E2A\u8F74\u7684\u65CB\u8F6C');
+                        explained.coLocated2 = true;
+                    } else if (!isCoLocated && !explained.link) {
+                        annotation = cmt('link = \u5F53\u524D\u5173\u8282\u76F8\u5BF9\u7236\u5173\u8282\u7684\u4F4D\u79FB\u77E2\u91CF\uFF0C\u5373\u9AA8\u9ABC\u957F\u5EA6\u548C\u65B9\u5411');
+                        explained.link = true;
+                    } else if (!isCoLocated && !explained.linkVec) {
+                        annotation = cmt('link \u5728\u7236\u5173\u8282\u65CB\u8F6C\u540E\u7684\u5750\u6807\u7CFB\u4E0B\u5EA6\u91CF\uFF1B-Z \u65B9\u5411\u8868\u793A\u6307\u5411\u6307\u5C16');
+                        explained.linkVec = true;
+                    } else if (!explained.limitRange) {
+                        const lo = (j.limitLower / DEG).toFixed(0);
+                        const hi = (j.limitUpper / DEG).toFixed(0);
+                        annotation = cmt(`\u6BCF\u4E2A\u5173\u8282\u6709\u89D2\u5EA6\u9650\u4F4D\uFF0C\u6B64\u5173\u8282\u8303\u56F4 ${lo}\u00B0~${hi}\u00B0`);
+                        explained.limitRange = true;
+                    } else if (!explained.childInherit) {
+                        annotation = cmt('\u5B50\u8282\u70B9\u7EE7\u627F\u7236\u8282\u70B9\u7684\u53D8\u6362\uFF1AT_global = T_parent \u00B7 T_local');
+                        explained.childInherit = true;
+                    } else if (!explained.dof) {
+                        annotation = cmt('\u56DB\u6307\u5404 4-DOF (1 abd + 3 flex)\uFF0C\u62C7\u6307 4-DOF + 1 coupled\uFF0C\u5171 20 active + 1 passive');
+                        explained.dof = true;
+                    }
+
+                    if (isCoupled) {
+                        lines.push(`${indent}\u2514\u2500\u2500 <span style="color:#b0a050">\u2699 ${fdata.sdk}_${j.sdk}</span> [revolute/coupled, axis: ${jt}${linkStr}]${annotation}`);
+                    } else {
+                        lines.push(`${indent}\u2514\u2500\u2500 <span class="joint">(J${gid}) ${fdata.sdk}_${j.sdk}</span> [revolute, axis: ${jt}${linkStr}]${annotation}`);
+                    }
+                });
+                const tipIndent = sub + '    '.repeat(fdata.joints.length);
+                let tipCmt = '';
+                if (!explained.tip) {
+                    tipCmt = cmt('\u6307\u5C16\u662F\u672B\u7AEF\u6267\u884C\u5668 (end-effector)\uFF0C\u65E0\u81EA\u7531\u5EA6');
+                    explained.tip = true;
+                }
+                lines.push(`${tipIndent}\u2514\u2500\u2500 <span class="fixed">${fname}_tip</span> [fixed]${tipCmt}`);
+                const coilOff = CONFIG.sensors.coils[fname].offset_mm;
+                let coilCmt = '';
+                if (!explained.coil) {
+                    coilCmt = cmt('EMF \u7EBF\u5708\u56FA\u5B9A\u5728\u6307\u7532\u4E0A\uFF0C\u968F\u6307\u5C16\u8FD0\u52A8\uFF0C\u7528\u4E8E\u78C1\u5B9A\u4F4D');
+                    explained.coil = true;
+                }
+                lines.push(`${tipIndent}    \u2514\u2500\u2500 <span class="sensor">${CONFIG.sensors.coils[fname].name}</span> [fixed, offset: (${coilOff.join(', ')}) mm]${coilCmt}`);
+            });
+
+            // Annotations
+            lines.push('');
+            lines.push('<span style="color:var(--dim);font-size:9px">\u6CE8:</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">[1] thumb_mcp / thumb_ip \u662F thumb_mcp_flex / thumb_ip_flex \u7684\u7B80\u79F0\u3002</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    \u62C7\u6307\u4EC5\u6709\u4E00\u4E2A MCP \u548C\u4E00\u4E2A IP \u5173\u8282\uFF0C\u5747\u4E3A\u5C48\u4F38\u8F74\uFF0C\u7701\u7565 _flex \u540E\u7F00\u4E0D\u4F1A\u4EA7\u751F\u6B67\u4E49\u3002</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    \u56DB\u6307\u7684 MCP \u56E0\u540C\u65F6\u5B58\u5728 abd \u548C flex \u4E24\u4E2A\u81EA\u7531\u5EA6\uFF0C\u6545\u5FC5\u987B\u5199\u5168\u540D\u4EE5\u533A\u5206\u3002</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">[2] \u89E3\u5256\u5B66\u4E0A\uFF0Cabd\uFF08\u5916\u5C55/\u5185\u6536\uFF09\u4E0E flex\uFF08\u5C48\u4F38\uFF09\u53D1\u751F\u5728\u540C\u4E00\u4E2A\u5173\u8282\u9762\u4E0A\uFF08MCP = \u9AC1\u72B6\u5173\u8282 condyloid, 2-DOF\uFF1B</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    CMC = \u978D\u72B6\u5173\u8282 saddle, 2-DOF\uFF09\u3002\u5C06\u5176\u62C6\u4E3A\u4E24\u4E2A\u4E32\u8054\u7684 revolute joint \u65F6\uFF0C\u8C01\u5728\u524D\uFF08\u66F4\u9760\u8FD1 root\uFF09\u3001\u8C01\u5728\u540E\uFF0C</span>');
+            lines.push('<span style="color:var(--dim);font-size:9px">    \u662F\u5EFA\u6A21\u8005\u7684\u9009\u62E9\uFF0C\u4E0D\u662F\u89E3\u5256\u5B66\u7684\u56FA\u6709\u987A\u5E8F\u3002\u672C\u6A21\u578B\u9009\u62E9 flex \u5728\u524D\u3001abd \u5728\u540E\uFF0C\u56DB\u6307\u987A\u5E8F\u4E3A flex\u2192abd\u2192pip\u2192dip\u3002</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">[3] v12 \u6062\u590D\u4E86 cmc_rot\uFF08\u8F74\u5411\u65CB\u8F6C\uFF09\u5173\u8282\uFF0C\u4F5C\u4E3A\u88AB\u52A8\u8026\u5408\u5173\u8282\u3002\u62C7\u6307 CMC \u5173\u8282\uFF08\u7B2C\u4E00\u8155\u638C\u5173\u8282\uFF09\u662F\u978D\u72B6\u5173\u8282 (saddle joint, 2-DOF:</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">    flex/ext + abd/add)\uFF0C\u5176\u8F74\u5411\u65CB\u8F6C\uFF08\u65CB\u524D pronation / \u65CB\u540E supination\uFF09\u662F\u88AB\u52A8\u8026\u5408\u8FD0\u52A8\uFF0C</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">    \u5E76\u975E\u4EBA\u7C7B\u53EF\u4E3B\u52A8\u72EC\u7ACB\u63A7\u5236\u7684\u81EA\u7531\u5EA6\u3002v12 \u5C06\u5176\u4F5C\u4E3A\u8026\u5408\u5173\u8282\u5EFA\u6A21\uFF1A</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">      \u03B8_rot = K_FLEX \u00D7 \u03B8_flex + K_ABD \u00D7 \u03B8_abd + K_CROSS \u00D7 \u03B8_flex \u00D7 \u03B8_abd</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">    \u53C2\u6570\u6765\u6E90\uFF1AD\'Agostino 2017 screw-home mechanism (13.6\u00B0/(30.7\u00B0+30.5\u00B0) \u2192 \u65B9\u68882: K_FLEX=K_ABD=0.22)</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">    URDF origin rpy=(0,0,0.7854) \u4E3A\u9759\u6001 45\u00B0 \u504F\u7F6E\uFF0C\u4EE3\u8868\u62C7\u6307\u81EA\u7136\u65CB\u524D\u89D2\u5EA6\uFF1A</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">      WG110 (Glove \u4E00\u4EE3) = 45\u00B0 (0.785 rad)</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">      WH110 (Hand \u4E00\u4EE3)  = 36\u00B0 (0.628 rad)</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">      WH120 (Hand \u4E8C\u4EE3)  = 20\u00B0 (0.349 rad)</span>');
+            lines.push('<span style="color:#d09040;font-size:9px">    \u8026\u5408\u53C2\u6570\u53EF\u5728\u9875\u9762\u9876\u90E8 \u201CThumb CMC Coupling\u201D \u9762\u677F\u5B9E\u65F6\u8C03\u8282\u3002</span>');
+
+            document.getElementById('treeOutput').innerHTML = lines.join('\n');
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  INIT & ANIMATE
+        // ══════════════════════════════════════════════════════
+        buildCards();
+        FINGER_ORDER.forEach(fname => {
+            buildFingerChain(fname);
+            updateChain(fname);
+        });
+        setTimeout(() => {
+            FINGER_ORDER.forEach(fname => updateMatrixDisplays(fname));
+        }, 50);
+        buildTreeText();
+
+        // ══════════════════════════════════════════════════════
+        //  CLICK-TO-POPUP (Raycasting)
+        // ══════════════════════════════════════════════════════
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const popup = document.getElementById('nodePopup');
+        const popupTitle = document.getElementById('popupTitle');
+        const popupContent = document.getElementById('popupContent');
+        let popupDragState = null;
+
+        document.getElementById('popupClose').addEventListener('click', () => {
+            popup.classList.remove('visible');
+        });
+
+        popup.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('popup-close')) return;
+            popupDragState = {
+                startX: e.clientX, startY: e.clientY,
+                origLeft: popup.offsetLeft, origTop: popup.offsetTop
+            };
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (!popupDragState) return;
+            popup.style.left = (popupDragState.origLeft + e.clientX - popupDragState.startX) + 'px';
+            popup.style.top = (popupDragState.origTop + e.clientY - popupDragState.startY) + 'px';
+        });
+        document.addEventListener('mouseup', () => { popupDragState = null; });
+
+        let mouseDownPos = null;
+        canvas.addEventListener('mousedown', (e) => {
+            mouseDownPos = { x: e.clientX, y: e.clientY };
+        });
+        canvas.addEventListener('mouseup', (e) => {
+            if (!mouseDownPos) return;
+            const dx = e.clientX - mouseDownPos.x;
+            const dy = e.clientY - mouseDownPos.y;
+            if (dx * dx + dy * dy > 16) return;
+
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            let hit = null;
+            for (const isect of intersects) {
+                let obj = isect.object;
+                while (obj) {
+                    if (obj.userData && obj.userData.clickable) { hit = obj.userData; break; }
+                    obj = obj.parent;
+                }
+                if (hit) break;
+            }
+
+            if (hit) {
+                showPopup(hit, e.clientX, e.clientY);
+            } else {
+                popup.classList.remove('visible');
+            }
+        });
+
+        function showPopup(data, cx, cy) {
+            let title = '';
+            let html = '';
+
+            if (data.type === 'joint') {
+                const fdata = model[data.finger];
+                const j = fdata.joints[data.jointIdx];
+                const ch = '#' + fdata.color.toString(16).padStart(6, '0');
+                const gid = globalJointId(data.finger, data.jointIdx);
+                const isCoupled = j.coupled || false;
+                const jLabel = isCoupled ? '\u2699 coupled' : `(J${gid})`;
+                title = `${fdata.label.zh} ${fdata.label.en} — ${jLabel} ${j.name}`;
+
+                const axLabel = Math.abs(j.axis[2]) > 0.5 ? 'Z (twist)' :
+                    Math.abs(j.axis[1]) > 0.5 ? 'Y (abd)' : 'X (flex)';
+                const linkLen = Math.sqrt(j.link[0]**2 + j.link[1]**2 + j.link[2]**2);
+
+                html = `
+                    <div class="popup-row"><span class="popup-label">SDK</span>
+                        <span class="popup-val" style="color:var(--dim);font-style:italic">${fdata.sdk}_${j.sdk}</span></div>
+                    ${isCoupled ? '<div class="popup-row"><span class="popup-label">type</span><span class="popup-val" style="color:#b0a050;font-weight:600">coupled passive (driven by flex/abd)</span></div>' : ''}
+                    <div class="popup-row"><span class="popup-label">\u03C9</span>
+                        <span class="popup-val">[${j.axis.join(', ')}] — ${axLabel}</span></div>
+                    <div class="popup-row"><span class="popup-label">\u03B8</span>
+                        <span class="popup-val" style="color:${ch};font-weight:600">${(j.angle / DEG).toFixed(1)}\u00B0 (${j.angle.toFixed(4)} rad)</span></div>
+                    <div class="popup-row"><span class="popup-label">link</span>
+                        <span class="popup-val">[${j.link.map(v=>v.toFixed(1)).join(', ')}] mm  |link|=${linkLen.toFixed(1)}</span></div>
+                    <div class="popup-row"><span class="popup-label">sign</span>
+                        <span class="popup-val" style="color:#6a8a50">${j.signConvention}</span></div>`;
+
+                const T = jointLocalT[data.finger]?.[data.jointIdx];
+                if (T) {
+                    html += `<div class="popup-matrix">${formatMatrix4x4(T)}</div>`;
+                }
+                const sv = jointSpatialVec[data.finger]?.[data.jointIdx];
+                if (sv) {
+                    const angStr = sv.slice(0, 3).map(v => v.toFixed(4)).join(', ');
+                    const linStr = sv.slice(3, 6).map(v => v.toFixed(4)).join(', ');
+                    html += `<div class="popup-spatial">
+                        <b>\u03C9\u03B8</b> = [${angStr}] rad<br>
+                        <b>v</b>&nbsp;&nbsp; = [${linStr}] mm</div>`;
+                }
+            } else if (data.type === 'tip') {
+                const fdata = model[data.finger];
+                title = `${fdata.label.zh} ${fdata.label.en} — Tip`;
+                html = `<div class="popup-row"><span class="popup-val">\u6307\u5C16\u8282\u70B9 (fixed)</span></div>`;
+            } else if (data.type === 'coil') {
+                const fdata = model[data.finger];
+                const coilData = CONFIG.sensors.coils[data.finger];
+                title = `${coilData.name} — ${fdata.label.zh}`;
+                html = `<div class="popup-row"><span class="popup-val">EMF \u78C1\u63A5\u6536\u7EBF\u5708\uFF0Coffset: [${coilData.offset_mm}] mm</span></div>`;
+            } else if (data.type === 'wrist') {
+                title = 'Wrist (Root)';
+                html = `<div class="popup-row"><span class="popup-val">\u624B\u8155\u539F\u70B9\uFF0C\u8FD0\u52A8\u5B66\u6811\u6839\u8282\u70B9</span></div>`;
+            } else if (data.type === 'emfBase') {
+                title = 'EMF Sensor Base';
+                html = `<div class="popup-row"><span class="popup-val">${CONFIG.sensors.emfBase.description}<br>offset: [${CONFIG.sensors.emfBase.offset_mm}] mm</span></div>`;
+            }
+
+            popupTitle.textContent = title;
+            popupContent.innerHTML = html;
+
+            const pw = 320, ph = 300;
+            let left = cx + 12, top = cy - 20;
+            if (left + pw > window.innerWidth) left = cx - pw - 12;
+            if (top + ph > window.innerHeight) top = window.innerHeight - ph - 10;
+            if (top < 10) top = 10;
+            popup.style.left = left + 'px';
+            popup.style.top = top + 'px';
+            popup.classList.add('visible');
+        }
+
+        function onResize() {
+            const vc = document.querySelector('.view-3d');
+            camera.aspect = vc.clientWidth / vc.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(vc.clientWidth, vc.clientHeight);
+            orthoCanvasIds.forEach((cid, i) => {
+                const wrap = document.getElementById(cid).parentElement;
+                const ow = wrap.clientWidth, oh = wrap.clientHeight;
+                orthoRenderers[i].setSize(ow, oh);
+                const a = ow / oh;
+                orthoCameras[i].left = -orthoSize * a;
+                orthoCameras[i].right = orthoSize * a;
+                orthoCameras[i].top = orthoSize;
+                orthoCameras[i].bottom = -orthoSize;
+                orthoCameras[i].updateProjectionMatrix();
+            });
+        }
+        window.addEventListener('resize', onResize);
+        onResize();
+
+        // ══════════════════════════════════════════════════════
+        //  SPREAD + GRASP ANIMATION
+        // ══════════════════════════════════════════════════════
+        let animRunning = true;
+        let animTime = 0;
+        const animBtn = document.getElementById('btnAnim');
+
+        function getAnimPose(t) {
+            let abd = 0, flex = 0;
+            if (t < 0.25) {
+                abd = t / 0.25;
+            } else if (t < 0.40) {
+                abd = 1.0 - (t - 0.25) / 0.15 * 0.5;
+                flex = (t - 0.25) / 0.15 * 0.3;
+            } else if (t < 0.70) {
+                abd = 0.5 - (t - 0.40) / 0.30 * 0.5;
+                flex = 0.3 + (t - 0.40) / 0.30 * 0.7;
+            } else if (t < 0.85) {
+                flex = 1.0;
+            } else {
+                const r = (t - 0.85) / 0.15;
+                flex = 1.0 - r;
+            }
+            return { abd, flex };
+        }
+
+        function applyAnimPose(pose) {
+            const maxAbd = 0.35;
+            const maxFlex = 1.2;
+            const thumbMaxFlex = 0.8;
+
+            FINGER_ORDER.forEach(fname => {
+                const fdata = model[fname];
+                fdata.joints.forEach((j, ji) => {
+                    if (fname === 'thumb') {
+                        // WG110v12 thumb: ji=0 is coupled cmc_rot (auto-computed)
+                        // ji=1: CMC Flex (X axis) — flex joint
+                        // ji=2: CMC Abd (Y axis) — spread
+                        // ji=3: MCP (X axis) — flex
+                        // ji=4: IP (X axis) — flex
+                        if (j.coupled) return; // skip coupled joint — auto-computed
+                        if (ji === 2) {
+                            // CMC Abd: spread outward (negative for thumb = abduction)
+                            j.angle = -pose.abd * maxAbd;
+                        } else if (j.axis[0] > 0.5) {
+                            // flex joints (ji=1, 3, 4)
+                            j.angle = pose.flex * thumbMaxFlex;
+                        }
+                    } else {
+                        // Four fingers: flex→abd order
+                        // Axis detection still works: axis[1]>0.5 = abd, axis[0]>0.5 = flex
+                        if (j.axis[1] > 0.5) {
+                            // Y-axis = abd joint: spread
+                            const sign = (fname === 'index' || fname === 'middle') ? -1 : 1;
+                            j.angle = sign * pose.abd * maxAbd;
+                        } else if (j.axis[0] > 0.5) {
+                            // X-axis = flex joint
+                            j.angle = pose.flex * maxFlex;
+                        }
+                    }
+                });
+                updateChain(fname);
+                updateMatrixDisplays(fname);
+            });
+
+            // Update slider UI
+            FINGER_ORDER.forEach(fname => {
+                model[fname].joints.forEach((j, ji) => {
+                    const angleDeg = j.angle / DEG;
+                    if (j.coupled) {
+                        // Update coupled angle display
+                        const cad = document.getElementById('coupledAngleDisplay');
+                        if (cad) cad.textContent = angleDeg.toFixed(1);
+                        return;
+                    }
+                    const slider = sliderRefs[fname]?.[ji];
+                    if (slider) slider.value = angleDeg.toFixed(1);
+                    const numInp = numInputRefs[fname]?.[ji];
+                    if (numInp) numInp.value = angleDeg.toFixed(1);
+                });
+            });
+        }
+
+        document.getElementById('btnZero').addEventListener('click', () => {
+            if (animRunning) {
+                animRunning = false;
+                animBtn.textContent = 'Play Spread+Grasp';
+                animBtn.style.background = 'var(--card)';
+                animBtn.style.color = 'var(--accent)';
+            }
+            FINGER_ORDER.forEach(fname => {
+                model[fname].joints.forEach((j, ji) => {
+                    j.angle = 0;
+                });
+                updateChain(fname);
+                updateMatrixDisplays(fname);
+            });
+            FINGER_ORDER.forEach(fname => {
+                model[fname].joints.forEach((j, ji) => {
+                    const slider = sliderRefs[fname]?.[ji];
+                    if (slider) slider.value = '0.0';
+                    const numInp = numInputRefs[fname]?.[ji];
+                    if (numInp) numInp.value = '0.0';
+                    updateZeroStar(fname, ji);
+                });
+            });
+        });
+
+        animBtn.addEventListener('click', () => {
+            animRunning = !animRunning;
+            animBtn.textContent = animRunning ? 'Stop Animation' : 'Play Spread+Grasp';
+            animBtn.style.background = animRunning ? 'var(--accent)' : 'var(--card)';
+            animBtn.style.color = animRunning ? '#fff' : 'var(--accent)';
+            if (animRunning) animTime = 0;
+        });
+
+        // ══════════════════════════════════════════════════════
+        //  COUPLING PANEL EVENT HANDLERS
+        // ══════════════════════════════════════════════════════
+        function setupCouplingPanel() {
+            const panel = document.getElementById('couplingPanel');
+            if (!panel) return;
+            const hdr = panel.querySelector('.finger-header');
+            const body = panel.querySelector('.finger-body');
+            const arrow = hdr.querySelector('.arrow');
+            hdr.addEventListener('click', () => {
+                const isOpen = body.style.display === 'block';
+                body.style.display = isOpen ? 'none' : 'block';
+                arrow.classList.toggle('open', !isOpen);
+            });
+
+            const paramDefs = [
+                { key: 'K_FLEX',  slider: 'sliderKFlex',  input: 'inputKFlex'  },
+                { key: 'K_ABD',   slider: 'sliderKAbd',   input: 'inputKAbd'   },
+                { key: 'K_CROSS', slider: 'sliderKCross', input: 'inputKCross' }
+            ];
+            paramDefs.forEach(({ key, slider, input }) => {
+                const sl = document.getElementById(slider);
+                const inp = document.getElementById(input);
+                if (!sl || !inp) return;
+                sl.addEventListener('input', () => {
+                    const v = parseFloat(sl.value);
+                    couplingParams[key] = v;
+                    inp.value = v.toFixed(2);
+                    updateChain('thumb');
+                    updateMatrixDisplays('thumb');
+                    // Update coupled angle display
+                    const cad = document.getElementById('coupledAngleDisplay');
+                    if (cad) cad.textContent = (model.thumb.joints[0].angle / DEG).toFixed(1);
+                });
+                inp.addEventListener('change', () => {
+                    const v = parseFloat(inp.value) || 0;
+                    couplingParams[key] = v;
+                    sl.value = v;
+                    updateChain('thumb');
+                    updateMatrixDisplays('thumb');
+                    const cad = document.getElementById('coupledAngleDisplay');
+                    if (cad) cad.textContent = (model.thumb.joints[0].angle / DEG).toFixed(1);
+                });
+            });
+        }
+        setupCouplingPanel();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (animRunning) {
+                animTime += 0.004;
+                if (animTime > 1) animTime = 0;
+                applyAnimPose(getAnimPose(animTime));
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+            if (sceneDirty) {
+                orthoRenderers.forEach((r, i) => r.render(scene, orthoCameras[i]));
+                sceneDirty = false;
+            }
+        }
+        animate();
+
+        if (window.renderMathInElement)
+            setTimeout(() => renderMathInElement(document.getElementById('cardsPanel')), 500);
+    </script>
+</body>
+
+</html>
