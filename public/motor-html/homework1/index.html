@@ -7,12 +7,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
   onerror="this.onerror=null;this.href='vendor/katex/katex.min.css';">
 <script>
-// KaTeX loader: try CDN first, fallback to local vendor/
+// KaTeX loader: CDN with 3s timeout, fallback to local vendor/
 (function(){
   var CDN = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/";
   var LOCAL = "vendor/katex/";
   var files = ["katex.min.js", "contrib/auto-render.min.js"];
   var idx = 0;
+  var TIMEOUT = 3000;
 
   function renderMath() {
     if (window.renderMathInElement) {
@@ -22,21 +23,30 @@
     }
   }
 
-  function loadNext(base) {
-    if (idx >= files.length) { renderMath(); return; }
+  function loadScript(src, onSuccess, onFail) {
     var s = document.createElement("script");
-    s.src = base + files[idx];
-    s.onload = function() { idx++; loadNext(base); };
-    s.onerror = function() {
-      if (base === CDN) { idx = 0; loadNext(LOCAL); }  // CDN failed, retry all from local
-    };
+    var done = false;
+    var timer = setTimeout(function() {
+      if (!done) { done = true; s.onload = s.onerror = null; onFail(); }
+    }, TIMEOUT);
+    s.src = src;
+    s.onload = function() { if (!done) { done = true; clearTimeout(timer); onSuccess(); } };
+    s.onerror = function() { if (!done) { done = true; clearTimeout(timer); onFail(); } };
     document.head.appendChild(s);
   }
 
+  function loadChain(base, fallback) {
+    if (idx >= files.length) { renderMath(); return; }
+    loadScript(base + files[idx],
+      function() { idx++; loadChain(base, fallback); },
+      function() { if (fallback) { idx = 0; loadChain(fallback, null); } }
+    );
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function(){ loadNext(CDN); });
+    document.addEventListener("DOMContentLoaded", function(){ loadChain(CDN, LOCAL); });
   } else {
-    loadNext(CDN);
+    loadChain(CDN, LOCAL);
   }
 })();
 </script>
@@ -513,17 +523,15 @@
 </div>
 
 <script>
-// Scroll reveal
-function revealSections() {
-  document.querySelectorAll('.content-section').forEach(sec => {
-    const rect = sec.getBoundingClientRect();
-    if (rect.top < window.innerHeight - 60) {
-      sec.classList.add('visible');
-    }
-  });
-}
-window.addEventListener('scroll', revealSections);
-window.addEventListener('load', revealSections);
+// Scroll reveal via IntersectionObserver
+(function() {
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.content-section').forEach(function(s) { io.observe(s); });
+})();
 
 // Submit homework
 async function submitHomework() {
