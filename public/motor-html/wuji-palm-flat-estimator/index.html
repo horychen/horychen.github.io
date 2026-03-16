@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WUJI Palm Flat Estimator</title>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+        :root {
+            --bg: #1e1d1c;
+            --card: #28271f;
+            --panel: #242322;
+            --border: #383630;
+            --text: #faf9f5;
+            --dim: #b0aea5;
+            --accent: #d97757;
+            --accent-light: #2a1f1a;
+            --font: 'Lora', serif;
+            --font-heading: 'Poppins', sans-serif;
+            --c-thumb: #c47272;
+            --c-index: #c49a6e;
+            --c-middle: #7ea86e;
+            --c-ring: #5e8bb0;
+            --c-pinky: #8a6aaa;
+            --c-wrist: #5ea8a8;
+            --c-tip: #b0a050;
+            --c-sensor: #d07878;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        }
+
+        .header {
+            padding: 10px 20px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+        }
+
+        .header h1 {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            font-family: var(--font-heading)
+        }
+
+        .header h1 span {
+            color: var(--accent);
+            font-weight: 700
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 600;
+            background: var(--accent-light);
+            color: var(--accent);
+            font-family: var(--font-heading);
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden
+        }
+
+        .left-panel {
+            width: 300px;
+            min-width: 240px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            padding: 8px;
+            flex-shrink: 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .center-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+            min-width: 0;
+        }
+
+        .right-panel {
+            width: 300px;
+            min-width: 240px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: var(--panel);
+            border-left: 1px solid var(--border);
+            padding: 8px;
+            flex-shrink: 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .views-container {
+            flex: 1 1 0;
+            display: flex;
+            flex-direction: row;
+            gap: 2px;
+            min-height: 0;
+        }
+
+        .view-3d {
+            flex: 1 1 50%;
+            position: relative;
+            min-height: 100px;
+            min-width: 0;
+        }
+
+        .view-3d.secondary {
+            flex: 1 1 50%;
+            border-left: 1px solid var(--border);
+            border-top: none;
+        }
+
+        .view-label {
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            font-size: 8px;
+            color: var(--dim);
+            background: rgba(20,20,19,0.7);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: var(--font-heading);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        #canvas3d, #canvas3dSub {
+            width: 100%;
+            height: 100%;
+            display: block
+        }
+
+        .coord-label {
+            position: absolute;
+            top: 8px;
+            left: 10px;
+            font-size: 9px;
+            color: var(--dim);
+            background: rgba(20, 20, 19, 0.8);
+            padding: 3px 8px;
+            border-radius: 4px;
+            z-index: 5;
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--border);
+            font-family: var(--font-heading);
+        }
+
+        .hud-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 5px 12px;
+            background: linear-gradient(0deg, rgba(20, 20, 19, 0.9), transparent);
+            font-size: 9px;
+            color: var(--dim);
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            font-family: var(--font-heading);
+            font-size: 10px;
+        }
+
+        .toolbar button {
+            padding: 4px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            color: var(--text);
+            font-size: 11px;
+            cursor: pointer;
+            font-family: var(--font-heading);
+            transition: all 0.15s;
+            font-weight: 600;
+        }
+
+        .toolbar button:hover {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+
+        .toolbar button.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent)
+        }
+
+        /* Panel sections */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .panel-section {
+            margin-bottom: 6px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--card);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+            animation: fadeInUp 0.3s ease both;
+        }
+
+        .panel-header {
+            padding: 6px 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            font-weight: 600;
+            user-select: none;
+            font-family: var(--font-heading);
+        }
+
+        .panel-header:hover {
+            background: rgba(217, 119, 87, 0.07)
+        }
+
+        .panel-header .arrow {
+            transition: transform .2s;
+            font-size: 9px;
+            color: var(--dim)
+        }
+
+        .panel-header .arrow.open {
+            transform: rotate(90deg)
+        }
+
+        .panel-body {
+            padding: 6px 8px;
+            display: none
+        }
+
+        .panel-body.open {
+            display: block
+        }
+
+        /* Step buttons */
+        .step-btn {
+            width: 100%;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            color: var(--text);
+            font-size: 10px;
+            cursor: pointer;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            transition: all 0.15s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 3px;
+        }
+
+        .step-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+
+        .step-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed
+        }
+
+        .step-btn.applied {
+            border-color: var(--step-color, rgba(122, 200, 122, 0.4));
+            background: var(--step-bg, rgba(122, 200, 122, 0.06));
+            border-left: 3px solid var(--step-color, rgba(122, 200, 122, 0.4))
+        }
+
+        .step-btn.applied .step-label {
+            color: var(--step-color, #7ac87a)
+        }
+
+        .step-btn.applied:hover:not(:disabled) {
+            border-color: #e85050;
+            color: #e85050;
+            background: rgba(232, 80, 80, 0.06)
+        }
+
+        .step-btn .step-icon {
+            font-size: 12px;
+            flex-shrink: 0;
+            width: 18px;
+            text-align: center
+        }
+
+        .step-btn .step-label {
+            flex: 1
+        }
+
+        .step-btn .revert-hint {
+            font-size: 8px;
+            color: var(--dim);
+            margin-left: auto;
+            display: none
+        }
+
+        .step-btn.applied .revert-hint {
+            display: inline
+        }
+
+        .step-btn.applied:hover .revert-hint {
+            color: #e85050
+        }
+
+        .step-output {
+            padding: 5px 8px;
+            margin: 0 0 4px 0;
+            font-size: 8.5px;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            color: var(--dim);
+            line-height: 1.6;
+            border-left: 2px solid var(--border);
+            display: none;
+        }
+
+        .step-output.visible {
+            display: block
+        }
+
+        .step-output .val {
+            color: var(--accent);
+            font-weight: 600
+        }
+
+        .step-output .ok {
+            color: #7ea86e
+        }
+
+        .step-output .warn {
+            color: #e8a84c
+        }
+
+        .step-output .err {
+            color: #e85050
+        }
+
+        .run-all-btn {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--accent);
+            background: var(--accent);
+            color: #fff;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            margin-top: 6px;
+            transition: all 0.15s;
+        }
+
+        .run-all-btn:hover {
+            opacity: 0.85
+        }
+
+        /* Skeleton table */
+        .skel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9px;
+            font-family: var(--font-heading)
+        }
+
+        .skel-table td {
+            padding: 1px 2px
+        }
+
+        .skel-table input[type=number] {
+            width: 52px;
+            padding: 2px 3px;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 9px;
+            font-family: 'Cascadia Code', monospace;
+            text-align: right;
+        }
+
+        .skel-table input[type=number]:focus {
+            border-color: var(--accent);
+            outline: none
+        }
+
+        /* Step-colored highlights for changed values */
+        .skel-table input.step-changed {
+            font-weight: 700
+        }
+
+        .skel-table td.step-cell {
+            position: relative
+        }
+
+        .skel-table td.step-cell::after {
+            content: attr(data-step-info);
+            position: absolute;
+            bottom: -10px;
+            left: 2px;
+            font-size: 7px;
+            font-family: 'Cascadia Code', monospace;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        /* Step 0 (UI:1): Procrustes — Red */
+        .step-changed-0 { border-color: #FF4444 !important; background: #3d1e1e !important; color: #ff8888 !important; box-shadow: 0 0 5px rgba(255,68,68,0.3) }
+        td.step-cell-0::after { color: #FF4444 }
+        /* Step 1 (UI:2): Z-tilt — Orange */
+        .step-changed-1 { border-color: #FF8C00 !important; background: #3d2e1a !important; color: #ffb84d !important; box-shadow: 0 0 5px rgba(255,140,0,0.3) }
+        td.step-cell-1::after { color: #FF8C00 }
+        /* Step 2 (UI:3): PalmY — Yellow */
+        .step-changed-2 { border-color: #FFD700 !important; background: #3d3520 !important; color: #ffe64d !important; box-shadow: 0 0 5px rgba(255,215,0,0.3) }
+        td.step-cell-2::after { color: #FFD700 }
+        /* Step 3 (UI:4): 4F X — Green */
+        .step-changed-3 { border-color: #32CD32 !important; background: #1e3d1e !important; color: #7dff7d !important; box-shadow: 0 0 5px rgba(50,205,50,0.3) }
+        td.step-cell-3::after { color: #32CD32 }
+        /* Step 4 (UI:5): 4F Bones — Cyan */
+        .step-changed-4 { border-color: #00CED1 !important; background: #1a3535 !important; color: #66e8ea !important; box-shadow: 0 0 5px rgba(0,206,209,0.3) }
+        td.step-cell-4::after { color: #00CED1 }
+        /* Step 5 (UI:6): Thumb 3D Sweep — Blue */
+        .step-changed-5 { border-color: #4488FF !important; background: #1e2d3d !important; color: #88bbff !important; box-shadow: 0 0 5px rgba(68,136,255,0.3) }
+        td.step-cell-5::after { color: #4488FF }
+        /* Step 6 (UI:7): Thumb Bones — Indigo */
+        .step-changed-6 { border-color: #7B68EE !important; background: #2d1e3d !important; color: #b0a0ff !important; box-shadow: 0 0 5px rgba(123,104,238,0.3) }
+        td.step-cell-6::after { color: #7B68EE }
+        /* Step 7 (UI:8): Verify 4F — Violet */
+        .step-changed-7 { border-color: #DA70D6 !important; background: #3d1e3a !important; color: #eeaaee !important; box-shadow: 0 0 5px rgba(218,112,214,0.3) }
+        td.step-cell-7::after { color: #DA70D6 }
+        /* Step 8 (UI:9): Verify 5F — Rose */
+        .step-changed-8 { border-color: #FF6B8A !important; background: #3d1e28 !important; color: #ffaabb !important; box-shadow: 0 0 5px rgba(255,107,138,0.3) }
+        td.step-cell-8::after { color: #FF6B8A }
+
+        .step-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 6px;
+            font-size: 8px;
+            font-family: var(--font-heading)
+        }
+
+        .step-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 3px
+        }
+
+        .step-legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px
+        }
+
+        .skel-section-title {
+            font-size: 9px;
+            color: var(--accent);
+            font-weight: 600;
+            margin: 6px 0 3px;
+            font-family: var(--font-heading);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2px;
+        }
+
+        .skel-btn {
+            padding: 4px 10px;
+            border-radius: 5px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            color: var(--text);
+            font-size: 9px;
+            cursor: pointer;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            transition: all 0.15s;
+        }
+
+        .skel-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+
+        .skel-actions {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+            flex-wrap: wrap
+        }
+
+        .help-box {
+            margin: 4px 0 8px;
+            padding: 8px 10px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 9px;
+            line-height: 1.6;
+            color: var(--dim);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+        }
+
+        .help-box strong {
+            color: var(--text);
+            font-size: 10px;
+            font-family: var(--font-heading)
+        }
+
+        .status-line {
+            padding: 4px 8px;
+            font-size: 9px;
+            color: var(--dim);
+            font-family: var(--font-heading);
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+
+        .status-line .loaded {
+            color: #7ea86e
+        }
+
+        .status-line .not-loaded {
+            color: #e85050
+        }
+
+        @media (max-width: 768px) {
+            body {
+                overflow: auto;
+                height: auto;
+                min-height: 100vh
+            }
+
+            .main {
+                flex-direction: column
+            }
+
+            .left-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                order: 2;
+                max-height: 30vh
+            }
+
+            .center-col {
+                order: 1
+            }
+
+            .right-panel {
+                width: 100%;
+                border-left: none;
+                border-top: 1px solid var(--border);
+                order: 3;
+                max-height: 30vh
+            }
+
+            .view-3d {
+                min-height: 260px;
+                flex: none;
+                height: 40vh
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1><span>WUJI</span> Palm Flat Estimator</h1>
+        <span class="badge">Step-by-Step</span>
+        <span class="badge" id="badgeInfo">No data</span>
+    </div>
+    <div class="main">
+        <div class="left-panel" id="leftPanel">
+            <div class="help-box">
+                <strong>Palm Flat Estimator</strong><br>
+                逐步估算手套骨骼参数。<br>
+                自动加载 <code>palm_flat_right.npz</code>，手动加载 <code>skeleton_init.json</code>。
+            </div>
+
+            <!-- Data Files -->
+            <div class="panel-section">
+                <div class="panel-header" onclick="togglePanel('dataBody', this)">
+                    <span class="arrow open">&#9654;</span>
+                    <span style="color:var(--accent);font-weight:700">Data Files</span>
+                </div>
+                <div class="panel-body open" id="dataBody">
+                    <div class="status-line" id="npzStatus">
+                        NPZ: <span class="not-loaded">loading...</span>
+                    </div>
+                    <div class="status-line" id="jsonStatus">
+                        Skeleton JSON: <span class="not-loaded">not loaded (using URDF defaults)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estimation Steps -->
+            <div class="panel-section">
+                <div class="panel-header" onclick="togglePanel('stepsBody', this)">
+                    <span class="arrow open">&#9654;</span>
+                    <span style="color:var(--c-wrist);font-weight:700">Estimation Steps</span>
+                </div>
+                <div class="panel-body open" id="stepsBody">
+                    <div id="stepsContainer"></div>
+                    <button class="run-all-btn" id="btnRunAll" onclick="runAllSteps()">Run All Steps</button>
+                </div>
+            </div>
+
+        </div>
+        <div class="center-col">
+            <div class="views-container">
+                <div class="view-3d" id="view3dMain">
+                    <canvas id="canvas3d"></canvas>
+                    <div class="coord-label">
+                        <span style="color:var(--accent);font-weight:600">Wrist Frame</span> ·
+                        <span style="color:#ff3333">X</span> ·
+                        <span style="color:#33cc33">Y</span> ·
+                        <span style="color:#3388ff">Z</span>
+                    </div>
+                    <div class="view-label" id="viewLabelMain">Perspective</div>
+                </div>
+                <div class="view-3d secondary" id="view3dSub">
+                    <canvas id="canvas3dSub"></canvas>
+                    <div class="view-label" id="viewLabelSub">Top · Ortho</div>
+                </div>
+            </div>
+            <div class="toolbar">
+                <span style="font-size:9px;color:var(--dim);font-family:var(--font-heading)">Main:</span>
+                <button id="viewFront">Front</button>
+                <button id="viewRear">Rear</button>
+                <button id="viewTop">Top</button>
+                <button id="viewBottom">Bottom</button>
+                <button id="viewSide">Left</button>
+                <button id="viewRight">Right</button>
+                <button id="btnOrtho">Ortho</button>
+                <span style="width:1px;height:16px;background:var(--border);margin:0 4px"></span>
+                <span style="font-size:9px;color:var(--dim);font-family:var(--font-heading)">Sub:</span>
+                <button id="viewFrontSub">Front</button>
+                <button id="viewRearSub">Rear</button>
+                <button id="viewTopSub" class="active">Top</button>
+                <button id="viewBottomSub">Bottom</button>
+                <button id="viewSideSub">Left</button>
+                <button id="viewRightSub">Right</button>
+                <span style="width:1px;height:16px;background:var(--border);margin:0 4px"></span>
+                <button id="btnToggleHand">Hide Glove</button>
+                <button id="btnToggleSensors">Hide Sensors</button>
+            </div>
+        </div>
+        <div class="right-panel" id="rightPanel">
+            <div class="panel-section">
+                <div class="panel-header" onclick="togglePanel('skelBody', this)">
+                    <span class="arrow open">&#9654;</span>
+                    <span style="font-weight:700">Skeleton Parameters</span>
+                    <span style="color:var(--dim);font-size:9px;margin-left:auto">editable</span>
+                </div>
+                <div class="panel-body open" id="skelBody">
+                    <div class="skel-actions">
+                        <button class="skel-btn" id="btnSaveSkel">Save JSON</button>
+                        <button class="skel-btn" id="btnLoadSkel">Load JSON</button>
+                        <input type="file" id="skelFileInput" accept=".json" style="display:none">
+                    </div>
+                    <div id="stepLegend" class="step-legend" style="margin-top:6px"></div>
+                    <div id="skelTablesContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePanel(bodyId, headerEl) {
+            const body = document.getElementById(bodyId);
+            body.classList.toggle('open');
+            headerEl.querySelector('.arrow').classList.toggle('open');
+        }
+    </script>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+      }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ══════════════════════════════════════════════════════
+        //  NPY / NPZ PARSER
+        // ══════════════════════════════════════════════════════
+        function parseNpy(buffer) {
+            const view = new DataView(buffer);
+            const magic = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3), view.getUint8(4), view.getUint8(5));
+            if (magic !== '\x93NUMPY') throw new Error('Not a .npy file');
+            const major = view.getUint8(6);
+            let headerLen, headerOffset;
+            if (major === 1) { headerLen = view.getUint16(8, true); headerOffset = 10; }
+            else { headerLen = view.getUint32(8, true); headerOffset = 12; }
+            const header = new TextDecoder().decode(new Uint8Array(buffer, headerOffset, headerLen)).trim();
+            const descrMatch = header.match(/'descr'\s*:\s*'([^']+)'/);
+            const shapeMatch = header.match(/'shape'\s*:\s*\(([^)]*)\)/);
+            const descr = descrMatch ? descrMatch[1] : '<f8';
+            const shapeStr = shapeMatch ? shapeMatch[1] : '';
+            const shape = shapeStr ? shapeStr.split(',').map(s => s.trim()).filter(s => s).map(Number) : [];
+            const dataOffset = headerOffset + headerLen;
+            const dataBuffer = buffer.slice(dataOffset);
+            let data;
+            if (descr === '<f8' || descr === '=f8') data = new Float64Array(dataBuffer);
+            else if (descr === '<f4' || descr === '=f4') data = new Float32Array(dataBuffer);
+            else if (descr === '<i4' || descr === '=i4') data = new Int32Array(dataBuffer);
+            else if (descr === '<i8' || descr === '=i8') data = new BigInt64Array(dataBuffer);
+            else if (descr.startsWith('<U') || descr.startsWith('=U')) {
+                const charWidth = parseInt(descr.replace(/^[<=]U/, ''));
+                const totalElements = shape.reduce((a, b) => a * b, 1) || 1;
+                const strData = [], dv = new DataView(dataBuffer);
+                for (let i = 0; i < totalElements; i++) {
+                    let s = '';
+                    for (let c = 0; c < charWidth; c++) {
+                        const code = dv.getUint32((i * charWidth + c) * 4, true);
+                        if (code === 0) break;
+                        s += String.fromCodePoint(code);
+                    }
+                    strData.push(s);
+                }
+                data = strData;
+            } else if (descr.startsWith('|S')) {
+                const byteWidth = parseInt(descr.replace('|S', ''));
+                const totalElements = shape.reduce((a, b) => a * b, 1) || 1;
+                const bytes = new Uint8Array(dataBuffer);
+                const strData = [];
+                for (let i = 0; i < totalElements; i++) {
+                    let s = '';
+                    for (let c = 0; c < byteWidth; c++) { const b = bytes[i * byteWidth + c]; if (b === 0) break; s += String.fromCharCode(b); }
+                    strData.push(s);
+                }
+                data = strData;
+            } else data = new Float64Array(dataBuffer);
+            return { descr, shape, data };
+        }
+
+        async function loadNpzFile(file) {
+            const arrayBuf = await file.arrayBuffer();
+            const zip = await JSZip.loadAsync(arrayBuf);
+            const result = new Map();
+            for (const [name, entry] of Object.entries(zip.files)) {
+                if (name.endsWith('.npy')) {
+                    const buf = await entry.async('arraybuffer');
+                    result.set(name.replace('.npy', ''), parseNpy(buf));
+                }
+            }
+            return result;
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  KINEMATIC MODEL CONFIG (WG110v12)
+        // ══════════════════════════════════════════════════════
+        const DEG = Math.PI / 180;
+        const FINGER_ORDER = ['thumb', 'index', 'middle', 'ring', 'pinky'];
+        const SENSOR_COLORS = [0xc47272, 0xc49a6e, 0x7ea86e, 0x5e8bb0, 0x8a6aaa];
+        const SENSOR_NAMES = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky'];
+
+        const CONFIG = {
+            sensors: {
+                emfBase: { offset_mm: [4, -12, -50], description: "EMF base" },
+                coils: {
+                    thumb: { parent: "thumb_tip", offset_mm: [0, -8, 0] },
+                    index: { parent: "index_tip", offset_mm: [0, -8, 0] },
+                    middle: { parent: "middle_tip", offset_mm: [0, -8, 0] },
+                    ring: { parent: "ring_tip", offset_mm: [0, -8, 0] },
+                    pinky: { parent: "pinky_tip", offset_mm: [0, -8, 0] }
+                }
+            },
+            fingers: {
+                thumb: {
+                    label: { en: "Thumb", zh: "拇指" }, color: 0xc47272,
+                    palmOffset: { position_mm: [32.9, 35.5, -24.1], rotationEulerDeg: [0, -24.641184, 0] },
+                    joints: [
+                        { name: "CMC Rot", axis: [0, 0, 1], link_mm: [0, 0, 0], coupled: true, originOffset_rad: 0.7854, limitLower_rad: -0.1745, limitUpper_rad: 0.8727 },
+                        { name: "CMC Flex", axis: [1, 0, 0], link_mm: [0, 0, 0], limitLower_rad: -0.3491, limitUpper_rad: 0.8727 },
+                        { name: "CMC Abd", axis: [0, 1, 0], link_mm: [0, 0, -40.7], limitLower_rad: -0.1745, limitUpper_rad: 0.6981 },
+                        { name: "MCP", axis: [1, 0, 0], link_mm: [0, 0, -34.6], limitLower_rad: 0, limitUpper_rad: 1.2217 },
+                        { name: "IP", axis: [1, 0, 0], link_mm: [0, 0, -33.2], limitLower_rad: 0, limitUpper_rad: 1.3963 }
+                    ]
+                },
+                index: {
+                    label: { en: "Index", zh: "食指" }, color: 0xc49a6e,
+                    palmOffset: { position_mm: [32.2, 0, -88.1], rotationEulerDeg: [0, 0, 0] },
+                    joints: [
+                        { name: "MCP Flex", axis: [1, 0, 0], link_mm: [0, 0, 0], limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { name: "MCP Abd", axis: [0, 1, 0], link_mm: [0, 0, -38.7], limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
+                        { name: "PIP", axis: [1, 0, 0], link_mm: [0, 0, -24.1], limitLower_rad: 0, limitUpper_rad: 1.7453 },
+                        { name: "DIP", axis: [1, 0, 0], link_mm: [0, 0, -24.1], limitLower_rad: 0, limitUpper_rad: 1.2217 }
+                    ]
+                },
+                middle: {
+                    label: { en: "Middle", zh: "中指" }, color: 0x7ea86e,
+                    palmOffset: { position_mm: [13.7, 0, -94.7], rotationEulerDeg: [0, 0, 0] },
+                    joints: [
+                        { name: "MCP Flex", axis: [1, 0, 0], link_mm: [0, 0, 0], limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { name: "MCP Abd", axis: [0, 1, 0], link_mm: [0, 0, -42.5], limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
+                        { name: "PIP", axis: [1, 0, 0], link_mm: [0, 0, -28.6], limitLower_rad: 0, limitUpper_rad: 1.7453 },
+                        { name: "DIP", axis: [1, 0, 0], link_mm: [0, 0, -25.9], limitLower_rad: 0, limitUpper_rad: 1.2217 }
+                    ]
+                },
+                ring: {
+                    label: { en: "Ring", zh: "无名指" }, color: 0x5e8bb0,
+                    palmOffset: { position_mm: [-6.7, 0, -81.7], rotationEulerDeg: [0, 0, 0] },
+                    joints: [
+                        { name: "MCP Flex", axis: [1, 0, 0], link_mm: [0, 0, 0], limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { name: "MCP Abd", axis: [0, 1, 0], link_mm: [0, 0, -40.7], limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
+                        { name: "PIP", axis: [1, 0, 0], link_mm: [0, 0, -27.3], limitLower_rad: 0, limitUpper_rad: 1.7453 },
+                        { name: "DIP", axis: [1, 0, 0], link_mm: [0, 0, -24.7], limitLower_rad: 0, limitUpper_rad: 1.2217 }
+                    ]
+                },
+                pinky: {
+                    label: { en: "Pinky", zh: "小指" }, color: 0x8a6aaa,
+                    palmOffset: { position_mm: [-23.2, 0, -68.8], rotationEulerDeg: [0, 0, 0] },
+                    joints: [
+                        { name: "MCP Flex", axis: [1, 0, 0], link_mm: [0, 0, 0], limitLower_rad: -0.1745, limitUpper_rad: 1.5708 },
+                        { name: "MCP Abd", axis: [0, 1, 0], link_mm: [0, 0, -32.1], limitLower_rad: -0.5236, limitUpper_rad: 0.5236 },
+                        { name: "PIP", axis: [1, 0, 0], link_mm: [0, 0, -21.5], limitLower_rad: 0, limitUpper_rad: 1.7453 },
+                        { name: "DIP", axis: [1, 0, 0], link_mm: [0, 0, -19.4], limitLower_rad: 0, limitUpper_rad: 1.2217 }
+                    ]
+                }
+            }
+        };
+
+        // Build runtime model
+        const model = {};
+        for (const fn of FINGER_ORDER) {
+            const src = CONFIG.fingers[fn];
+            model[fn] = {
+                color: src.color, label: src.label,
+                palmOffset: { pos: [...src.palmOffset.position_mm], rotDeg: [...src.palmOffset.rotationEulerDeg] },
+                joints: src.joints.map(j => ({
+                    ...j, axis: [...j.axis], link: [...j.link_mm],
+                    angle: 0, coupled: j.coupled || false,
+                    originOffset: j.originOffset_rad || 0
+                }))
+            };
+        }
+
+        const couplingParams = { K_FLEX: 0.22, K_ABD: 0.22, K_CROSS: 0.0 };
+
+        function updateThumbCoupling() {
+            const joints = model.thumb.joints;
+            if (joints[0].coupled) {
+                let rot = couplingParams.K_FLEX * joints[1].angle + couplingParams.K_ABD * joints[2].angle
+                    + couplingParams.K_CROSS * joints[1].angle * joints[2].angle;
+                rot = Math.max(joints[0].limitLower_rad || -Math.PI, Math.min(joints[0].limitUpper_rad || Math.PI, rot));
+                joints[0].angle = rot;
+            }
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  SKELETON PARAMS — initialized from CONFIG (Fix D)
+        // ══════════════════════════════════════════════════════
+        const skeletonParams = {
+            emfBase: { pos: [4, -12, -50], rpy: [0, 0, 0] },
+            fingers: {}
+        };
+        FINGER_ORDER.forEach(fn => {
+            const src = CONFIG.fingers[fn];
+            const fp = {
+                metacarpal: {
+                    pos: [...src.palmOffset.position_mm],
+                    rpy: src.palmOffset.rotationEulerDeg.map(d => d * DEG)
+                },
+                bones: {},
+                coilOffset: [...CONFIG.sensors.coils[fn].offset_mm]
+            };
+            if (fn === 'thumb') {
+                fp.bones.proximal = Math.abs(src.joints[2].link_mm[2]) || 40.7;
+                fp.bones.middle = Math.abs(src.joints[3].link_mm[2]) || 34.6;
+                fp.bones.distal = Math.abs(src.joints[4].link_mm[2]) || 33.2;
+                fp.cmcRotOffset = src.joints[0].originOffset_rad || 0.7854;
+                fp.couplingK = { ...couplingParams };
+            } else {
+                fp.bones.proximal = Math.abs(src.joints[1].link_mm[2]);
+                fp.bones.middle = Math.abs(src.joints[2].link_mm[2]);
+                fp.bones.distal = Math.abs(src.joints[3].link_mm[2]);
+            }
+            skeletonParams.fingers[fn] = fp;
+        });
+        const URDF_SKELETON = JSON.parse(JSON.stringify(skeletonParams));
+
+        // ══════════════════════════════════════════════════════
+        //  THREE.JS SETUP
+        // ══════════════════════════════════════════════════════
+        let BG_COLOR = 0x32312f;
+        const pixelRatio = Math.min(window.devicePixelRatio, 2);
+
+        // ── Main viewport ──
+        const canvas = document.getElementById('canvas3d');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setPixelRatio(pixelRatio);
+        renderer.setClearColor(BG_COLOR);
+        renderer.shadowMap.enabled = true;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.4;
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(BG_COLOR);
+
+        const perspCamera = new THREE.PerspectiveCamera(45, 1, 0.1, 5000);
+        perspCamera.position.set(120, 80, 120);
+        const orthoCamera = new THREE.OrthographicCamera(-200, 200, 150, -150, 0.1, 5000);
+        orthoCamera.position.set(120, 80, 120);
+        orthoCamera.zoom = 1;
+        let camera = perspCamera;
+        let isOrtho = false;
+
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+        controls.target.set(0, 0, -50);
+
+        // ── Secondary viewport ──
+        const canvasSub = document.getElementById('canvas3dSub');
+        const rendererSub = new THREE.WebGLRenderer({ canvas: canvasSub, antialias: true });
+        rendererSub.setPixelRatio(pixelRatio);
+        rendererSub.setClearColor(BG_COLOR);
+        rendererSub.shadowMap.enabled = true;
+        rendererSub.toneMapping = THREE.ACESFilmicToneMapping;
+        rendererSub.toneMappingExposure = 1.4;
+
+        const subCamera = new THREE.OrthographicCamera(-200, 200, 150, -150, 0.1, 5000);
+        const VIEW_DIST_SUB = 250;
+        subCamera.position.set(0, VIEW_DIST_SUB, -50.01);  // Top view default
+        subCamera.zoom = 1;
+
+        const controlsSub = new OrbitControls(subCamera, canvasSub);
+        controlsSub.enableDamping = true;
+        controlsSub.dampingFactor = 0.06;
+        controlsSub.target.set(0, 0, -50);
+        let subViewType = 'top';
+
+        // Lighting
+        scene.add(new THREE.AmbientLight(0x2a2a28, 1.5));
+        const dl = new THREE.DirectionalLight(0xffeedd, 1.2);
+        dl.position.set(80, 150, 100); dl.castShadow = true; scene.add(dl);
+        scene.add(new THREE.DirectionalLight(0xddeeff, 0.5).translateX(-80).translateY(80));
+        scene.add(new THREE.HemisphereLight(0x2a2a28, 0x111110, 0.6));
+
+        // Grid
+        const grid = new THREE.GridHelper(400, 40, 0x000000, 0x000000);
+        grid.position.set(0, -60, -50);
+        grid.material.opacity = 0.4; grid.material.transparent = true;
+        scene.add(grid);
+
+        function metalMat(c, r) { return new THREE.MeshStandardMaterial({ color: c, metalness: 0.4, roughness: r || 0.45 }); }
+
+        function createAxes(size) {
+            const g = new THREE.Group();
+            const headLen = size * 0.3, headW = size * 0.15;
+            const axes = [
+                { dir: new THREE.Vector3(1, 0, 0), color: 0xff3333 },
+                { dir: new THREE.Vector3(0, 1, 0), color: 0x33cc33 },
+                { dir: new THREE.Vector3(0, 0, 1), color: 0x3388ff },
+            ];
+            for (const a of axes) g.add(new THREE.ArrowHelper(a.dir, new THREE.Vector3(), size, a.color, headLen, headW));
+            return g;
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  HAND MODEL
+        // ══════════════════════════════════════════════════════
+        const handGroup = new THREE.Group();
+        scene.add(handGroup);
+        handGroup.visible = true;
+
+        const _vec3A = new THREE.Vector3();
+        const _quatA = new THREE.Quaternion();
+        const JR = 3.5, LR = 1.8;
+        const fingerObjects = {};
+
+        function createJointMesh(color, axis) {
+            const g = new THREE.Group();
+            const cyl = new THREE.Mesh(new THREE.CylinderGeometry(JR, JR, 9, 20), metalMat(color, 0.35));
+            const ax = Math.abs(axis[0]) > 0.5;
+            if (ax) cyl.rotation.z = Math.PI / 2;
+            else if (Math.abs(axis[1]) <= 0.5) cyl.rotation.x = Math.PI / 2;
+            cyl.castShadow = true;
+            g.add(cyl);
+            g.add(new THREE.Mesh(new THREE.SphereGeometry(1.2, 10, 10),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.5 })));
+            g.add(createAxes(12));
+            return g;
+        }
+
+        function createBone(lv, col) {
+            const len = lv.length();
+            if (len < 0.5) return null;
+            const m = new THREE.Mesh(new THREE.CylinderGeometry(LR, LR, len, 10), metalMat(col, 0.5));
+            m.castShadow = true;
+            m.position.copy(lv.clone().multiplyScalar(0.5));
+            const up = new THREE.Vector3(0, 1, 0), dir = lv.clone().normalize();
+            if (Math.abs(up.dot(dir)) < 0.999) m.quaternion.setFromUnitVectors(up, dir);
+            return m;
+        }
+
+        function createThenarMesh(lv) {
+            const len = lv.length();
+            if (len < 0.5) return null;
+            const g = new THREE.Group();
+            const inner = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.0, 1.0, len, 8),
+                new THREE.MeshStandardMaterial({ color: 0xc47272, metalness: 0.4, roughness: 0.45, transparent: true, opacity: 0.6 }));
+            g.add(inner);
+            const pts = [];
+            const N = 20;
+            for (let i = 0; i <= N; i++) {
+                const t = i / N;
+                const bulge = Math.sin(Math.PI * (t * 0.85 + 0.08));
+                const taper = 1.15 - 0.5 * t;
+                const r = 7.5 * bulge * taper;
+                pts.push(new THREE.Vector2(Math.max(r, 0.3), (t - 0.5) * len));
+            }
+            const fleshGeo = new THREE.LatheGeometry(pts, 14);
+            const fleshMat = new THREE.MeshPhysicalMaterial({
+                color: 0xe8b8a0, metalness: 0.02, roughness: 0.85,
+                transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false
+            });
+            g.add(new THREE.Mesh(fleshGeo, fleshMat));
+            g.position.copy(lv.clone().multiplyScalar(0.5));
+            const up = new THREE.Vector3(0, 1, 0), dir = lv.clone().normalize();
+            if (Math.abs(up.dot(dir)) < 0.999) g.quaternion.setFromUnitVectors(up, dir);
+            return g;
+        }
+
+        function createCoil() {
+            const g = new THREE.Group();
+            g.add(new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 2, 16),
+                new THREE.MeshPhysicalMaterial({ color: 0xd07878, metalness: 0.3, roughness: 0.4, transparent: true, opacity: 0.85 })));
+            g.add(new THREE.Mesh(new THREE.TorusGeometry(2, 0.4, 8, 16),
+                new THREE.MeshStandardMaterial({ color: 0xaa5555, metalness: 0.5, roughness: 0.3 })));
+            return g;
+        }
+
+        // Fix A: buildFingerChain reads coilOffset from skeletonParams
+        function buildFingerChain(fname) {
+            const fdata = model[fname];
+            const group = new THREE.Group();
+            const po = fdata.palmOffset;
+            group.position.set(po.pos[0], po.pos[1], po.pos[2]);
+            if (po.rotDeg) group.rotation.set(po.rotDeg[0] * DEG, po.rotDeg[1] * DEG, po.rotDeg[2] * DEG, 'XYZ');
+            const chainNodes = [];
+            let parentObj = group;
+            fdata.joints.forEach((j, ji) => {
+                const pivot = new THREE.Group();
+                parentObj.add(pivot);
+                pivot.add(createJointMesh(fdata.color, j.axis));
+                const child = new THREE.Group();
+                child.position.set(j.link[0], j.link[1], j.link[2]);
+                pivot.add(child);
+                const lv = new THREE.Vector3(j.link[0], j.link[1], j.link[2]);
+                const isThenar = (fname === 'thumb' && ji === 2);
+                const bone = isThenar ? createThenarMesh(lv) : createBone(lv, fdata.color);
+                if (bone) pivot.add(bone);
+                chainNodes.push({ pivot, child, bone, isThenar });
+                parentObj = child;
+            });
+
+            const tipLink = new THREE.Group();
+            parentObj.add(tipLink);
+            const tipMesh = new THREE.Mesh(
+                new THREE.SphereGeometry(2.5, 14, 14),
+                new THREE.MeshPhysicalMaterial({ color: 0xb0a050, emissive: 0xb0a050, emissiveIntensity: 0.15, metalness: 0.3, roughness: 0.3 }));
+            tipMesh.scale.set(1, 0.7, 1);
+            tipLink.add(tipMesh);
+            // Nail
+            const nailShape = new THREE.Shape();
+            const nw = 2.8, nl = 4.5, nr = 1.2;
+            nailShape.moveTo(-nw + nr, -nl);
+            nailShape.lineTo(nw - nr, -nl);
+            nailShape.quadraticCurveTo(nw, -nl, nw, -nl + nr);
+            nailShape.lineTo(nw, nl - nr);
+            nailShape.quadraticCurveTo(nw, nl, nw - nr, nl);
+            nailShape.lineTo(-nw + nr, nl);
+            nailShape.quadraticCurveTo(-nw, nl, -nw, nl - nr);
+            nailShape.lineTo(-nw, -nl + nr);
+            nailShape.quadraticCurveTo(-nw, -nl, -nw + nr, -nl);
+            const nailGeo = new THREE.ExtrudeGeometry(nailShape, { depth: 0.6, bevelEnabled: false });
+            const nailMesh = new THREE.Mesh(nailGeo,
+                new THREE.MeshPhysicalMaterial({ color: 0xf0d0c0, metalness: 0.1, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.2 }));
+            nailMesh.rotation.x = -Math.PI / 2;
+            nailMesh.position.set(0, -2, 0);
+            tipLink.add(nailMesh);
+
+            // Fix A: Coil uses skeletonParams coilOffset
+            const coil = createCoil();
+            const co = skeletonParams.fingers[fname].coilOffset;
+            coil.position.set(co[0], co[1], co[2]);
+            tipLink.add(coil);
+
+            handGroup.add(group);
+            fingerObjects[fname] = { group, chainNodes, tipLink, coil };
+        }
+
+        function updateChain(fname) {
+            const fdata = model[fname];
+            const fobj = fingerObjects[fname];
+            if (!fobj) return;
+            if (fname === 'thumb') updateThumbCoupling();
+            fdata.joints.forEach((j, ji) => {
+                const node = fobj.chainNodes[ji];
+                _vec3A.set(j.axis[0], j.axis[1], j.axis[2]).normalize();
+                const renderAngle = j.angle + (j.originOffset || 0);
+                node.pivot.setRotationFromQuaternion(_quatA.setFromAxisAngle(_vec3A, renderAngle));
+                node.child.position.set(j.link[0], j.link[1], j.link[2]);
+            });
+        }
+
+        // Build wrist + metacarpal links + hand chains
+        handGroup.add(new THREE.Mesh(new THREE.SphereGeometry(4, 20, 20), metalMat(0x5ea8a8, 0.35)));
+        handGroup.add(createAxes(24));
+        const metacarpalMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.2, roughness: 0.6 });
+        FINGER_ORDER.forEach(fname => {
+            const po = model[fname].palmOffset;
+            const target = new THREE.Vector3(po.pos[0], po.pos[1], po.pos[2]);
+            const len = target.length();
+            if (len < 0.5) return;
+            const bone = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, len, 8), metacarpalMat);
+            bone.position.copy(target.clone().multiplyScalar(0.5));
+            const up = new THREE.Vector3(0, 1, 0), dir = target.clone().normalize();
+            if (Math.abs(up.dot(dir)) < 0.999) bone.quaternion.setFromUnitVectors(up, dir);
+            bone.castShadow = true;
+            handGroup.add(bone);
+            buildFingerChain(fname);
+        });
+
+        // EMF Base sensor triangle
+        const emfBase = new THREE.Group();
+        {
+            const hw = 10, backZ = 7, tipZ = -14;
+            const cz = (backZ * 2 + tipZ) / 3;
+            const h = 5;
+            const vertices = new Float32Array([
+                -hw, 0, backZ - cz, hw, 0, backZ - cz, 0, 0, tipZ - cz,
+                -hw, h, backZ - cz, 0, h, tipZ - cz, hw, h, backZ - cz,
+                -hw, 0, backZ - cz, -hw, h, backZ - cz, hw, h, backZ - cz,
+                hw, h, backZ - cz, hw, 0, backZ - cz, -hw, 0, backZ - cz,
+                0, 0, tipZ - cz, 0, h, tipZ - cz, -hw, h, backZ - cz,
+                -hw, h, backZ - cz, -hw, 0, backZ - cz, 0, 0, tipZ - cz,
+                hw, 0, backZ - cz, hw, h, backZ - cz, 0, h, tipZ - cz,
+                0, h, tipZ - cz, 0, 0, tipZ - cz, hw, 0, backZ - cz,
+            ]);
+            const triGeo = new THREE.BufferGeometry();
+            triGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            triGeo.computeVertexNormals();
+            triGeo.translate(0, -h / 2, 0);
+            const triMesh = new THREE.Mesh(triGeo,
+                new THREE.MeshPhysicalMaterial({ color: 0xd07878, metalness: 0.3, roughness: 0.4, transparent: true, opacity: 0.85, side: THREE.DoubleSide }));
+            emfBase.add(triMesh);
+        }
+        emfBase.add(createAxes(10));
+        const emfOff = CONFIG.sensors.emfBase.offset_mm;
+        emfBase.position.set(emfOff[0], emfOff[1], emfOff[2]);
+        handGroup.add(emfBase);
+
+        // Helper: T_emf2wrist
+        function getEmfToWristMatrix4() {
+            const eb = skeletonParams.emfBase;
+            const REuler = new THREE.Euler(eb.rpy[0], eb.rpy[1], eb.rpy[2], 'XYZ');
+            const Rmat = new THREE.Matrix4().makeRotationFromEuler(REuler);
+            const tEmf = new THREE.Vector3(eb.pos[0], eb.pos[1], eb.pos[2]);
+            const T = Rmat.clone();
+            T.setPosition(tEmf);
+            return T;
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  SENSOR POINT DISPLAY (avg positions in wrist frame)
+        // ══════════════════════════════════════════════════════
+        const sensorGroup = new THREE.Group();
+        scene.add(sensorGroup);
+        const sensorDots = [];
+
+        function buildSensorDots() {
+            sensorGroup.clear();
+            sensorDots.length = 0;
+            for (let i = 0; i < 5; i++) {
+                const color = SENSOR_COLORS[i];
+                const g = new THREE.Group();
+                const sphere = new THREE.Mesh(
+                    new THREE.SphereGeometry(2.5, 16, 16),
+                    new THREE.MeshPhysicalMaterial({ color, emissive: color, emissiveIntensity: 0.3, metalness: 0.3, roughness: 0.3 }));
+                g.add(sphere);
+                // Label
+                const labelCanvas = document.createElement('canvas');
+                labelCanvas.width = 128; labelCanvas.height = 40;
+                const ctx = labelCanvas.getContext('2d');
+                ctx.font = '600 22px Inter, system-ui, sans-serif';
+                ctx.fillStyle = '#' + color.toString(16).padStart(6, '0');
+                ctx.textAlign = 'center';
+                ctx.fillText(SENSOR_NAMES[i], 64, 28);
+                const labelTex = new THREE.CanvasTexture(labelCanvas);
+                const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex, depthTest: false, transparent: true, opacity: 0.85 }));
+                label.scale.set(16, 5, 1);
+                label.position.set(0, 6, 0);
+                g.add(label);
+                g.visible = false;
+                sensorGroup.add(g);
+                sensorDots.push(g);
+            }
+        }
+        buildSensorDots();
+
+        function updateSensorDisplay() {
+            if (!estimationState.avgPos) {
+                sensorDots.forEach(d => d.visible = false);
+                return;
+            }
+            const T = getEmfToWristMatrix4();
+            for (let i = 0; i < 5; i++) {
+                const sp = estimationState.avgPos[i];
+                const v = new THREE.Vector3(sp[0], sp[1], sp[2]);
+                v.applyMatrix4(T);
+                sensorDots[i].position.set(v.x, v.y, v.z);
+                sensorDots[i].visible = true;
+            }
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  REBUILD HAND (syncs skeletonParams → model → 3D)
+        // ══════════════════════════════════════════════════════
+        function rebuildHandFromSkeleton() {
+            FINGER_ORDER.forEach(fn => {
+                const fd = skeletonParams.fingers[fn];
+                const md = model[fn];
+                md.palmOffset.pos = [...fd.metacarpal.pos];
+                md.palmOffset.rotDeg = fd.metacarpal.rpy.map(r => r / DEG);
+                if (fn === 'thumb') {
+                    md.joints[2].link = [0, 0, -fd.bones.proximal];
+                    md.joints[3].link = [0, 0, -fd.bones.middle];
+                    md.joints[4].link = [0, 0, -fd.bones.distal];
+                    md.joints[0].originOffset = fd.cmcRotOffset;
+                    couplingParams.K_FLEX = fd.couplingK.K_FLEX;
+                    couplingParams.K_ABD = fd.couplingK.K_ABD;
+                    couplingParams.K_CROSS = fd.couplingK.K_CROSS;
+                } else {
+                    md.joints[1].link = [0, 0, -fd.bones.proximal];
+                    md.joints[2].link = [0, 0, -fd.bones.middle];
+                    md.joints[3].link = [0, 0, -fd.bones.distal];
+                }
+            });
+
+            const toRemove = handGroup.children.filter(c => c !== emfBase);
+            toRemove.forEach(child => {
+                handGroup.remove(child);
+                child.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); });
+            });
+            handGroup.add(new THREE.Mesh(new THREE.SphereGeometry(4, 20, 20), metalMat(0x5ea8a8, 0.35)));
+            handGroup.add(createAxes(24));
+            const mcMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.2, roughness: 0.6 });
+            for (const k of Object.keys(fingerObjects)) delete fingerObjects[k];
+            FINGER_ORDER.forEach(fname => {
+                const po = model[fname].palmOffset;
+                const target = new THREE.Vector3(po.pos[0], po.pos[1], po.pos[2]);
+                const len = target.length();
+                if (len > 0.5) {
+                    const bone = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, len, 8), mcMat.clone());
+                    bone.position.copy(target.clone().multiplyScalar(0.5));
+                    const up = new THREE.Vector3(0, 1, 0), dir = target.clone().normalize();
+                    if (Math.abs(up.dot(dir)) < 0.999) bone.quaternion.setFromUnitVectors(up, dir);
+                    bone.castShadow = true;
+                    handGroup.add(bone);
+                }
+                buildFingerChain(fname);
+            });
+            handGroup.position.set(0, 0, 0);
+            handGroup.rotation.set(0, 0, 0);
+            handGroup.visible = true;
+
+            // Fix B: update EMF base position AND rotation
+            emfBase.position.set(
+                skeletonParams.emfBase.pos[0],
+                skeletonParams.emfBase.pos[1],
+                skeletonParams.emfBase.pos[2]);
+            const emfEuler = new THREE.Euler(
+                skeletonParams.emfBase.rpy[0],
+                skeletonParams.emfBase.rpy[1],
+                skeletonParams.emfBase.rpy[2], 'XYZ');
+            emfBase.setRotationFromEuler(emfEuler);
+
+            // Apply joint rotations (originOffset, etc.) to 3D
+            FINGER_ORDER.forEach(fn => updateChain(fn));
+
+            updateSensorDisplay();
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  SVD / PROCRUSTES
+        // ══════════════════════════════════════════════════════
+        function _svd3x3(H) {
+            const M = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+            for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++)
+                for (let k = 0; k < 3; k++) M[i][j] += H[k][i] * H[k][j];
+            const A = M.map(r => [...r]);
+            const V = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+            for (let iter = 0; iter < 50; iter++) {
+                let mx = 0, p = 0, q = 1;
+                for (let i = 0; i < 3; i++) for (let j = i + 1; j < 3; j++)
+                    if (Math.abs(A[i][j]) > mx) { mx = Math.abs(A[i][j]); p = i; q = j; }
+                if (mx < 1e-14) break;
+                const d = A[p][p] - A[q][q];
+                const th = Math.abs(d) < 1e-15 ? Math.PI / 4 : 0.5 * Math.atan2(2 * A[p][q], d);
+                const c = Math.cos(th), s = Math.sin(th);
+                const app = A[p][p], aqq = A[q][q], apq = A[p][q];
+                A[p][p] = c * c * app + 2 * c * s * apq + s * s * aqq;
+                A[q][q] = s * s * app - 2 * c * s * apq + c * c * aqq;
+                A[p][q] = 0; A[q][p] = 0;
+                for (let i = 0; i < 3; i++) {
+                    if (i === p || i === q) continue;
+                    const aip = A[i][p], aiq = A[i][q];
+                    A[i][p] = A[p][i] = c * aip + s * aiq;
+                    A[i][q] = A[q][i] = -s * aip + c * aiq;
+                }
+                for (let i = 0; i < 3; i++) {
+                    const vp = V[i][p], vq = V[i][q];
+                    V[i][p] = c * vp + s * vq; V[i][q] = -s * vp + c * vq;
+                }
+            }
+            const eig = [A[0][0], A[1][1], A[2][2]];
+            const idx = [0, 1, 2]; idx.sort((a, b) => eig[b] - eig[a]);
+            const S = idx.map(i => Math.sqrt(Math.max(eig[i], 0)));
+            const Vs = V.map(r => idx.map(i => r[i]));
+            const U = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+            for (let col = 0; col < 3; col++) {
+                if (S[col] < 1e-10) continue;
+                for (let i = 0; i < 3; i++) { let sum = 0; for (let k = 0; k < 3; k++)sum += H[i][k] * Vs[k][col]; U[i][col] = sum / S[col]; }
+            }
+            if (S[2] < 1e-10) {
+                U[0][2] = U[1][0] * U[2][1] - U[2][0] * U[1][1];
+                U[1][2] = U[2][0] * U[0][1] - U[0][0] * U[2][1];
+                U[2][2] = U[0][0] * U[1][1] - U[1][0] * U[0][1];
+            }
+            return { U, S, V: Vs };
+        }
+
+        function _procrustes(src, dst) {
+            const n = src.length;
+            const sm = [0, 0, 0], dm = [0, 0, 0];
+            for (const p of src) { sm[0] += p[0]; sm[1] += p[1]; sm[2] += p[2]; }
+            for (const p of dst) { dm[0] += p[0]; dm[1] += p[1]; dm[2] += p[2]; }
+            for (let i = 0; i < 3; i++) { sm[i] /= n; dm[i] /= n; }
+            const H = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+            for (let k = 0; k < n; k++) {
+                const sc = [src[k][0] - sm[0], src[k][1] - sm[1], src[k][2] - sm[2]];
+                const dc = [dst[k][0] - dm[0], dst[k][1] - dm[1], dst[k][2] - dm[2]];
+                for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) H[i][j] += sc[i] * dc[j];
+            }
+            const { U, V } = _svd3x3(H);
+            const VUt = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+            for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++)
+                for (let k = 0; k < 3; k++) VUt[i][j] += V[i][k] * U[j][k];
+            const det = VUt[0][0] * (VUt[1][1] * VUt[2][2] - VUt[1][2] * VUt[2][1])
+                - VUt[0][1] * (VUt[1][0] * VUt[2][2] - VUt[1][2] * VUt[2][0])
+                + VUt[0][2] * (VUt[1][0] * VUt[2][1] - VUt[1][1] * VUt[2][0]);
+            const dd = det < 0 ? -1 : 1;
+            const R = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+            for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++)
+                R[i][j] = V[i][0] * U[j][0] + V[i][1] * U[j][1] + dd * V[i][2] * U[j][2];
+            const t = [
+                dm[0] - (R[0][0] * sm[0] + R[0][1] * sm[1] + R[0][2] * sm[2]),
+                dm[1] - (R[1][0] * sm[0] + R[1][1] * sm[1] + R[1][2] * sm[2]),
+                dm[2] - (R[2][0] * sm[0] + R[2][1] * sm[1] + R[2][2] * sm[2])
+            ];
+            return { R, t, sm, dm };
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  ESTIMATION STATE MACHINE
+        // ══════════════════════════════════════════════════════
+        let npzData = null; // { positions, rotations, numFrames, numSensors }
+        let thumbXCoeff = 1.05; // editable coefficient for Step 5
+
+        const estimationState = {
+            avgPos: null,       // (5,3) mm, sensor frame
+            coilInWrist: null,  // (5,3) mm, wrist frame
+            tipPositions: null, // (5,3) mm, wrist frame
+            palmY: null,        // mm scalar
+            procrustesR: null,  // 3x3 rotation from Step 1
+            procrustesT: null,  // [3] translation from Step 1
+            procrustesSm: null, procrustesDm: null,
+            step4Done: false,
+            step5Done: false,
+            step6Done: false,
+            step7Done: false,
+        };
+
+        const stepDefs = [
+            { id: 0, label: '1: EMF定位 Procrustes', requires: () => npzData !== null },
+            { id: 1, label: '2: EMF旋转 Z-tilt修正', requires: () => stepApplied[0] },
+            { id: 2, label: '3: 五指根部Y修正 PalmY', requires: () => stepApplied[1] },
+            { id: 3, label: '4: 四指根部X修正', requires: () => estimationState.palmY !== null },
+            { id: 4, label: '5: 四指link vec修正', requires: () => estimationState.step4Done },
+            { id: 5, label: '6: 拇指X+Alpha+CMC联合搜索', requires: () => estimationState.step4Done },
+            { id: 6, label: '7: 拇指长度分配', requires: () => estimationState.step6Done },
+            { id: 7, label: '8: 验证 4F Procrustes残差', requires: () => estimationState.step7Done },
+            { id: 8, label: '9: 验证 5F Procrustes残差', requires: () => stepApplied[7] },
+        ];
+
+        const NUM_STEPS = 9;
+        const stepStatus = new Array(NUM_STEPS).fill(null);
+        const stepOutputs = new Array(NUM_STEPS).fill('');
+        const stepApplied = new Array(NUM_STEPS).fill(false);
+        const stepSnapshots = new Array(NUM_STEPS).fill(null);
+
+        function snapshotEstimationState() {
+            return {
+                avgPos: estimationState.avgPos ? estimationState.avgPos.map(a => [...a]) : null,
+                coilInWrist: estimationState.coilInWrist ? estimationState.coilInWrist.map(a => [...a]) : null,
+                tipPositions: estimationState.tipPositions ? estimationState.tipPositions.map(a => [...a]) : null,
+                palmY: estimationState.palmY,
+                procrustesR: estimationState.procrustesR,
+                procrustesT: estimationState.procrustesT ? [...estimationState.procrustesT] : null,
+                procrustesSm: estimationState.procrustesSm ? [...estimationState.procrustesSm] : null,
+                procrustesDm: estimationState.procrustesDm ? [...estimationState.procrustesDm] : null,
+                step4Done: estimationState.step4Done,
+                step5Done: estimationState.step5Done,
+                step6Done: estimationState.step6Done,
+                step7Done: estimationState.step7Done,
+            };
+        }
+
+        function restoreEstimationState(snap) {
+            estimationState.avgPos = snap.avgPos ? snap.avgPos.map(a => [...a]) : null;
+            estimationState.coilInWrist = snap.coilInWrist ? snap.coilInWrist.map(a => [...a]) : null;
+            estimationState.tipPositions = snap.tipPositions ? snap.tipPositions.map(a => [...a]) : null;
+            estimationState.palmY = snap.palmY;
+            estimationState.procrustesR = snap.procrustesR;
+            estimationState.procrustesT = snap.procrustesT ? [...snap.procrustesT] : null;
+            estimationState.procrustesSm = snap.procrustesSm ? [...snap.procrustesSm] : null;
+            estimationState.procrustesDm = snap.procrustesDm ? [...snap.procrustesDm] : null;
+            estimationState.step4Done = snap.step4Done;
+            estimationState.step5Done = snap.step5Done;
+            estimationState.step6Done = snap.step6Done;
+            estimationState.step7Done = snap.step7Done;
+        }
+
+        function restoreSkeletonFromSnapshot(snap) {
+            skeletonParams.emfBase.pos = [...snap.emfBase.pos];
+            skeletonParams.emfBase.rpy = [...snap.emfBase.rpy];
+            FINGER_ORDER.forEach(fn => {
+                const sf = snap.fingers[fn], df = skeletonParams.fingers[fn];
+                df.metacarpal.pos = [...sf.metacarpal.pos];
+                df.metacarpal.rpy = [...sf.metacarpal.rpy];
+                df.bones.proximal = sf.bones.proximal;
+                df.bones.middle = sf.bones.middle;
+                df.bones.distal = sf.bones.distal;
+                df.coilOffset = [...sf.coilOffset];
+                if (fn === 'thumb' && sf.cmcRotOffset !== undefined) df.cmcRotOffset = sf.cmcRotOffset;
+            });
+        }
+
+        function revertStep(stepIdx) {
+            // Revert this step and all downstream steps
+            for (let i = NUM_STEPS - 1; i >= stepIdx; i--) {
+                if (!stepApplied[i]) continue;
+                if (stepSnapshots[i]) {
+                    // Only restore from the earliest reverted step's snapshot
+                    if (i === stepIdx) {
+                        restoreSkeletonFromSnapshot(stepSnapshots[i].skeleton);
+                        restoreEstimationState(stepSnapshots[i].estimation);
+                    }
+                }
+                stepApplied[i] = false;
+                stepStatus[i] = null;
+                stepOutputs[i] = '';
+                stepSnapshots[i] = null;
+                // Remove changedFields belonging to this step
+                for (const [key, val] of changedFields) {
+                    if (val.stepIdx === i) changedFields.delete(key);
+                }
+            }
+            updateStepsUI();
+            rebuildHandFromSkeleton();
+            buildSkeletonUI();
+            buildStepLegend();
+        }
+
+        function handleStepClick(i) {
+            if (stepApplied[i]) {
+                revertStep(i);
+            } else {
+                runStep(i);
+            }
+        }
+
+        function applyStepColor(btn, i) {
+            const sc = STEP_COLORS[i];
+            if (stepApplied[i] && sc) {
+                btn.style.setProperty('--step-color', sc.color);
+                btn.style.setProperty('--step-bg', sc.bg);
+            } else {
+                btn.style.removeProperty('--step-color');
+                btn.style.removeProperty('--step-bg');
+            }
+        }
+
+        function buildStepsUI() {
+            const container = document.getElementById('stepsContainer');
+            container.innerHTML = '';
+            stepDefs.forEach((def, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'step-btn' + (stepApplied[i] ? ' applied' : '');
+                btn.id = `stepBtn${i}`;
+                const enabled = stepApplied[i] || def.requires();
+                btn.disabled = !enabled;
+                const icon = stepApplied[i]
+                    ? (stepStatus[i] === 'ok' ? '🟢' : stepStatus[i] === 'warn' ? '🟡' : stepStatus[i] === 'err' ? '🔴' : '⬜')
+                    : '⬜';
+                btn.innerHTML = `<span class="step-icon">${icon}</span><span class="step-label">${def.label}</span><span class="revert-hint">click to revert</span>`;
+                applyStepColor(btn, i);
+                btn.addEventListener('click', () => handleStepClick(i));
+                container.appendChild(btn);
+
+                const outDiv = document.createElement('div');
+                outDiv.className = 'step-output' + (stepOutputs[i] ? ' visible' : '');
+                outDiv.id = `stepOut${i}`;
+                outDiv.innerHTML = stepOutputs[i];
+                const sc = STEP_COLORS[i];
+                if (sc) outDiv.style.borderLeftColor = sc.color;
+                outDiv.style.userSelect = 'text';
+                container.appendChild(outDiv);
+
+                // For Step 6 (index 5): add thumbXCoeff input
+                if (i === 5) {
+                    const coeffDiv = document.createElement('div');
+                    coeffDiv.style.cssText = 'padding:3px 8px;margin:0 0 4px;font-size:9px;font-family:var(--font-heading);display:flex;align-items:center;gap:6px;color:var(--dim);';
+                    coeffDiv.innerHTML = `<span>Thumb X 经验系数:</span>`;
+                    const coeffInput = document.createElement('input');
+                    coeffInput.type = 'number';
+                    coeffInput.step = '0.01';
+                    coeffInput.value = thumbXCoeff.toFixed(2);
+                    coeffInput.style.cssText = 'width:60px;padding:2px 4px;border:1px solid var(--border);border-radius:3px;background:var(--bg);color:var(--text);font-size:9px;font-family:Cascadia Code,monospace;text-align:right;';
+                    coeffInput.addEventListener('input', () => {
+                        thumbXCoeff = parseFloat(coeffInput.value) || 1.05;
+                    });
+                    coeffDiv.appendChild(coeffInput);
+                    container.appendChild(coeffDiv);
+                }
+            });
+        }
+
+        function updateStepsUI() {
+            stepDefs.forEach((def, i) => {
+                const btn = document.getElementById(`stepBtn${i}`);
+                if (!btn) return;
+                const enabled = stepApplied[i] || def.requires();
+                btn.disabled = !enabled;
+                btn.classList.toggle('applied', stepApplied[i]);
+                applyStepColor(btn, i);
+                const icon = stepApplied[i]
+                    ? (stepStatus[i] === 'ok' ? '🟢' : stepStatus[i] === 'warn' ? '🟡' : stepStatus[i] === 'err' ? '🔴' : '⬜')
+                    : '⬜';
+                btn.querySelector('.step-icon').textContent = icon;
+                const outDiv = document.getElementById(`stepOut${i}`);
+                if (outDiv) {
+                    outDiv.innerHTML = stepOutputs[i];
+                    if (stepOutputs[i]) outDiv.classList.add('visible');
+                    else outDiv.classList.remove('visible');
+                }
+            });
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  CHANGE TRACKING — per-step diff highlighting
+        // ══════════════════════════════════════════════════════
+        // changedFields: Map<string, {stepIdx, oldVal, newVal}>
+        // key format: "emfBase.pos.0", "thumb.metacarpal.pos.1", "index.bones.proximal", "thumb.cmcRotOffset" etc.
+        const changedFields = new Map();
+
+        const STEP_COLORS = {
+            0: { name: '1:Procrustes', color: '#FF4444', bg: '#3d1e1e' },
+            1: { name: '2:Z-tilt', color: '#FF8C00', bg: '#3d2e1a' },
+            2: { name: '3:PalmY', color: '#FFD700', bg: '#3d3520' },
+            3: { name: '4:4F X', color: '#32CD32', bg: '#1e3d1e' },
+            4: { name: '5:4F Bones', color: '#00CED1', bg: '#1a3535' },
+            5: { name: '6:Thumb 3D', color: '#4488FF', bg: '#1e2d3d' },
+            6: { name: '7:Thumb Bones', color: '#7B68EE', bg: '#2d1e3d' },
+            7: { name: '8:Verify 4F', color: '#DA70D6', bg: '#3d1e3a' },
+            8: { name: '9:Verify 5F', color: '#FF6B8A', bg: '#3d1e28' },
+        };
+
+        function snapshotSkeleton() {
+            const snap = { emfBase: { pos: [...skeletonParams.emfBase.pos], rpy: [...skeletonParams.emfBase.rpy] }, fingers: {} };
+            FINGER_ORDER.forEach(fn => {
+                const fd = skeletonParams.fingers[fn];
+                const f = {
+                    metacarpal: { pos: [...fd.metacarpal.pos], rpy: [...fd.metacarpal.rpy] },
+                    bones: { proximal: fd.bones.proximal, middle: fd.bones.middle, distal: fd.bones.distal },
+                    coilOffset: [...fd.coilOffset],
+                };
+                if (fn === 'thumb') f.cmcRotOffset = fd.cmcRotOffset;
+                snap.fingers[fn] = f;
+            });
+            return snap;
+        }
+
+        function diffSkeleton(before, after, stepIdx) {
+            const axLabels = ['x', 'y', 'z'];
+            // emfBase
+            for (let i = 0; i < 3; i++) {
+                if (before.emfBase.pos[i] !== after.emfBase.pos[i])
+                    changedFields.set(`emfBase.pos.${i}`, { stepIdx, oldVal: before.emfBase.pos[i], newVal: after.emfBase.pos[i] });
+                if (before.emfBase.rpy[i] !== after.emfBase.rpy[i])
+                    changedFields.set(`emfBase.rpy.${i}`, { stepIdx, oldVal: before.emfBase.rpy[i], newVal: after.emfBase.rpy[i] });
+            }
+            FINGER_ORDER.forEach(fn => {
+                const bf = before.fingers[fn], af = after.fingers[fn];
+                for (let i = 0; i < 3; i++) {
+                    if (bf.metacarpal.pos[i] !== af.metacarpal.pos[i])
+                        changedFields.set(`${fn}.metacarpal.pos.${i}`, { stepIdx, oldVal: bf.metacarpal.pos[i], newVal: af.metacarpal.pos[i] });
+                    if (bf.metacarpal.rpy[i] !== af.metacarpal.rpy[i])
+                        changedFields.set(`${fn}.metacarpal.rpy.${i}`, { stepIdx, oldVal: bf.metacarpal.rpy[i], newVal: af.metacarpal.rpy[i] });
+                    if (bf.coilOffset[i] !== af.coilOffset[i])
+                        changedFields.set(`${fn}.coilOffset.${i}`, { stepIdx, oldVal: bf.coilOffset[i], newVal: af.coilOffset[i] });
+                }
+                for (const bk of ['proximal', 'middle', 'distal']) {
+                    if (bf.bones[bk] !== af.bones[bk])
+                        changedFields.set(`${fn}.bones.${bk}`, { stepIdx, oldVal: bf.bones[bk], newVal: af.bones[bk] });
+                }
+                if (fn === 'thumb' && bf.cmcRotOffset !== af.cmcRotOffset)
+                    changedFields.set(`thumb.cmcRotOffset`, { stepIdx, oldVal: bf.cmcRotOffset, newVal: af.cmcRotOffset });
+            });
+        }
+
+        function buildStepLegend() {
+            const el = document.getElementById('stepLegend');
+            if (!el) return;
+            // Only show legend for steps that actually have changes
+            const activeSteps = new Set();
+            changedFields.forEach(v => activeSteps.add(v.stepIdx));
+            if (activeSteps.size === 0) { el.innerHTML = ''; return; }
+            let html = '';
+            for (const [si, info] of Object.entries(STEP_COLORS)) {
+                if (!activeSteps.has(parseInt(si))) continue;
+                html += `<span class="step-legend-item"><span class="step-legend-dot" style="background:${info.color}"></span>${info.name}</span>`;
+            }
+            el.innerHTML = html;
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  HELPER: compute average sensor positions from NPZ
+        // ══════════════════════════════════════════════════════
+        function computeAvgPositions() {
+            if (!npzData) return null;
+            const { positions, numFrames, numSensors } = npzData;
+            const scale = 1000;
+            const avgPos = [];
+            for (let s = 0; s < Math.min(numSensors, 5); s++) {
+                let sx = 0, sy = 0, sz = 0;
+                for (let f = 0; f < numFrames; f++) {
+                    const base = f * numSensors * 3 + s * 3;
+                    sx += positions.data[base] * scale;
+                    sy += positions.data[base + 1] * scale;
+                    sz += positions.data[base + 2] * scale;
+                }
+                avgPos.push([sx / numFrames, sy / numFrames, sz / numFrames]);
+            }
+            return avgPos;
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  STEP IMPLEMENTATIONS
+        // ══════════════════════════════════════════════════════
+        function runStep(stepIdx) {
+            // If re-running an already-applied step, revert it first
+            if (stepApplied[stepIdx]) {
+                revertStep(stepIdx);
+            }
+
+            // Save snapshot BEFORE running (skeleton + estimationState)
+            stepSnapshots[stepIdx] = {
+                skeleton: snapshotSkeleton(),
+                estimation: snapshotEstimationState(),
+            };
+
+            const before = snapshotSkeleton();
+            try {
+                switch (stepIdx) {
+                    case 0: runStep1_Procrustes(); break;
+                    case 1: runStep2_ZTilt(); break;
+                    case 2: runStep3_PalmY(); break;
+                    case 3: runStep4_FourFingerX(); break;
+                    case 4: runStep5_FourFingerBones(); break;
+                    case 5: runStep6_ThumbJointSweep(); break;
+                    case 6: runStep7_ThumbBones(); break;
+                    case 7: runStep8_Verify4F(); break;
+                    case 8: runStep9_Verify5F(); break;
+                }
+                stepApplied[stepIdx] = true;
+            } catch (e) {
+                stepStatus[stepIdx] = 'err';
+                stepOutputs[stepIdx] = `<span class="err">Error: ${e.message}</span>`;
+                stepApplied[stepIdx] = true; // still mark applied so user can revert
+                console.error(`Step ${stepIdx} error:`, e);
+            }
+            const after = snapshotSkeleton();
+            diffSkeleton(before, after, stepIdx);
+
+            updateStepsUI();
+            rebuildHandFromSkeleton();
+            buildSkeletonUI();
+            buildStepLegend();
+        }
+
+        // Per-step camera hint: briefly animate to show the affected area
+        function stepCameraHint(stepIdx) {
+            const center = new THREE.Vector3(0, 0, -50);
+            switch (stepIdx) {
+                case 0: case 1: // EMF steps — show from perspective angle
+                    setCameraView('front'); break;
+                case 2: // PalmY — top view
+                    setCameraView('top'); break;
+                case 3: // 4F X — top view
+                    setCameraView('top'); break;
+                case 4: // Thumb X — side view
+                    setCameraView('side'); break;
+                case 5: // 4F Bones — front view
+                    setCameraView('front'); break;
+                case 6: // Thumb Bones — side view
+                    setCameraView('side'); break;
+                case 7: // Alpha/CMC — side view
+                    setCameraView('side'); break;
+            }
+        }
+
+        // Helper: compute coilInWrist from current T_emf2wrist
+        function computeCoilInWrist() {
+            if (!estimationState.avgPos) return null;
+            const T = getEmfToWristMatrix4();
+            return estimationState.avgPos.map(sp => {
+                const v = new THREE.Vector3(sp[0], sp[1], sp[2]);
+                v.applyMatrix4(T);
+                return [v.x, v.y, v.z];
+            });
+        }
+
+        // ─── Step 1: Procrustes Alignment ───
+        function runStep1_Procrustes() {
+            if (!npzData) throw new Error('No NPZ data loaded');
+            if (!estimationState.avgPos) {
+                estimationState.avgPos = computeAvgPositions();
+            }
+            const avgPos = estimationState.avgPos;
+
+            // FK COIL positions at theta=0 for 4 fingers
+            const fkPts = [];
+            ['index', 'middle', 'ring', 'pinky'].forEach(fn => {
+                const fd = skeletonParams.fingers[fn];
+                const px = fd.metacarpal.pos[0];
+                const pz = fd.metacarpal.pos[2];
+                const L1 = fd.bones.proximal, L2 = fd.bones.middle, L3 = fd.bones.distal;
+                const co = fd.coilOffset;
+                fkPts.push([px + co[0], co[1], pz - L1 - L2 - L3 + co[2]]);
+            });
+            const senPts = [avgPos[1], avgPos[2], avgPos[3], avgPos[4]];
+            const { R, t, sm, dm } = _procrustes(senPts, fkPts);
+
+            // R → Euler
+            const m4 = new THREE.Matrix4();
+            m4.set(R[0][0], R[0][1], R[0][2], 0, R[1][0], R[1][1], R[1][2], 0, R[2][0], R[2][1], R[2][2], 0, 0, 0, 0, 1);
+            const euler = new THREE.Euler().setFromRotationMatrix(m4, 'XYZ');
+            skeletonParams.emfBase.pos = [
+                Math.round(t[0] * 10) / 10, Math.round(t[1] * 10) / 10, Math.round(t[2] * 10) / 10
+            ];
+            skeletonParams.emfBase.rpy = [
+                parseFloat(euler.x.toFixed(4)),
+                parseFloat(euler.y.toFixed(4)),
+                parseFloat(euler.z.toFixed(4))
+            ];
+
+            // Save Procrustes results for Step 2
+            estimationState.procrustesR = R;
+            estimationState.procrustesT = t;
+            estimationState.procrustesSm = sm;
+            estimationState.procrustesDm = dm;
+
+            // Compute coilInWrist with this T_emf2wrist
+            estimationState.coilInWrist = computeCoilInWrist();
+
+            // Residuals
+            const coilInWrist = estimationState.coilInWrist;
+            const residuals = [];
+            ['index', 'middle', 'ring', 'pinky'].forEach((fn, fi) => {
+                const fk = fkPts[fi];
+                const cw = coilInWrist[fi + 1];
+                const err = Math.sqrt((fk[0] - cw[0]) ** 2 + (fk[1] - cw[1]) ** 2 + (fk[2] - cw[2]) ** 2);
+                residuals.push({ finger: fn, err: err.toFixed(1) });
+            });
+            const meanErr = (residuals.reduce((s, r) => s + parseFloat(r.err), 0) / 4).toFixed(1);
+
+            stepStatus[0] = parseFloat(meanErr) < 15 ? 'ok' : 'warn';
+            const pos = skeletonParams.emfBase.pos;
+            const rpy = skeletonParams.emfBase.rpy.map(r => (r * 180 / Math.PI).toFixed(1) + '°');
+            stepOutputs[0] = `<span style="color:var(--dim)">EMF在手腕系的位置(mm):</span><br><span class="val">pos=[${pos.join(', ')}]</span><br>`
+                + `<span style="color:var(--dim)">EMF在手腕系的旋转(XYZ):</span><br><span class="val">rpy=[${rpy.join(', ')}]</span><br>`
+                + `<span style="color:var(--dim)">残差 ‖FK线圈 - 传感器线圈‖(越小越准):</span><br>`
+                + residuals.map(r => `  ${r.finger}: <span class="${parseFloat(r.err) < 10 ? 'ok' : 'warn'}">${r.err}mm</span>`).join('<br>')
+                + `<br>mean: <span class="val">${meanErr}mm</span>`;
+            console.log('Step 1 Procrustes done:', { pos, rpy, meanErr });
+        }
+
+        // ─── Step 2: Z-tilt correction ───
+        function runStep2_ZTilt() {
+            if (!stepApplied[0]) throw new Error('Run Step 1 first');
+            const R = estimationState.procrustesR;
+            const t = estimationState.procrustesT;
+            const sm = estimationState.procrustesSm;
+            const dm = estimationState.procrustesDm;
+            const avgPos = estimationState.avgPos;
+            const senPts = [avgPos[1], avgPos[2], avgPos[3], avgPos[4]];
+
+            const wristPts = senPts.map(p => [
+                R[0][0] * p[0] + R[0][1] * p[1] + R[0][2] * p[2] + t[0],
+                R[1][0] * p[0] + R[1][1] * p[1] + R[1][2] * p[2] + t[1],
+                R[2][0] * p[0] + R[2][1] * p[1] + R[2][2] * p[2] + t[2],
+            ]);
+            const mX = wristPts.reduce((s, p) => s + p[0], 0) / 4;
+            const mY = wristPts.reduce((s, p) => s + p[1], 0) / 4;
+            let covXY = 0, varX = 0;
+            wristPts.forEach(p => { covXY += (p[0] - mX) * (p[1] - mY); varX += (p[0] - mX) ** 2; });
+            const slope = varX > 1e-6 ? covXY / varX : 0;
+            const tiltZ = -Math.atan(slope);
+
+            if (Math.abs(tiltZ) > 0) {
+                const cz = Math.cos(tiltZ), sz = Math.sin(tiltZ);
+                const Rc = [
+                    [cz * R[0][0] - sz * R[1][0], cz * R[0][1] - sz * R[1][1], cz * R[0][2] - sz * R[1][2]],
+                    [sz * R[0][0] + cz * R[1][0], sz * R[0][1] + cz * R[1][1], sz * R[0][2] + cz * R[1][2]],
+                    [...R[2]]
+                ];
+                const tc = [
+                    dm[0] - (Rc[0][0] * sm[0] + Rc[0][1] * sm[1] + Rc[0][2] * sm[2]),
+                    dm[1] - (Rc[1][0] * sm[0] + Rc[1][1] * sm[1] + Rc[1][2] * sm[2]),
+                    dm[2] - (Rc[2][0] * sm[0] + Rc[2][1] * sm[1] + Rc[2][2] * sm[2])
+                ];
+                const m4c = new THREE.Matrix4();
+                m4c.set(Rc[0][0], Rc[0][1], Rc[0][2], 0, Rc[1][0], Rc[1][1], Rc[1][2], 0, Rc[2][0], Rc[2][1], Rc[2][2], 0, 0, 0, 0, 1);
+                const eulerC = new THREE.Euler().setFromRotationMatrix(m4c, 'XYZ');
+                skeletonParams.emfBase.pos = [
+                    Math.round(tc[0] * 10) / 10, Math.round(tc[1] * 10) / 10, Math.round(tc[2] * 10) / 10
+                ];
+                skeletonParams.emfBase.rpy = [
+                    parseFloat(eulerC.x.toFixed(4)),
+                    parseFloat(eulerC.y.toFixed(4)),
+                    parseFloat(eulerC.z.toFixed(4))
+                ];
+            }
+
+            // Update coilInWrist with corrected T_emf2wrist
+            estimationState.coilInWrist = computeCoilInWrist();
+
+            stepStatus[1] = 'ok';
+            const pos = skeletonParams.emfBase.pos;
+            const rpy = skeletonParams.emfBase.rpy.map(r => (r * 180 / Math.PI).toFixed(1) + '°');
+            stepOutputs[1] = `Z-tilt: <span class="val">${(tiltZ * 180 / Math.PI).toFixed(2)}°</span><br>`
+                + `<span class="val">emf pos=[${pos.join(', ')}]</span><br>`
+                + `<span class="val">emf rpy=[${rpy.join(', ')}]</span>`;
+            console.log('Step 2 Z-tilt done:', { tiltZ: (tiltZ * 180 / Math.PI).toFixed(2) + '°' });
+        }
+
+        // ─── Step 3: PalmY (四指根部Y修正) ───
+        function runStep3_PalmY() {
+            if (!estimationState.coilInWrist) throw new Error('Run Step 2 first');
+            // Compute tipPositions (wrist frame)
+            const coilInWrist = estimationState.coilInWrist;
+            const tipPositions = FINGER_ORDER.map((fn, fi) => {
+                const co = skeletonParams.fingers[fn].coilOffset;
+                const cw = coilInWrist[fi];
+                return [cw[0] - co[0], cw[1] - co[1], cw[2] - co[2]];
+            });
+            estimationState.tipPositions = tipPositions;
+
+            // palmY = avgTipY (tipPositions已减掉coilOffset，就是指尖Y)
+            const avgTipY = tipPositions.reduce((s, p) => s + p[1], 0) / tipPositions.length;
+            const palmY = avgTipY;
+            estimationState.palmY = palmY;
+
+            // Write palmY to ALL 5 metacarpal.pos[1]
+            FINGER_ORDER.forEach(fn => {
+                skeletonParams.fingers[fn].metacarpal.pos[1] = Math.round(palmY * 10) / 10;
+            });
+
+            stepStatus[2] = 'ok';
+            const palmYRound = Math.round(palmY * 10) / 10;
+            let html = `palmY = <span class="val">${palmY.toFixed(2)}mm</span> (avgTipY=${avgTipY.toFixed(2)})<br>`;
+            html += `ALL 5F meta_y = <span class="val">${palmYRound}</span>mm<br>`;
+            FINGER_ORDER.forEach((fn, fi) => {
+                const cy = skeletonParams.fingers[fn].coilOffset[1];
+                html += `  ${fn} tipY: ${tipPositions[fi][1].toFixed(2)}mm (coilY=${(tipPositions[fi][1] + cy).toFixed(2)})<br>`;
+            });
+            stepOutputs[2] = html;
+        }
+
+        // ─── Step 4: 四指根部X修正 ───
+        function runStep4_FourFingerX() {
+            if (estimationState.palmY === null) throw new Error('Run Step 3 first');
+            if (!estimationState.coilInWrist) throw new Error('coilInWrist not set');
+            // Recompute coilInWrist with latest T_emf2wrist
+            estimationState.coilInWrist = computeCoilInWrist();
+            const coilInWrist = estimationState.coilInWrist;
+            // Compute tipPositions
+            const tipPositions = FINGER_ORDER.map((fn, fi) => {
+                const co = skeletonParams.fingers[fn].coilOffset;
+                const cw = coilInWrist[fi];
+                return [cw[0] - co[0], cw[1] - co[1], cw[2] - co[2]];
+            });
+            estimationState.tipPositions = tipPositions;
+
+            let html = '';
+            FINGER_ORDER.forEach((fn, fi) => {
+                if (fn === 'thumb') return;
+                const fd = skeletonParams.fingers[fn];
+                const tip = tipPositions[fi];
+                fd.metacarpal.pos[0] = Math.round(tip[0] * 10) / 10;
+                const c = '#' + SENSOR_COLORS[fi].toString(16).padStart(6, '0');
+                html += `<span style="color:${c}">${fn}</span>: x=<span class="val">${fd.metacarpal.pos[0]}</span><br>`;
+            });
+            estimationState.step4Done = true;
+            stepStatus[3] = 'ok';
+            stepOutputs[3] = html;
+        }
+
+        // ─── Step 5: 四指link vec修正 (bone lengths) ───
+        function runStep5_FourFingerBones() {
+            if (!estimationState.step4Done) throw new Error('Run Step 4 first');
+            const tips = estimationState.tipPositions;
+            let html = '';
+            FINGER_ORDER.forEach((fn, fi) => {
+                if (fn === 'thumb') return;
+                const fd = skeletonParams.fingers[fn];
+                const tip = tips[fi];
+                const origMz = URDF_SKELETON.fingers[fn].metacarpal.pos[2];
+                const totalBones = origMz - tip[2];
+                const ob = URDF_SKELETON.fingers[fn].bones;
+                const oldChain = ob.proximal + ob.middle + ob.distal;
+                if (oldChain > 0 && totalBones > 0) {
+                    fd.bones.proximal = Math.round(totalBones * (ob.proximal / oldChain) * 10) / 10;
+                    fd.bones.middle = Math.round(totalBones * (ob.middle / oldChain) * 10) / 10;
+                    fd.bones.distal = Math.round(totalBones * (ob.distal / oldChain) * 10) / 10;
+                }
+                const scale = oldChain > 0 ? (totalBones / oldChain).toFixed(3) : '?';
+                const c = '#' + SENSOR_COLORS[fi].toString(16).padStart(6, '0');
+                html += `<span style="color:${c}">${fn}</span>: `
+                    + `bones=${totalBones.toFixed(1)}mm (×${scale})<br>`;
+            });
+            estimationState.step5Done = true;
+            stepStatus[4] = 'ok';
+            stepOutputs[4] = html;
+        }
+
+        // ─── Step 6: 拇指X+Alpha+CMC联合搜索 (3D sweep) ───
+        function runStep6_ThumbJointSweep() {
+            if (!estimationState.step4Done) throw new Error('Run Step 4 first');
+            if (!npzData) throw new Error('No NPZ data');
+            const fd = skeletonParams.fingers.thumb;
+            const { rotations, numFrames, numSensors } = npzData;
+
+            // Average thumb rotation
+            const avgR = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+            for (let f = 0; f < numFrames; f++) {
+                const base = f * numSensors * 9;
+                for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++)
+                    avgR[i][j] += rotations.data[base + i * 3 + j];
+            }
+            for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) avgR[i][j] /= numFrames;
+
+            // Transform to wrist frame
+            const _eb = skeletonParams.emfBase;
+            const eul = new THREE.Euler(_eb.rpy[0], _eb.rpy[1], _eb.rpy[2], 'XYZ');
+            const m4 = new THREE.Matrix4().makeRotationFromEuler(eul);
+            const el = m4.elements;
+            const Re = [[el[0], el[4], el[8]], [el[1], el[5], el[9]], [el[2], el[6], el[10]]];
+            const Rw = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+            for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) for (let k = 0; k < 3; k++)
+                Rw[i][j] += Re[i][k] * avgR[k][j];
+
+            const thumbPosW = estimationState.coilInWrist[0];
+            const indexX = skeletonParams.fingers.index.metacarpal.pos[0];
+            const py = fd.metacarpal.pos[1], pz = fd.metacarpal.pos[2];
+            const Lsum = fd.bones.proximal + fd.bones.middle + fd.bones.distal;
+            const cy6 = fd.coilOffset[1];
+            const D2R = Math.PI / 180;
+
+            let bestCost = Infinity, bestCoeff = thumbXCoeff, bestAlpha = 0, bestCmcRot = 0;
+            let bestPosErr = 0, bestRotErr = 0;
+
+            function sweep3D(cMin, cMax, cStep, aMin, aMax, aStep, cmMin, cmMax, cmStep) {
+                for (let coeff = cMin; coeff <= cMax + 1e-9; coeff += cStep) {
+                    const px = Math.round(indexX * coeff * 10) / 10;
+                    for (let aDeg = aMin; aDeg <= aMax + 1e-9; aDeg += aStep) {
+                        const alpha = aDeg * D2R;
+                        const ca = Math.cos(alpha), sa = Math.sin(alpha);
+                        for (let cDeg = cmMin; cDeg <= cmMax + 1e-9; cDeg += cmStep) {
+                            const cmcRot = cDeg * D2R;
+                            const cc = Math.cos(cmcRot), sc = Math.sin(cmcRot);
+                            const v1x = -sc * cy6, v1y = cc * cy6, v1z = -Lsum;
+                            const v2x = ca * v1x + sa * v1z;
+                            const v2y = v1y;
+                            const v2z = -sa * v1x + ca * v1z;
+                            const dx = (px + v2x) - thumbPosW[0];
+                            const dy = (py + v2y) - thumbPosW[1];
+                            const dz = (pz + v2z) - thumbPosW[2];
+                            const posErr = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                            const R00 = ca * cc, R01 = -ca * sc, R02 = sa;
+                            const R10 = sc, R11 = cc, R12 = 0;
+                            const R20 = -sa * cc, R21 = sa * sc, R22 = ca;
+                            const tr = R00 * Rw[0][0] + R01 * Rw[0][1] + R02 * Rw[0][2]
+                                + R10 * Rw[1][0] + R11 * Rw[1][1] + R12 * Rw[1][2]
+                                + R20 * Rw[2][0] + R21 * Rw[2][1] + R22 * Rw[2][2];
+                            const rotErrDeg = Math.acos(Math.max(-1, Math.min(1, (tr - 1) / 2))) / D2R;
+                            const cost = posErr + 1.0 * rotErrDeg;
+                            if (cost < bestCost) {
+                                bestCost = cost; bestCoeff = coeff;
+                                bestAlpha = alpha; bestCmcRot = cmcRot;
+                                bestPosErr = posErr; bestRotErr = rotErrDeg;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Stage 1: coarse (coeff 0.1, alpha 10°, cmc 10°)
+            sweep3D(0.8, 1.3, 0.1, -60, 0, 10, 20, 70, 10);
+            const bc1 = bestCoeff, ba1 = bestAlpha / D2R, bm1 = bestCmcRot / D2R;
+            // Stage 2: medium (coeff 0.02, alpha 2°, cmc 2°)
+            sweep3D(Math.max(0.8, bc1 - 0.1), Math.min(1.3, bc1 + 0.1), 0.02,
+                    Math.max(-60, ba1 - 10), Math.min(0, ba1 + 10), 2,
+                    Math.max(20, bm1 - 10), Math.min(70, bm1 + 10), 2);
+            const bc2 = bestCoeff, ba2 = bestAlpha / D2R, bm2 = bestCmcRot / D2R;
+            // Stage 3: fine (coeff 0.005, alpha 0.5°, cmc 0.5°)
+            sweep3D(Math.max(0.8, bc2 - 0.02), Math.min(1.3, bc2 + 0.02), 0.005,
+                    Math.max(-60, ba2 - 2), Math.min(0, ba2 + 2), 0.5,
+                    Math.max(20, bm2 - 2), Math.min(70, bm2 + 2), 0.5);
+
+            // Apply results
+            thumbXCoeff = bestCoeff;
+            fd.metacarpal.pos[0] = Math.round(indexX * bestCoeff * 10) / 10;
+            fd.metacarpal.rpy = [0, bestAlpha, 0];
+            fd.cmcRotOffset = bestCmcRot;
+
+            estimationState.step6Done = true;
+            stepStatus[5] = bestPosErr < 15 ? 'ok' : 'warn';
+            stepOutputs[5] = `thumbXCoeff = <span class="val">${bestCoeff.toFixed(3)}</span><br>`
+                + `thumb meta_x = <span class="val">${fd.metacarpal.pos[0]}</span>mm<br>`
+                + `alpha = <span class="val">${(bestAlpha / D2R).toFixed(1)}°</span><br>`
+                + `CMC_ROT = <span class="val">${(bestCmcRot / D2R).toFixed(1)}°</span><br>`
+                + `pos_err = <span class="${bestPosErr < 10 ? 'ok' : 'warn'}">${bestPosErr.toFixed(1)}mm</span><br>`
+                + `rot_err = <span class="${bestRotErr < 15 ? 'ok' : 'warn'}">${bestRotErr.toFixed(1)}°</span><br>`
+                + `cost = <span class="val">${bestCost.toFixed(2)}</span>`;
+            console.log('Step 6 done:', { coeff: bestCoeff.toFixed(3), alpha: (bestAlpha / D2R).toFixed(1),
+                cmcRot: (bestCmcRot / D2R).toFixed(1), posErr: bestPosErr.toFixed(1), rotErr: bestRotErr.toFixed(1) });
+        }
+
+        // ─── Step 7: 拇指长度分配 ───
+        function runStep7_ThumbBones() {
+            if (!estimationState.step6Done) throw new Error('Run Step 6 first');
+            const fd = skeletonParams.fingers.thumb;
+            const coilInWrist = estimationState.coilInWrist;
+            const cw = coilInWrist[0];
+            const co = fd.coilOffset;
+            const tip = [cw[0] - co[0], cw[1] - co[1], cw[2] - co[2]];
+            const cmc = fd.metacarpal.pos;
+            const dx = tip[0] - cmc[0], dy = tip[1] - cmc[1], dz = tip[2] - cmc[2];
+            const totalLength = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            const ob = URDF_SKELETON.fingers.thumb.bones;
+            const oldTotal = ob.proximal + ob.middle + ob.distal;
+            if (oldTotal > 0 && totalLength > 0) {
+                fd.bones.proximal = Math.round(totalLength * (ob.proximal / oldTotal) * 10) / 10;
+                fd.bones.middle = Math.round(totalLength * (ob.middle / oldTotal) * 10) / 10;
+                fd.bones.distal = Math.round(totalLength * (ob.distal / oldTotal) * 10) / 10;
+            }
+            estimationState.step7Done = true;
+            stepStatus[6] = 'ok';
+            const scale = oldTotal > 0 ? (totalLength / oldTotal).toFixed(3) : '?';
+            stepOutputs[6] = `total = <span class="val">${totalLength.toFixed(1)}mm</span><br>`
+                + `URDF total = ${oldTotal.toFixed(1)}mm<br>`
+                + `scale = <span class="val">${scale}</span><br>`
+                + `L1=${fd.bones.proximal} L2=${fd.bones.middle} L3=${fd.bones.distal}`;
+        }
+
+        // ─── Step 8: 验证 4F Procrustes残差 (read-only) ───
+        function runStep8_Verify4F() {
+            if (!estimationState.step7Done) throw new Error('Run Step 7 first');
+            if (!estimationState.coilInWrist) throw new Error('coilInWrist not set');
+            // FK coil positions for 4 non-thumb fingers
+            const fkCoilPts = [];
+            const senPts = [];
+            FINGER_ORDER.forEach((fn, fi) => {
+                if (fn === 'thumb') return;
+                const fd = skeletonParams.fingers[fn];
+                const tipZ = fd.metacarpal.pos[2] - (fd.bones.proximal + fd.bones.middle + fd.bones.distal);
+                const fkCoil = [
+                    fd.metacarpal.pos[0] + fd.coilOffset[0],
+                    fd.metacarpal.pos[1] + fd.coilOffset[1],
+                    tipZ + fd.coilOffset[2],
+                ];
+                fkCoilPts.push(fkCoil);
+                senPts.push(estimationState.coilInWrist[fi]);
+            });
+            // Compute per-sensor residuals
+            let html = '<b>4F Procrustes Residuals</b><br>';
+            let totalErr = 0;
+            const names = ['index', 'middle', 'ring', 'pinky'];
+            const colors4F = [1, 2, 3, 4]; // FINGER_ORDER indices for non-thumb
+            for (let i = 0; i < 4; i++) {
+                const dx = fkCoilPts[i][0] - senPts[i][0];
+                const dy = fkCoilPts[i][1] - senPts[i][1];
+                const dz = fkCoilPts[i][2] - senPts[i][2];
+                const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                totalErr += dist;
+                const c = '#' + SENSOR_COLORS[colors4F[i]].toString(16).padStart(6, '0');
+                html += `<span style="color:${c}">${names[i]}</span>: `
+                    + `<span class="${dist < 5 ? 'ok' : (dist < 10 ? 'warn' : 'err')}">${dist.toFixed(1)}mm</span> `
+                    + `(Δ=${dx.toFixed(1)}, ${dy.toFixed(1)}, ${dz.toFixed(1)})<br>`;
+            }
+            const mean = totalErr / 4;
+            html += `mean = <span class="${mean < 5 ? 'ok' : (mean < 10 ? 'warn' : 'err')}">${mean.toFixed(1)}mm</span>`;
+            stepStatus[7] = mean < 5 ? 'ok' : (mean < 10 ? 'warn' : 'err');
+            stepOutputs[7] = html;
+        }
+
+        // ─── Step 9: 验证 5F Procrustes残差 (read-only) ───
+        function runStep9_Verify5F() {
+            if (!stepApplied[7]) throw new Error('Run Step 8 first');
+            if (!estimationState.coilInWrist) throw new Error('coilInWrist not set');
+            // FK coil positions for all 5 fingers (thumb uses FK with alpha/cmc)
+            const fkCoilPts = [];
+            const senPts = [];
+            FINGER_ORDER.forEach((fn, fi) => {
+                const fd = skeletonParams.fingers[fn];
+                let fkCoil;
+                if (fn === 'thumb') {
+                    // Thumb FK: metacarpal + alpha rotation + cmc rotation + bones + coilOffset
+                    const D2R = Math.PI / 180;
+                    const alpha = fd.metacarpal.rpy[1];
+                    const cmcRot = fd.cmcRotOffset || 0;
+                    const ca = Math.cos(alpha), sa = Math.sin(alpha);
+                    const cc = Math.cos(cmcRot), sc = Math.sin(cmcRot);
+                    const Lsum = fd.bones.proximal + fd.bones.middle + fd.bones.distal;
+                    const cy = fd.coilOffset[1];
+                    const v1x = -sc * cy, v1y = cc * cy, v1z = -Lsum;
+                    const v2x = ca * v1x + sa * v1z;
+                    const v2y = v1y;
+                    const v2z = -sa * v1x + ca * v1z;
+                    fkCoil = [fd.metacarpal.pos[0] + v2x, fd.metacarpal.pos[1] + v2y, fd.metacarpal.pos[2] + v2z];
+                } else {
+                    const tipZ = fd.metacarpal.pos[2] - (fd.bones.proximal + fd.bones.middle + fd.bones.distal);
+                    fkCoil = [
+                        fd.metacarpal.pos[0] + fd.coilOffset[0],
+                        fd.metacarpal.pos[1] + fd.coilOffset[1],
+                        tipZ + fd.coilOffset[2],
+                    ];
+                }
+                fkCoilPts.push(fkCoil);
+                senPts.push(estimationState.coilInWrist[fi]);
+            });
+            // Compute per-sensor residuals
+            let html = '<b>5F Procrustes Residuals</b><br>';
+            let totalErr = 0;
+            for (let i = 0; i < 5; i++) {
+                const fn = FINGER_ORDER[i];
+                const dx = fkCoilPts[i][0] - senPts[i][0];
+                const dy = fkCoilPts[i][1] - senPts[i][1];
+                const dz = fkCoilPts[i][2] - senPts[i][2];
+                const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                totalErr += dist;
+                const c = '#' + SENSOR_COLORS[i].toString(16).padStart(6, '0');
+                html += `<span style="color:${c}">${fn}</span>: `
+                    + `<span class="${dist < 5 ? 'ok' : (dist < 10 ? 'warn' : 'err')}">${dist.toFixed(1)}mm</span> `
+                    + `(Δ=${dx.toFixed(1)}, ${dy.toFixed(1)}, ${dz.toFixed(1)})<br>`;
+            }
+            const mean = totalErr / 5;
+            html += `mean = <span class="${mean < 5 ? 'ok' : (mean < 10 ? 'warn' : 'err')}">${mean.toFixed(1)}mm</span>`;
+            stepStatus[8] = mean < 5 ? 'ok' : (mean < 10 ? 'warn' : 'err');
+            stepOutputs[8] = html;
+        }
+
+        function runAllSteps() {
+            for (let i = 0; i < NUM_STEPS; i++) {
+                if (!stepDefs[i].requires()) {
+                    console.warn(`Step ${i} prerequisites not met, stopping.`);
+                    break;
+                }
+                runStep(i);
+            }
+        }
+        // Expose to onclick
+        window.runAllSteps = runAllSteps;
+
+        // ══════════════════════════════════════════════════════
+        //  SKELETON UI (editable tables)
+        // ══════════════════════════════════════════════════════
+        function buildSkeletonUI() {
+            const container = document.getElementById('skelTablesContainer');
+            container.innerHTML = '';
+
+            // changeKey: lookup key for changedFields map
+            function numInput(value, step, onChange, width, changeKey) {
+                const inp = document.createElement('input');
+                inp.type = 'number';
+                inp.step = step || '0.1';
+                const decimals = step === '0.0001' ? 4 : (step === '0.01' ? 2 : (step === '1' ? 0 : 1));
+                inp.value = typeof value === 'number' ? value.toFixed(decimals) : value;
+                if (width) inp.style.width = width;
+                // Apply step-colored highlight if this field was changed
+                const ci = changeKey ? changedFields.get(changeKey) : null;
+                if (ci && STEP_COLORS[ci.stepIdx]) {
+                    inp.classList.add('step-changed', `step-changed-${ci.stepIdx}`);
+                    const oldFmt = typeof ci.oldVal === 'number' ? ci.oldVal.toFixed(decimals) : ci.oldVal;
+                    inp.title = `Step ${ci.stepIdx}: ${oldFmt} → ${inp.value}`;
+                }
+                inp.addEventListener('input', () => { onChange(parseFloat(inp.value) || 0); rebuildHandFromSkeleton(); });
+                return inp;
+            }
+
+            // changeKeyPrefix: e.g. "emfBase.pos", "index.metacarpal.pos"
+            function addRow(tbl, label, values, step, onChange, unit, changeKeyPrefix) {
+                const tr = document.createElement('tr');
+                const tdL = document.createElement('td');
+                tdL.textContent = label;
+                tr.appendChild(tdL);
+                const decimals = step === '0.0001' ? 4 : (step === '0.01' ? 2 : (step === '1' ? 0 : 1));
+                if (Array.isArray(values)) {
+                    values.forEach((v, i) => {
+                        const td = document.createElement('td');
+                        const ck = changeKeyPrefix ? `${changeKeyPrefix}.${i}` : null;
+                        const ci = ck ? changedFields.get(ck) : null;
+                        if (ci && STEP_COLORS[ci.stepIdx]) {
+                            td.classList.add('step-cell', `step-cell-${ci.stepIdx}`);
+                            const oldFmt = typeof ci.oldVal === 'number' ? ci.oldVal.toFixed(decimals) : ci.oldVal;
+                            const newFmt = typeof ci.newVal === 'number' ? ci.newVal.toFixed(decimals) : ci.newVal;
+                            td.setAttribute('data-step-info', `${oldFmt}→${newFmt}`);
+                        }
+                        td.appendChild(numInput(v, step, val => onChange(i, val), null, ck));
+                        tr.appendChild(td);
+                    });
+                } else {
+                    const td = document.createElement('td');
+                    td.colSpan = 3;
+                    const ck = changeKeyPrefix || null;
+                    const ci = ck ? changedFields.get(ck) : null;
+                    if (ci && STEP_COLORS[ci.stepIdx]) {
+                        td.classList.add('step-cell', `step-cell-${ci.stepIdx}`);
+                        const oldFmt = typeof ci.oldVal === 'number' ? ci.oldVal.toFixed(decimals) : ci.oldVal;
+                        const newFmt = typeof ci.newVal === 'number' ? ci.newVal.toFixed(decimals) : ci.newVal;
+                        td.setAttribute('data-step-info', `${oldFmt}→${newFmt}`);
+                    }
+                    td.appendChild(numInput(values, step, val => onChange(val), null, ck));
+                    tr.appendChild(td);
+                }
+                if (unit) {
+                    const utd = document.createElement('td');
+                    utd.innerHTML = `<span style="color:var(--dim);font-size:8px">${unit}</span>`;
+                    tr.appendChild(utd);
+                }
+                tbl.appendChild(tr);
+            }
+
+            // EMF Base
+            let title = document.createElement('div');
+            title.className = 'skel-section-title';
+            title.textContent = 'EMF Base';
+            container.appendChild(title);
+            let tbl = document.createElement('table');
+            tbl.className = 'skel-table';
+            addRow(tbl, 'pos', skeletonParams.emfBase.pos, '1', (i, v) => { skeletonParams.emfBase.pos[i] = v; }, 'mm', 'emfBase.pos');
+            addRow(tbl, 'rpy', skeletonParams.emfBase.rpy, '0.0001', (i, v) => { skeletonParams.emfBase.rpy[i] = v; }, 'rad', 'emfBase.rpy');
+            container.appendChild(tbl);
+
+            const fingerColors = { thumb: '#c47272', index: '#c49a6e', middle: '#7ea86e', ring: '#5e8bb0', pinky: '#8a6aaa' };
+            const fingerLabels = { thumb: 'Thumb', index: 'Index', middle: 'Middle', ring: 'Ring', pinky: 'Pinky' };
+
+            FINGER_ORDER.forEach(fn => {
+                const fd = skeletonParams.fingers[fn];
+                title = document.createElement('div');
+                title.className = 'skel-section-title';
+                title.style.color = fingerColors[fn];
+                title.textContent = fingerLabels[fn];
+                container.appendChild(title);
+
+                tbl = document.createElement('table');
+                tbl.className = 'skel-table';
+                addRow(tbl, 'meta pos', fd.metacarpal.pos, '1', (i, v) => { fd.metacarpal.pos[i] = v; }, 'mm', `${fn}.metacarpal.pos`);
+                addRow(tbl, 'meta rpy', fd.metacarpal.rpy, '0.0001', (i, v) => { fd.metacarpal.rpy[i] = v; }, 'rad', `${fn}.metacarpal.rpy`);
+                addRow(tbl, 'proximal', fd.bones.proximal, '1', v => { fd.bones.proximal = v; }, 'mm', `${fn}.bones.proximal`);
+                addRow(tbl, 'middle', fd.bones.middle, '1', v => { fd.bones.middle = v; }, 'mm', `${fn}.bones.middle`);
+                addRow(tbl, 'distal', fd.bones.distal, '1', v => { fd.bones.distal = v; }, 'mm', `${fn}.bones.distal`);
+                addRow(tbl, 'coil off', fd.coilOffset, '1', (i, v) => { fd.coilOffset[i] = v; }, 'mm', `${fn}.coilOffset`);
+                if (fn === 'thumb') {
+                    addRow(tbl, 'cmc_rot', fd.cmcRotOffset, '0.0001', v => { fd.cmcRotOffset = v; }, 'rad', 'thumb.cmcRotOffset');
+                    addRow(tbl, 'K_flex', fd.couplingK.K_FLEX, '0.01', v => { fd.couplingK.K_FLEX = v; });
+                    addRow(tbl, 'K_abd', fd.couplingK.K_ABD, '0.01', v => { fd.couplingK.K_ABD = v; });
+                    addRow(tbl, 'K_cross', fd.couplingK.K_CROSS, '0.01', v => { fd.couplingK.K_CROSS = v; });
+                }
+                container.appendChild(tbl);
+            });
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  SAVE / LOAD JSON (Fix C: supports both formats)
+        // ══════════════════════════════════════════════════════
+        function skeletonToOverrides() {
+            const eb = skeletonParams.emfBase;
+            const overrides = {
+                emfBase: { pos: [...eb.pos], rpy: [...eb.rpy] },
+                fingers: {}
+            };
+            FINGER_ORDER.forEach(fn => {
+                const fd = skeletonParams.fingers[fn];
+                const fo = {
+                    metacarpal: { pos: [...fd.metacarpal.pos], rpy: [...fd.metacarpal.rpy] },
+                    bones: { ...fd.bones },
+                    coilOffset: [...fd.coilOffset]
+                };
+                if (fn === 'thumb') {
+                    fo.cmcRotOffset = fd.cmcRotOffset;
+                    fo.couplingK = { ...fd.couplingK };
+                }
+                overrides.fingers[fn] = fo;
+            });
+            return overrides;
+        }
+
+        // Fix C: loadSkeletonFromData supports both formats
+        function loadSkeletonFromData(data) {
+            const src = data.overrides || data;
+            if (src.emfBase) {
+                if (src.emfBase.pos) skeletonParams.emfBase.pos = [...src.emfBase.pos];
+                if (src.emfBase.rpy) skeletonParams.emfBase.rpy = [...src.emfBase.rpy];
+            }
+            if (src.fingers) {
+                for (const fn of FINGER_ORDER) {
+                    if (!src.fingers[fn]) continue;
+                    const s = src.fingers[fn];
+                    const d = skeletonParams.fingers[fn];
+                    if (s.metacarpal) {
+                        if (s.metacarpal.pos) d.metacarpal.pos = [...s.metacarpal.pos];
+                        if (s.metacarpal.rpy) d.metacarpal.rpy = [...s.metacarpal.rpy];
+                    }
+                    if (s.bones) Object.assign(d.bones, s.bones);
+                    if (s.coilOffset) d.coilOffset = [...s.coilOffset];
+                    if (s.cmcRotOffset !== undefined) d.cmcRotOffset = s.cmcRotOffset;
+                    if (s.couplingK) Object.assign(d.couplingK, s.couplingK);
+                }
+            }
+            // skeleton_init.json: top-level coupling → thumb.couplingK
+            const ck = src.fingers?.thumb?.couplingK || src.coupling;
+            if (ck) {
+                skeletonParams.fingers.thumb.couplingK = { ...skeletonParams.fingers.thumb.couplingK, ...ck };
+                couplingParams.K_FLEX = skeletonParams.fingers.thumb.couplingK.K_FLEX;
+                couplingParams.K_ABD = skeletonParams.fingers.thumb.couplingK.K_ABD;
+                couplingParams.K_CROSS = skeletonParams.fingers.thumb.couplingK.K_CROSS;
+            }
+        }
+
+        function saveSkeletonJSON() {
+            const output = { overrides: skeletonToOverrides() };
+            const json = JSON.stringify(output, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'skeleton_overrides.json'; a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function loadSkeletonJSON(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    loadSkeletonFromData(data);
+                    buildSkeletonUI();
+                    rebuildHandFromSkeleton();
+                    document.getElementById('jsonStatus').innerHTML =
+                        `Skeleton JSON: <span class="loaded">${file.name}</span>`;
+                    console.log('Loaded skeleton from', file.name);
+                } catch (err) {
+                    alert('Invalid JSON: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Wire up Save/Load buttons
+        document.getElementById('btnSaveSkel').addEventListener('click', saveSkeletonJSON);
+        document.getElementById('btnLoadSkel').addEventListener('click', () => document.getElementById('skelFileInput').click());
+        document.getElementById('skelFileInput').addEventListener('change', e => {
+            if (e.target.files[0]) loadSkeletonJSON(e.target.files[0]);
+        });
+
+        // ══════════════════════════════════════════════════════
+        //  CAMERA & RENDER
+        // ══════════════════════════════════════════════════════
+        const VIEW_DIST = 250;
+
+        // ── Shared camera animation helper ──
+        function animateCameraTo(cam, ctrl, targetPos, targetCenter, duration) {
+            const startPos = cam.position.clone();
+            const startTarget = ctrl.target.clone();
+            const t0 = performance.now();
+            function step(now) {
+                const t = Math.min((now - t0) / duration, 1);
+                const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                cam.position.lerpVectors(startPos, targetPos, ease);
+                ctrl.target.lerpVectors(startTarget, targetCenter, ease);
+                ctrl.update();
+                if (t < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        function getViewPosition(type, dist) {
+            const center = new THREE.Vector3(0, 0, -50);
+            if (type === 'front')  return new THREE.Vector3(center.x, center.y, center.z + dist);
+            if (type === 'rear')   return new THREE.Vector3(center.x, center.y, center.z - dist);
+            if (type === 'top')    return new THREE.Vector3(center.x, center.y + dist, center.z - 0.01);
+            if (type === 'bottom') return new THREE.Vector3(center.x, center.y - dist, center.z + 0.01);
+            if (type === 'side')   return new THREE.Vector3(center.x - dist, center.y, center.z);
+            if (type === 'right')  return new THREE.Vector3(center.x + dist, center.y, center.z);
+            return new THREE.Vector3(center.x, center.y, center.z + dist);
+        }
+
+        // ── Main camera controls ──
+        const VIEW_LABELS = { front:'Front', rear:'Rear', top:'Top', bottom:'Bottom', side:'Left', right:'Right' };
+
+        function setCameraView(type) {
+            if (!isOrtho) switchCamera(true);
+            animateCameraTo(camera, controls, getViewPosition(type, VIEW_DIST), new THREE.Vector3(0, 0, -50), 400);
+            document.getElementById('viewLabelMain').textContent = (VIEW_LABELS[type] || type) + ' · Ortho';
+        }
+        ['front','rear','top','bottom','side','right'].forEach(v => {
+            const id = 'view' + v.charAt(0).toUpperCase() + v.slice(1);
+            document.getElementById(id).addEventListener('click', () => setCameraView(v));
+        });
+
+        function switchCamera(toOrtho) {
+            isOrtho = toOrtho;
+            const oldCam = camera;
+            camera = isOrtho ? orthoCamera : perspCamera;
+            camera.position.copy(oldCam.position);
+            controls.object = camera;
+            controls.update();
+            const w = canvas.clientWidth, h = canvas.clientHeight;
+            if (isOrtho) {
+                const dist = camera.position.distanceTo(controls.target);
+                const halfH = dist * Math.tan(perspCamera.fov * DEG / 2);
+                const halfW = halfH * (w / h);
+                orthoCamera.left = -halfW; orthoCamera.right = halfW;
+                orthoCamera.top = halfH; orthoCamera.bottom = -halfH;
+                orthoCamera.zoom = 1;
+            } else {
+                perspCamera.aspect = w / h;
+            }
+            camera.updateProjectionMatrix();
+            document.getElementById('btnOrtho').classList.toggle('active', isOrtho);
+            document.getElementById('btnOrtho').textContent = isOrtho ? 'Persp' : 'Ortho';
+            document.getElementById('viewLabelMain').textContent = isOrtho ? 'Ortho' : 'Perspective';
+        }
+        document.getElementById('btnOrtho').addEventListener('click', () => switchCamera(!isOrtho));
+
+        // ── Secondary camera controls ──
+        function setSubCameraView(type) {
+            subViewType = type;
+            animateCameraTo(subCamera, controlsSub, getViewPosition(type, VIEW_DIST_SUB), new THREE.Vector3(0, 0, -50), 400);
+            document.getElementById('viewLabelSub').textContent = (VIEW_LABELS[type] || type) + ' · Ortho';
+            ['front','rear','top','bottom','side','right'].forEach(v => {
+                const id = 'view' + v.charAt(0).toUpperCase() + v.slice(1) + 'Sub';
+                document.getElementById(id).classList.toggle('active', v === type);
+            });
+        }
+        ['front','rear','top','bottom','side','right'].forEach(v => {
+            const id = 'view' + v.charAt(0).toUpperCase() + v.slice(1) + 'Sub';
+            document.getElementById(id).addEventListener('click', () => setSubCameraView(v));
+        });
+
+        function resizeIfNeeded() {
+            // Main viewport
+            const w = canvas.clientWidth, h = canvas.clientHeight;
+            if (canvas.width !== w * renderer.getPixelRatio() || canvas.height !== h * renderer.getPixelRatio()) {
+                renderer.setSize(w, h, false);
+                if (isOrtho) {
+                    const dist = camera.position.distanceTo(controls.target);
+                    const halfH = dist * Math.tan(perspCamera.fov * DEG / 2);
+                    const halfW = halfH * (w / h);
+                    orthoCamera.left = -halfW; orthoCamera.right = halfW;
+                    orthoCamera.top = halfH; orthoCamera.bottom = -halfH;
+                } else {
+                    perspCamera.aspect = w / h;
+                }
+                camera.updateProjectionMatrix();
+            }
+            // Sub viewport
+            const ws = canvasSub.clientWidth, hs = canvasSub.clientHeight;
+            if (canvasSub.width !== ws * rendererSub.getPixelRatio() || canvasSub.height !== hs * rendererSub.getPixelRatio()) {
+                rendererSub.setSize(ws, hs, false);
+                const distS = subCamera.position.distanceTo(controlsSub.target);
+                const halfHS = distS * Math.tan(45 * DEG / 2);
+                const halfWS = halfHS * (ws / hs);
+                subCamera.left = -halfWS; subCamera.right = halfWS;
+                subCamera.top = halfHS; subCamera.bottom = -halfHS;
+                subCamera.updateProjectionMatrix();
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            controlsSub.update();
+            resizeIfNeeded();
+            renderer.render(scene, camera);
+            rendererSub.render(scene, subCamera);
+        }
+
+        // Toggle buttons
+        document.getElementById('btnToggleHand').addEventListener('click', () => {
+            handGroup.visible = !handGroup.visible;
+            document.getElementById('btnToggleHand').textContent = handGroup.visible ? 'Hide Glove' : 'Show Glove';
+        });
+        document.getElementById('btnToggleSensors').addEventListener('click', () => {
+            sensorGroup.visible = !sensorGroup.visible;
+            document.getElementById('btnToggleSensors').textContent = sensorGroup.visible ? 'Hide Sensors' : 'Show Sensors';
+        });
+
+        // ══════════════════════════════════════════════════════
+        //  INIT
+        // ══════════════════════════════════════════════════════
+        buildSkeletonUI();
+        rebuildHandFromSkeleton();
+        buildStepsUI();
+        requestAnimationFrame(animate);
+
+        // Auto-load palm_flat_right.npz (Fix D: only NPZ is auto-fetched)
+        (async () => {
+            try {
+                const resp = await fetch('../data/palm_flat_right.npz');
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const blob = await resp.blob();
+                const file = new File([blob], 'palm_flat_right.npz', { type: 'application/octet-stream' });
+                const npzMap = await loadNpzFile(file);
+                if (!npzMap.has('positions') || !npzMap.has('rotations')) {
+                    throw new Error('NPZ missing positions/rotations arrays');
+                }
+                const pos = npzMap.get('positions');
+                const rot = npzMap.get('rotations');
+                npzData = {
+                    positions: pos,
+                    rotations: rot,
+                    numFrames: pos.shape[0],
+                    numSensors: pos.shape[1]
+                };
+                document.getElementById('npzStatus').innerHTML =
+                    `NPZ: <span class="loaded">palm_flat_right.npz (${npzData.numFrames}f × ${npzData.numSensors}s)</span>`;
+                document.getElementById('badgeInfo').textContent = `${npzData.numFrames}f loaded`;
+                console.log('Auto-loaded palm_flat_right.npz:', npzData.numFrames, 'frames,', npzData.numSensors, 'sensors');
+
+                // Immediately compute avgPos and display sensors with default T_emf2wrist
+                estimationState.avgPos = computeAvgPositions();
+                updateSensorDisplay();
+                console.log('Sensors displayed with default T_emf2wrist:', skeletonParams.emfBase.pos, skeletonParams.emfBase.rpy);
+
+                updateStepsUI();
+            } catch (e) {
+                document.getElementById('npzStatus').innerHTML =
+                    `NPZ: <span class="not-loaded">Failed: ${e.message}</span>`;
+                console.warn('Auto-load palm_flat_right.npz failed:', e.message);
+            }
+        })();
+    </script>
+</body>
+
+</html>
