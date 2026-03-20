@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Coding Project 1 — 电机控制中的扫频到底在测什么？</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+  onerror="this.onerror=null;this.href='vendor/katex/katex.min.css';">
+<script>
+(function(){
+  var CDN = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/";
+  var LOCAL = "vendor/katex/";
+  var files = ["katex.min.js", "contrib/auto-render.min.js"];
+  var idx = 0, TIMEOUT = 3000;
+  function renderMath() {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [
+          {left:"$$", right:"$$", display:true},
+          {left:"$", right:"$", display:false}
+        ]
+      });
+    }
+  }
+  function loadScript(src, onSuccess, onFail) {
+    var s = document.createElement("script");
+    var done = false;
+    var timer = setTimeout(function() {
+      if (!done) { done = true; s.onload = s.onerror = null; onFail(); }
+    }, TIMEOUT);
+    s.src = src;
+    s.onload = function() { if (!done) { done = true; clearTimeout(timer); onSuccess(); } };
+    s.onerror = function() { if (!done) { done = true; clearTimeout(timer); onFail(); } };
+    document.head.appendChild(s);
+  }
+  function loadChain(base, fallback) {
+    if (idx >= files.length) { renderMath(); return; }
+    loadScript(base + files[idx],
+      function() { idx++; loadChain(base, fallback); },
+      function() { if (fallback) { idx = 0; loadChain(fallback, null); } }
+    );
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function(){ loadChain(CDN, LOCAL); });
+  } else {
+    loadChain(CDN, LOCAL);
+  }
+})();
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #090b11;
+    --bg-panel: rgba(17, 21, 31, 0.88);
+    --bg-code: #111722;
+    --line: rgba(255,255,255,0.10);
+    --text: #eef3ff;
+    --text-soft: #b7c0d8;
+    --text-muted: #7c869d;
+    --gold: #f3c76a;
+    --teal: #7de1d2;
+    --blue: #7aa8ff;
+    --green: #98e38d;
+    --shadow: 0 24px 80px rgba(0,0,0,0.35);
+    --font-display: Georgia, "Times New Roman", "Noto Serif SC", serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans SC", sans-serif;
+    --font-mono: "Cascadia Code", Consolas, monospace;
+  }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    min-height: 100vh;
+    font-family: var(--font-body);
+    color: var(--text);
+    background:
+      radial-gradient(circle at 15% 20%, rgba(122,168,255,0.18), transparent 28%),
+      radial-gradient(circle at 85% 12%, rgba(125,225,210,0.12), transparent 24%),
+      radial-gradient(circle at 50% 120%, rgba(243,199,106,0.10), transparent 35%),
+      linear-gradient(180deg, #07090e 0%, #0b0f18 50%, #07090e 100%);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.08;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(circle at center, rgba(0,0,0,1), rgba(0,0,0,0.2) 70%, transparent 100%);
+  }
+  .app { position: relative; z-index: 1; width: min(1180px, calc(100vw - 32px)); margin: 0 auto; padding: 32px 0 64px; }
+  .hero, .section, .sidebar {
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    background: var(--bg-panel);
+    backdrop-filter: blur(14px);
+    box-shadow: var(--shadow);
+  }
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 32px;
+    margin-bottom: 18px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)), rgba(10,14,22,0.82);
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: auto -10% -35% auto;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(243,199,106,0.14), transparent 70%);
+    pointer-events: none;
+  }
+  .hero__eyebrow, .section__tag, .sidebar__title, .pill, .meta-chip__label {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+  }
+  .hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 0.72rem; color: var(--gold); margin-bottom: 18px; }
+  .hero__eyebrow::before, .section__tag::before { content: ""; width: 36px; height: 1px; background: linear-gradient(90deg, currentColor, transparent); }
+  .hero h1 { max-width: 900px; font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3.6rem); line-height: 1.08; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 14px; }
+  .hero h1 em { font-style: normal; color: var(--teal); }
+  .hero__lead { max-width: 860px; font-size: 1rem; line-height: 1.9; color: var(--text-soft); }
+  .hero__meta { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 26px; }
+  .meta-chip { padding: 12px 14px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,0.03); }
+  .meta-chip__label { display: block; font-size: 0.68rem; color: var(--text-muted); margin-bottom: 6px; }
+  .meta-chip__value { font-size: 0.95rem; line-height: 1.55; color: var(--text); }
+  .layout { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 18px; align-items: start; }
+  .sidebar { position: sticky; top: 18px; padding: 18px; }
+  .sidebar__title { font-size: 0.76rem; color: var(--gold); margin-bottom: 12px; }
+  .nav-list { list-style: none; display: grid; gap: 10px; margin-bottom: 18px; }
+  .nav-list a {
+    display: block; padding: 10px 12px; border-radius: 12px; color: var(--text-soft);
+    text-decoration: none; border: 1px solid transparent; transition: 0.22s ease;
+  }
+  .nav-list a:hover { color: var(--text); background: rgba(255,255,255,0.04); border-color: var(--line); transform: translateX(3px); }
+  .side-note { border-top: 1px solid var(--line); padding-top: 14px; font-size: 0.86rem; line-height: 1.75; color: var(--text-muted); }
+  .main { display: grid; gap: 18px; }
+  .section { padding: 28px; opacity: 0; transform: translateY(26px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .section.visible { opacity: 1; transform: translateY(0); }
+  .section__tag { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 0.7rem; color: var(--teal); }
+  h2 { font-family: var(--font-display); font-size: 1.75rem; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 14px; }
+  h3 { font-size: 1.08rem; color: var(--gold); margin: 20px 0 10px; }
+  h4 { font-size: 1rem; margin-bottom: 10px; color: var(--text); }
+  p, li { color: var(--text-soft); line-height: 1.9; font-size: 0.98rem; }
+  strong { color: var(--text); }
+  em { color: var(--teal); }
+  ul, ol { padding-left: 1.25rem; margin: 10px 0 14px; }
+  li + li { margin-top: 6px; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .grid-2, .grid-3, .q-grid { display: grid; gap: 14px; margin-top: 16px; }
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .q-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card, .q-card, .callout, .eq-block, pre, .check, .mini-list li { border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,0.03); }
+  .card, .q-card { padding: 18px; }
+  .callout, .eq-block, pre { margin: 16px 0; padding: 16px 18px; }
+  .callout--warn { background: rgba(243,199,106,0.08); border-color: rgba(243,199,106,0.22); }
+  .callout--ok { background: rgba(125,225,210,0.07); border-color: rgba(125,225,210,0.22); }
+  .callout--task { background: rgba(152,227,141,0.07); border-color: rgba(152,227,141,0.20); }
+  .callout__title { display: block; margin-bottom: 6px; font-weight: 700; color: var(--text); }
+  .eq-block, pre { background: var(--bg-code); overflow-x: auto; }
+  pre, code { font-family: var(--font-mono); font-size: 0.9rem; }
+  code { color: var(--teal); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); padding: 0.1rem 0.35rem; border-radius: 8px; }
+  pre code { background: none; border: none; padding: 0; color: #d9e6ff; }
+  .pill { display: inline-flex; align-items: center; padding: 4px 9px; border-radius: 999px; font-size: 0.72rem; border: 1px solid var(--line); color: var(--text-soft); margin-right: 6px; margin-bottom: 6px; }
+  .q-card__index {
+    display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(122,168,255,0.14); color: var(--blue); font-family: var(--font-mono); font-size: 0.82rem; margin-bottom: 12px;
+  }
+  .mini-list { list-style: none; padding-left: 0; display: grid; gap: 10px; margin-top: 14px; }
+  .mini-list li { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; }
+  .mini-list li::before, .check::before { flex: none; font-weight: 700; }
+  .mini-list li::before { content: "\2192"; color: var(--gold); }
+  .checklist { display: grid; gap: 10px; margin-top: 14px; }
+  .check { display: flex; gap: 12px; align-items: flex-start; padding: 13px 14px; }
+  .check::before { content: "\2713"; color: var(--green); margin-top: 1px; }
+  .task-table { width: 100%; border-collapse: collapse; margin-top: 16px; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); }
+  .task-table th, .task-table td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: left; }
+  .task-table th { background: rgba(255,255,255,0.05); color: var(--text); font-size: 0.9rem; }
+  .task-table td { color: var(--text-soft); font-size: 0.94rem; line-height: 1.8; }
+  .task-table tr:last-child td { border-bottom: none; }
+  .footer-note { margin-top: 18px; font-size: 0.88rem; color: var(--text-muted); }
+  .name-row { display: flex; gap: 10px; align-items: center; margin-top: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+  .name-row label { color: var(--text); font-size: 0.94rem; }
+  .text-input, .file-input {
+    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 14px;
+    padding: 0.85rem 1rem; color: var(--text); font-size: 16px; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .text-input:focus, .file-input:focus { border-color: rgba(122,168,255,0.45); box-shadow: 0 0 0 3px rgba(122,168,255,0.12); }
+  .btn {
+    border: none; border-radius: 14px; padding: 0.9rem 1.3rem; min-height: 50px; cursor: pointer;
+    font-size: 0.95rem; font-weight: 700; transition: transform 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+  }
+  .btn--primary { background: linear-gradient(135deg, var(--gold), #ffe3a4); color: #1c1508; }
+  .btn--primary:hover { filter: brightness(1.03); }
+  .btn--primary:active { transform: translateY(1px) scale(0.99); }
+  .btn--primary:disabled { opacity: 0.45; cursor: not-allowed; }
+  .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .result-banner { display: none; margin-top: 14px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); font-size: 0.94rem; }
+  .result-banner.visible { display: block; }
+  .result-banner.success { background: rgba(152,227,141,0.08); border-color: rgba(152,227,141,0.24); color: #c6f1bf; }
+  .result-banner.error { background: rgba(255,141,141,0.08); border-color: rgba(255,141,141,0.24); color: #ffc2c2; }
+  .katex { color: var(--text); }
+  @media (max-width: 980px) {
+    .hero__meta, .layout, .grid-3, .grid-2, .q-grid { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
+  @media (max-width: 640px) {
+    .app { width: min(100vw - 18px, 1180px); padding-top: 12px; }
+    .hero, .section, .sidebar { padding: 20px; border-radius: 22px; }
+    h2 { font-size: 1.45rem; }
+    .hero__lead, p, li { font-size: 0.95rem; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hero">
+    <div class="hero__eyebrow">Coding Project 1 / FOC Frequency Sweep</div>
+    <h1>电机控制中的“扫频”，<em>到底在测什么？</em></h1>
+    <p class="hero__lead">
+      本次编程作业不要求你背结论，而是要求你 <strong>通过仿真、作图、调参和解释</strong>，
+      真正弄清楚：速度环扫频、电流环扫频、负载转矩扫频分别对应哪条传递关系；
+      为什么某些扫频方式会“掺入”机械环节；以及 <strong>内环带宽</strong> 是如何决定外环观测结果的。
+    </p>
+
+    <div class="hero__meta">
+      <div class="meta-chip">
+        <span class="meta-chip__label">核心脚本</span>
+        <div class="meta-chip__value"><code>simulation/tuner.py</code><br><code>simulation/tutorials_ep6_svpwm.py</code></div>
+      </div>
+      <div class="meta-chip">
+        <span class="meta-chip__label">关键词</span>
+        <div class="meta-chip__value">speed loop / current loop / disturbance / bandwidth</div>
+      </div>
+      <div class="meta-chip">
+        <span class="meta-chip__label">建议产出</span>
+        <div class="meta-chip__value">图 + 表 + 解释 + 代码修改说明</div>
+      </div>
+      <div class="meta-chip">
+        <span class="meta-chip__label">提交形式</span>
+        <div class="meta-chip__value">PDF/Markdown + 代码或截图</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar__title">Contents</div>
+      <ul class="nav-list">
+        <li><a href="#overview">项目目标</a></li>
+        <li><a href="#resources">代码与环境</a></li>
+        <li><a href="#questions">核心问题</a></li>
+        <li><a href="#workflow">建议实验流程</a></li>
+        <li><a href="#hints">关键提示</a></li>
+        <li><a href="#deliverables">提交要求</a></li>
+        <li><a href="#submit-section">在线提交</a></li>
+      </ul>
+      <div class="side-note">
+        建议先通读整页，再开始写代码。<br>
+        这份作业刻意给了很多提示，但 <strong>不会替你完成推理</strong>。
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="section" id="overview">
+        <div class="section__tag">Overview / Objective</div>
+        <h2>你这次要真正回答的，不是“怎么扫”，而是“扫出来的到底是什么”</h2>
+        <p>
+          在控制里，“扫频”本质上是在某个工作点附近，向系统注入正弦信号，然后观察输出如何随频率变化。
+          因此你最终测到的，不是某个神秘指标，而是某条 <strong>输入 → 输出</strong> 动态关系在频域里的样子。
+        </p>
+
+        <div class="eq-block">
+          $$G(j\omega)=\frac{Y(j\omega)}{U(j\omega)}$$
+        </div>
+
+        <p>
+          问题在于：电机控制是多闭环系统。你把信号注入在哪一层、输出看哪一个量、机械端是否允许转动、
+          电流环是否足够快，这些都会改变你“扫到”的对象。
+        </p>
+
+        <div class="callout callout--warn">
+          <span class="callout__title">本作业的最低目标</span>
+          不要只给“仿真截图”。你必须明确写出：<strong>这次扫频的输入是什么、输出是什么、中间经过哪些环节、哪一部分是你想测的、哪一部分是你不想混进去的。</strong>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <h4>层次 1：看现象</h4>
+            <p>先让脚本跑起来，观察速度、<code>i_q</code>、<code>i_d</code>、负载转矩、命令值与反馈值的波形随频率的变化。</p>
+          </div>
+          <div class="card">
+            <h4>层次 2：解释路径</h4>
+            <p>说明这条扫频是在测 <em>tracking</em>、<em>disturbance rejection</em>，还是混合了电气与机械动态。</p>
+          </div>
+          <div class="card">
+            <h4>层次 3：会调参数</h4>
+            <p>通过 <code>tuner.py</code> 改带宽，再回来看扫频结果为什么变化，尤其关注电流环对速度环的支撑作用。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="resources">
+        <div class="section__tag">Resources / Setup</div>
+        <h2>代码入口、环境入口、你应该先搜哪些关键词</h2>
+
+        <div class="callout callout--ok">
+          <span class="callout__title">推荐参考仓库</span>
+          仓库：<a href="https://github.com/horychen/ee275" target="_blank" rel="noopener noreferrer">https://github.com/horychen/ee275</a><br>
+          Clone：<a href="https://github.com/horychen/ee275.git" target="_blank" rel="noopener noreferrer">https://github.com/horychen/ee275.git</a><br>
+          README：<a href="https://github.com/horychen/ee275/blob/master/README.md" target="_blank" rel="noopener noreferrer">环境配置与教程入口</a>
+        </div>
+
+        <pre><code>git clone https://github.com/horychen/ee275.git</code></pre>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4><code>simulation/tutorials_ep6_svpwm.py</code></h4>
+            <ul>
+              <li>找 <code>bool_apply_sweeping_frequency_excitation</code></li>
+              <li>找 <code>CMD_SPEED_SINE_RPM</code> / <code>CMD_CURRENT_SINE_AMPERE</code></li>
+              <li>找 <code>cmd_rpm</code> / <code>cmd_idq[1]</code></li>
+              <li>找 <code>ACM.TLoad</code></li>
+              <li>找速度环、电流环 PI 的初始化位置</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4><code>simulation/tuner.py</code></h4>
+            <ul>
+              <li>看 <code>get_coeffs_dc_motor_current_regulator()</code></li>
+              <li>看 <code>get_coeffs_dc_motor_SPEED_regulator()</code></li>
+              <li>看 <code>iterate_for_desired_bandwidth()</code></li>
+              <li>看 <code>tunner_wrapper()</code></li>
+              <li>理解 <code>FOC_delta</code>、<code>FOC_desired_VLBW_HZ</code> 的作用</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>你至少要知道这些变量在干什么</h3>
+        <div>
+          <span class="pill">CTRL.bool_apply_speed_closed_loop_control</span>
+          <span class="pill">CTRL.bool_apply_sweeping_frequency_excitation</span>
+          <span class="pill">CTRL.bool_overwrite_speed_commands</span>
+          <span class="pill">CMD_SPEED_SINE_HZ</span>
+          <span class="pill">CMD_SPEED_SINE_STEP_SIZE</span>
+          <span class="pill">CMD_SPEED_SINE_HZ_CEILING</span>
+          <span class="pill">CMD_CURRENT_SINE_AMPERE</span>
+          <span class="pill">CL_SERIES_KP / KI</span>
+          <span class="pill">VL_SERIES_KP / KI</span>
+          <span class="pill">FOC_delta</span>
+          <span class="pill">FOC_desired_VLBW_HZ</span>
+        </div>
+
+        <div class="callout">
+          <span class="callout__title">重要提醒</span>
+          脚本里的扫频实现默认是“逐频率注入正弦”，每个频率停留约一个周期。你可以直接用，也可以自行改成停留多个周期。
+          如果你发现低频段还没进入稳态就切频了，请把这件事写进报告，而不是假装没看见。
+        </div>
+      </section>
+
+      <section class="section" id="questions">
+        <div class="section__tag">Core Questions / What To Figure Out</div>
+        <h2>你必须围绕下列问题组织报告</h2>
+        <p>
+          以下每一问都不要求一句话作答，而是要求你用 <strong>波形、频率响应趋势、参数对比、代码定位和物理解释</strong> 支撑结论。
+        </p>
+
+        <div class="q-grid">
+          <div class="q-card">
+            <div class="q-card__index">Q1</div>
+            <h4>“扫频”到底在测什么？</h4>
+            <p>请明确写出输入、输出、注入位置和观测位置。不要只说“在测带宽”。带宽只是结果的一部分。</p>
+          </div>
+          <div class="q-card">
+            <div class="q-card__index">Q2</div>
+            <h4>扫速度环和扫电流环，分别在测什么？</h4>
+            <p>请区分：速度参考到速度、q轴电流参考到q轴电流、负载扰动到速度，这三者不是同一条通道。</p>
+          </div>
+          <div class="q-card">
+            <div class="q-card__index">Q3</div>
+            <h4>扫电流环时，电机速度应变化还是不变？为什么？</h4>
+            <p>请分别讨论扫 <code>d</code> 轴电流与扫 <code>q</code> 轴电流；说明反电势、转矩、机械耦合分别如何进入结果。</p>
+          </div>
+          <div class="q-card">
+            <div class="q-card__index">Q4</div>
+            <h4>为什么扫速度指令时，频率越高，<code>i_q</code> 幅值常常越大？</h4>
+            <p>请从机械方程出发，不要只用“控制器更努力了”这种口语解释。</p>
+          </div>
+          <div class="q-card">
+            <div class="q-card__index">Q5</div>
+            <h4>恒速下扫负载转矩，与扫速度参考，有什么联系与区别？</h4>
+            <p>请用框图或传递函数语言解释二者共享什么，不共享什么，符号为什么会不同。</p>
+          </div>
+          <div class="q-card">
+            <div class="q-card__index">Q6</div>
+            <h4>电流环会怎样影响负载转矩扫频结果？</h4>
+            <p>你需要说明：为什么内环越慢，速度环抗扰越差；以及相位滞后为何会更早出现。</p>
+          </div>
+          <div class="q-card">
+            <div class="q-card__index">Q7</div>
+            <h4>如何改变带宽？改哪些参数？原理是什么？</h4>
+            <p>请把 <code>tuner.py</code> 里的公式与你自己的实验结果对应起来，不要只贴参数表。</p>
+          </div>
+          <div class="q-card">
+            <div class="q-card__index">Q8</div>
+            <h4>哪些结果是“环路本身”的，哪些结果是“仿真条件造成的”？</h4>
+            <p>例如：电压限幅、转速变化、工作点漂移、每个频率停留时间不够，都会污染你以为在测的对象。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="workflow">
+        <div class="section__tag">Workflow / Suggested Experiments</div>
+        <h2>建议实验流程：按这个顺序做，最不容易乱</h2>
+
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th style="width: 18%;">阶段</th>
+              <th style="width: 32%;">你要做什么</th>
+              <th>你要回答什么</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Task A</strong><br>跑通脚本</td>
+              <td>先用默认参数把 <code>tutorials_ep6_svpwm.py</code> 跑起来，确认你能看到速度、电流、负载等基本波形。</td>
+              <td>你要先知道：哪些变量是命令，哪些变量是反馈，哪些是状态，哪些是扰动。</td>
+            </tr>
+            <tr>
+              <td><strong>Task B</strong><br>速度参考扫频</td>
+              <td>开启 <code>bool_apply_sweeping_frequency_excitation</code>，保留速度闭环，扫 <code>cmd_rpm</code>，记录速度响应和 <code>i_q</code> 变化。</td>
+              <td>你测到的是哪条闭环传递关系？随着频率上升，速度幅值、相位、<code>i_q</code> 幅值怎么变化？</td>
+            </tr>
+            <tr>
+              <td><strong>Task C</strong><br>电流环扫频</td>
+              <td>改为扫 <code>cmd_idq[1]</code> 或 <code>cmd_idq[0]</code>，并认真设计“速度是否固定”的实验条件。</td>
+              <td>你是在测纯电流环，还是把机械环也扫进去了？为什么 <code>d</code> 轴和 <code>q</code> 轴不对称？</td>
+            </tr>
+            <tr>
+              <td><strong>Task D</strong><br>负载转矩扫频</td>
+              <td>让速度参考保持常值，在 <code>ACM.TLoad</code> 上注入正弦扰动，记录速度与 <code>i_q</code> 的响应。</td>
+              <td>这更接近 tracking 还是 disturbance rejection？与速度指令扫频有何共同分母、不同分子？</td>
+            </tr>
+            <tr>
+              <td><strong>Task E</strong><br>带宽对比</td>
+              <td>用 <code>tuner.py</code> 生成至少两组不同带宽参数，重复 Task B 与 Task D。</td>
+              <td>电流环更快后，速度环的跟踪和抗扰分别怎样变？为什么？</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>建议你至少画出这些图</h3>
+        <div class="checklist">
+          <div class="check">速度参考扫频：<code>cmd_rpm</code>、实际速度、<code>i_q</code>、频率索引或当前频率。</div>
+          <div class="check">电流环扫频：<code>i_q^*</code> 与 <code>i_q</code>，或 <code>i_d^*</code> 与 <code>i_d</code>。</div>
+          <div class="check">负载扰动扫频：<code>T_L</code>、速度、<code>i_q</code>。</div>
+          <div class="check">不同带宽对比图：至少两组 <code>CLBW</code>/<code>VLBW</code> 对同一实验的叠图。</div>
+        </div>
+
+        <div class="callout callout--task">
+          <span class="callout__title">编程最低要求</span>
+          你至少需要自己补一个“自动整理结果”的功能：例如把每个扫频段的频率、响应幅值、相位或峰峰值提取出来，做成表格或 Bode-like 曲线。
+          不要求和专业频响分析仪完全一致，但必须能支撑你的讨论。
+        </div>
+      </section>
+
+      <section class="section" id="hints">
+        <div class="section__tag">Hints / Physics + Code</div>
+        <h2>下面这些提示足够把你推到正确方向，但不会替你做完作业</h2>
+
+        <h3>提示 1：扫频测的是“某条通道”的频率响应</h3>
+        <p>
+          如果你扫的是速度参考，输出看速度，那么更接近在测 <strong>速度闭环 tracking</strong>；
+          如果你扫的是负载转矩，输出看速度，那么更接近在测 <strong>速度环的抗扰能力</strong>；
+          如果你扫的是电流参考，输出看电流，那么目标是测 <strong>电流环</strong>，但前提是别把机械动态混进去。
+        </p>
+
+        <h3>提示 2：扫电流环时，先想清楚你到底要不要让机械系统参与</h3>
+        <div class="grid-2">
+          <div class="card">
+            <h4>扫 <code>d</code> 轴电流</h4>
+            <p>
+              对表贴 PMSM 或零弱磁工作点而言，纯扫 <code>d</code> 轴通常不直接产生产生平均电磁转矩。
+              如果转子不动，就没有与转速相关的动生反电势项干扰，是观察电流环的较“干净”方式。
+            </p>
+          </div>
+          <div class="card">
+            <h4>扫 <code>q</code> 轴电流</h4>
+            <p>
+              <code>i_q</code> 直接决定电磁转矩。若电机可以自由转动，那么你一边在扫电流环，一边也在激发机械方程。
+              此时测到的未必还是“纯电流环”，而是电流环与机械环耦合后的结果。
+            </p>
+          </div>
+        </div>
+
+        <div class="callout callout--warn">
+          <span class="callout__title">所以你要自己判断</span>
+          如果你的目标是尽量测“纯电流环”，你更希望 <strong>转速不变</strong>（最好近似恒定，甚至为零），
+          这样可以尽量消掉机械动态和速度相关反电势的影响。你必须用自己的实验去证明这件事。
+        </div>
+
+        <h3>提示 3：为什么速度参考扫频时，<code>i_q</code> 幅值往往越扫越大？</h3>
+        <div class="eq-block">
+          $$J\frac{d\omega_m}{dt}=T_e-T_L,\qquad
+          T_e=\frac{3}{2}n_{pp}K_A i_q$$
+        </div>
+        <div class="eq-block">
+          $$\omega_m^\ast(t)=A\sin(2\pi f t)\;\Rightarrow\;
+          \frac{d\omega_m^\ast}{dt}=2\pi f A\cos(2\pi f t)$$
+        </div>
+        <p>
+          也就是说，在速度振幅 <code>A</code> 固定时，频率 <code>f</code> 越高，所需加速度幅值越大；
+          为了实现更大的加速度，就需要更大的电磁转矩，而转矩又需要更大的 <code>i_q</code>。
+          这就是你报告里应该出现的主线之一。
+        </p>
+
+        <h3>提示 4：速度参考扫频与负载转矩扫频，既相关又不同</h3>
+        <p>
+          它们都经过 <strong>同一个闭环系统</strong>，所以常常会共享相同或相近的闭环极点结构；
+          但二者的注入点不同：一个是从参考端进入，一个是从扰动端进入，因此分子、符号、低频意义都不一样。
+        </p>
+        <div class="eq-block">
+          $$\frac{\omega_m}{\omega_m^\ast}\sim \frac{C_v G_i G_m}{1+C_v G_i G_m},
+          \qquad
+          \frac{\omega_m}{T_L}\sim -\frac{G_d}{1+C_v G_i G_m}$$
+        </div>
+        <p>
+          你不必完全照抄这个符号写法，但报告里至少要表达出：<strong>二者共享闭环分母，却不是同一条传递函数。</strong>
+        </p>
+
+        <h3>提示 5：电流环是速度环眼中的“转矩执行器”</h3>
+        <p>
+          从速度环角度看，速度 PI 并不直接产生转矩，它先产生 <code>i_q^*</code>，再由电流环把 <code>i_q^*</code> 尽量快地变成真实 <code>i_q</code>。
+          因此电流环越慢，速度环看到的“执行器”越迟钝，抗负载扰动的能力越差，相位滞后也更大。
+        </p>
+
+        <h3>提示 6：带宽在代码里不是抽象概念，它被写成了明确公式</h3>
+        <div class="eq-block">
+          $$K_{p,i}=2\pi\,L\cdot \text{BW}_{c},\qquad
+          K_{i,i}=\frac{R}{L}$$
+        </div>
+        <div class="eq-block">
+          $$K_{i,\omega}=\frac{\omega_{ci}}{\delta^2},\qquad
+          K_{p,\omega}=\frac{J_s/n_{pp}}{1.5\,n_{pp}\,K_A}\,\delta\,K_{i,\omega}$$
+        </div>
+        <p>
+          这些关系就在 <code>simulation/tuner.py</code> 中。请你把公式、代码变量名和实验结果连起来：
+          哪个参数主要影响电流环？哪个参数控制速度环目标带宽？<code>delta</code> 为什么会影响速度环设计？
+        </p>
+
+        <h3>提示 7：不要忽略限幅与工作点</h3>
+        <ul class="mini-list">
+          <li>若频率太高，可能不是“环路小信号能力不够”，而是电压或电流限幅先到了。</li>
+          <li>若你扫的是 <code>q</code> 轴电流且允许转速变化，那么工作点会漂移，系统不再是你以为的那个线性化点。</li>
+          <li>若每个频率停留太短，幅值与相位提取可能不可靠。</li>
+          <li>若你开启或关闭解耦电压补偿，电流环结果也会发生变化，这一点值得加分讨论。</li>
+        </ul>
+
+        <h3>提示 8：你可以从这些代码位置开始改</h3>
+        <pre><code># 建议先搜索这些关键词：
+bool_apply_sweeping_frequency_excitation
+CMD_SPEED_SINE_RPM
+CMD_CURRENT_SINE_AMPERE
+cmd_rpm
+cmd_idq[1]
+ACM.TLoad
+get_coeffs_dc_motor_current_regulator
+get_coeffs_dc_motor_SPEED_regulator
+iterate_for_desired_bandwidth</code></pre>
+
+        <div class="callout">
+          <span class="callout__title">一个很好的加分方向</span>
+          你可以尝试同时给出两种“扫频理解”：
+          <strong>时域逐频正弦注入</strong> 与 <strong>由已知近似传递函数直接画 Bode</strong>。
+          然后比较：为什么二者趋势一致，但细节不一定一模一样？
+        </div>
+      </section>
+
+      <section class="section" id="deliverables">
+        <div class="section__tag">Deliverables / What To Submit</div>
+        <h2>提交要求：至少交出这些内容</h2>
+
+        <div class="callout callout--warn">
+          <span class="callout__title">PDF 报告最终必须包含的 4 张核心图</span>
+          你的最终 PDF 报告必须至少包含以下四张图，并基于这四张图分析本页前面提出的问题：
+          <ol>
+            <li><strong><code>d</code> 轴电流环扫频图</strong>：单独对 <code>d</code> 轴进行扫频。</li>
+            <li><strong><code>q</code> 轴电流环扫频图</strong>：单独对 <code>q</code> 轴进行扫频。</li>
+            <li><strong>速度环扫频图</strong>：对速度参考进行扫频。</li>
+            <li><strong>恒速条件下的负载转矩扫频图</strong>：速度参考保持恒定，对 <code>TLoad</code> 进行扫频。</li>
+          </ol>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4>必须有的内容</h4>
+            <div class="checklist">
+              <div class="check">代码修改说明：你改了哪些地方，为什么要改。</div>
+              <div class="check">最终 PDF 必须明确放入 4 张核心图：<code>d</code> 轴扫频、<code>q</code> 轴扫频、速度环扫频、恒速下 <code>TLoad</code> 扫频。</div>
+              <div class="check">至少 2 组不同带宽参数的对比结果。</div>
+              <div class="check">对 Q1–Q8 的逐条回答，不能只贴图不解释。</div>
+            </div>
+          </div>
+          <div class="card">
+            <h4>推荐加分项</h4>
+            <div class="checklist">
+              <div class="check">自己写自动提取幅值/相位的小工具。</div>
+              <div class="check">比较 <code>d</code> 轴电流扫频与 <code>q</code> 轴电流扫频的差异。</div>
+              <div class="check">比较“转速固定”和“转速自由变化”对电流环结果的影响。</div>
+              <div class="check">讨论解耦补偿、限幅或停留时间对结果的污染。</div>
+            </div>
+          </div>
+        </div>
+
+        <h3>建议你的报告结构</h3>
+        <ol>
+          <li>实验目的：你想测哪条通道？为什么要分成这 4 张图？</li>
+          <li>代码入口：你改了哪些变量与哪几个函数？</li>
+          <li>实验设置：工作点、扫频范围、扫频幅值、是否恒速、是否加负载。</li>
+          <li>结果图表：先给出 4 张核心图，再给出整理后的幅值/相位趋势图、参数对比表。</li>
+          <li>解释：围绕 Q1–Q8 回答，并说明哪些现象来自物理，哪些来自仿真设置。</li>
+          <li>结论：你认为“最适合测纯电流环”和“最适合测速度抗扰”的实验方式分别是什么？</li>
+        </ol>
+
+        <div class="callout callout--task">
+          <span class="callout__title">提交底线</span>
+          如果你的结论里没有出现诸如“输入/输出/注入点/工作点/带宽/机械耦合/扰动通道/限幅”这些关键词，
+          基本可以认为你还没有真正完成这份作业。
+        </div>
+
+        <p class="footer-note">
+          文件命名建议：<code>codingProject1_姓名.pdf</code>、<code>codingProject1_姓名.zip</code> 或同等清晰的格式。
+        </p>
+      </section>
+
+      <section class="section" id="submit-section">
+        <div class="section__tag">Submission / Upload</div>
+        <h2>在线提交</h2>
+
+        <p>
+          请上传你的报告（PDF 或 Markdown 导出的 PDF）以及必要的代码/截图。若你提交压缩包，请确保能直接看到最终报告与核心脚本修改。
+        </p>
+
+        <div class="name-row">
+          <label for="cpName">姓名 / Name:</label>
+          <input type="text" class="text-input" id="cpName" placeholder="请输入姓名..." style="max-width: 280px;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label for="cpFile" style="display:block; margin-bottom:0.55rem; color:var(--text); font-size:0.94rem;">
+            上传文件 / Upload (PDF, ZIP, PNG, JPG):
+          </label>
+          <input type="file" id="cpFile" accept=".pdf,.zip,.md,.png,.jpg,.jpeg" multiple
+            style="font-size:0.92rem; color:var(--text-soft);">
+        </div>
+
+        <div id="resultBanner" class="result-banner"></div>
+
+        <div class="actions">
+          <button class="btn btn--primary" id="submitBtn" onclick="submitProject()">Submit / 提交</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+(function() {
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.section').forEach(function(section) { io.observe(section); });
+})();
+
+async function submitProject() {
+  const name = document.getElementById('cpName').value.trim();
+  if (!name) {
+    showResult('error', '请填写姓名 / Please enter your name.');
+    return;
+  }
+  const fileInput = document.getElementById('cpFile');
+  if (!fileInput.files.length) {
+    showResult('error', '请选择至少一个文件 / Please select at least one file.');
+    return;
+  }
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Uploading...';
+  const formData = new FormData();
+  formData.append('name', name);
+  formData.append('homework', 'codingProject1');
+  formData.append('timestamp', new Date().toISOString());
+  for (const f of fileInput.files) formData.append('files', f);
+  try {
+    const resp = await fetch('/submit-homework', { method: 'POST', body: formData });
+    if (resp.ok) {
+      showResult('success', '提交成功 / Submission received.');
+      btn.textContent = 'Submitted';
+    } else {
+      throw new Error('Server error: ' + resp.status);
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Submit / 提交';
+    showResult('error', '提交失败 / Failed: ' + e.message);
+  }
+}
+
+function showResult(type, msg) {
+  const banner = document.getElementById('resultBanner');
+  banner.className = 'result-banner visible ' + type;
+  banner.textContent = msg;
+}
+</script>
+</body>
+</html>
