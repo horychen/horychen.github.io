@@ -19,7 +19,7 @@
     "clsx": "^2.1.1",
     "geist": "^1.4.2",
     "lucide-react": "^0.522.0",
-    "next": "^15.3.3",
+    "next": "^15.5.15",
     "nextra": "4.3.0-alpha.23",
     "nextra-theme-docs": "4.3.0-alpha.23",
     "react": "^19.1.0",
