@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Coding Project 5 - Reading and Verifying the Existing SVPWM Implementation</title>
+<title>Coding Project 5 - Five-Sampling-Time SVPWM Waveform Study</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
   onerror="this.onerror=null;this.href='vendor/katex/katex.min.css';">
 <script>
@@ -100,7 +100,7 @@
   }
   .eyebrow { display: inline-flex; align-items: center; gap: 10px; color: var(--gold); font-size: 0.72rem; margin-bottom: 14px; }
   .eyebrow::before, .section-tag::before { content: ""; width: 32px; height: 1px; background: linear-gradient(90deg, currentColor, transparent); }
-  .hero h1 { font-family: var(--font-display); font-size: clamp(2.05rem, 4vw, 3.5rem); line-height: 1.06; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 14px; max-width: 920px; }
+  .hero h1 { font-family: var(--font-display); font-size: clamp(2.05rem, 4vw, 3.4rem); line-height: 1.06; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 14px; max-width: 920px; }
   .hero h1 em { font-style: normal; color: var(--teal); }
   .lead { max-width: 920px; color: var(--soft); line-height: 1.84; font-size: 1rem; }
   .meta-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
@@ -108,7 +108,10 @@
   .meta-label { display: block; color: var(--muted); font-size: 0.68rem; margin-bottom: 6px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.16em; }
   .meta-value { line-height: 1.58; font-size: 0.95rem; }
   .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 14px; align-items: start; }
-  .layout > *, .main, .sidebar, .section, .grid-2, .grid-3, .q-grid, .card, .q-card, .callout, .eq-block, pre, .check, .table-wrap { min-width: 0; max-width: 100%; }
+  .layout > *, .main, .sidebar, .section, .grid-2, .q-grid, .card, .q-card, .callout, .eq-block, pre, .check, .table-wrap {
+    min-width: 0;
+    max-width: 100%;
+  }
   .sidebar { position: sticky; top: 72px; padding: 18px; }
   .side-title { color: var(--gold); font-size: 0.75rem; margin-bottom: 10px; }
   .nav-list { list-style: none; display: grid; gap: 8px; margin-bottom: 14px; }
@@ -129,11 +132,13 @@
   li + li { margin-top: 6px; }
   a { color: var(--blue); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .grid-2, .grid-3, .q-grid { display: grid; gap: 14px; margin-top: 16px; }
-  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .q-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .card, .q-card, .callout, .eq-block, pre, .check, .table-wrap { border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,0.03); }
+  .grid-2, .q-grid { display: grid; gap: 14px; margin-top: 16px; }
+  .grid-2, .q-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card, .q-card, .callout, .eq-block, pre, .check, .table-wrap {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.03);
+  }
   .card, .q-card, .table-wrap { padding: 18px; }
   .callout, .eq-block, pre { padding: 16px 18px; margin: 16px 0; }
   .callout--warn { background: rgba(239,196,106,0.08); border-color: rgba(239,196,106,0.24); }
@@ -160,7 +165,7 @@
   .footer-note { margin-top: 16px; color: var(--muted); font-size: 0.88rem; }
   .katex { color: var(--text); }
   @media (max-width: 980px) {
-    .meta-grid, .layout, .grid-3, .grid-2, .q-grid { grid-template-columns: 1fr; }
+    .meta-grid, .layout, .grid-2, .q-grid { grid-template-columns: 1fr; }
     .sidebar, .topbar { position: static; }
     .section { opacity: 1; transform: none; }
   }
@@ -170,9 +175,8 @@
     .lang-switch { width: 100%; }
     .lang-switch button { flex: 1; min-width: 0; }
     h2 { font-size: 1.44rem; }
-    .lead, p, li, .card-desc { font-size: 0.95rem; }
-    .table-wrap { overflow-x: auto; }
-    table { min-width: 480px; }
+    .lead, p, li { font-size: 0.95rem; }
+    table { min-width: 460px; }
   }
 </style>
 </head>
@@ -186,14 +190,14 @@
   </div>
 
   <header class="hero">
-    <div class="eyebrow">Coding Project 5 / Reading and Verifying the Existing SVPWM Implementation</div>
+    <div class="eyebrow">Coding Project 5 / Five-Sampling-Time SVPWM Waveform Study</div>
     <h1>
-      <span class="lang-en">Do not write a new modulator first. <em>Read, instrument, and verify</em> the existing SVPWM code.</span>
-      <span class="lang-zh">这次先不要从零重写调制器，而是去<em>读懂、加监测、做验证</em>已有的 SVPWM 代码。</span>
+      <span class="lang-en">Run the SVPWM tutorial, zoom into <em>five sampling times</em>, and reconstruct the <em>zero-sequence voltage</em>.</span>
+      <span class="lang-zh">运行 SVPWM tutorial，放大到<em>5 个 sampling time</em>，并重构<em>零序电压</em>。</span>
     </h1>
     <p class="lead">
-      <span class="lang-en">This project uses the repository's existing SVPWM implementation in <code>simulation/tutorials_ep6_svpwm.py</code>. Your job is to connect theory to implementation: identify how an $\alpha\beta$ voltage reference becomes duty ratios, compare SPWM and SVPWM voltage utilization, and show how dc-bus limits enter the closed-loop behavior.</span>
-      <span class="lang-zh">本次项目直接使用仓库里已有的 SVPWM 实现 <code>simulation/tutorials_ep6_svpwm.py</code>。你的任务是把理论和实现对起来：弄清楚 $\alpha\beta$ 电压参考如何变成占空比，比较 SPWM 与 SVPWM 的母线利用率，并展示母线限制如何进入闭环行为。</span>
+      <span class="lang-en">This version of Coding Project 5 is focused and concrete. You will run <code>simulation/tutorials_ep6_svpwm.py</code>, observe the key voltage and current waveforms within a window of exactly five control sampling periods, then compute and plot the zero-sequence voltage from theory and from numerical signals.</span>
+      <span class="lang-zh">这一版 Coding Project 5 的要求非常聚焦。你要运行 <code>simulation/tutorials_ep6_svpwm.py</code>，在恰好 5 个控制采样周期的窗口内观察关键电压和电流波形，然后分别用理论表达式和数值信号计算并画出零序电压。</span>
     </p>
     <div class="meta-grid">
       <div class="meta-card">
@@ -201,16 +205,16 @@
         <div class="meta-value"><code>simulation/tutorials_ep6_svpwm.py</code></div>
       </div>
       <div class="meta-card">
-        <span class="meta-label"><span class="lang-en">Core functions</span><span class="lang-zh">核心函数</span></span>
-        <div class="meta-value"><code>SVGEN_DQ</code>, <code>SVgen_Object</code></div>
+        <span class="meta-label"><span class="lang-en">Observation window</span><span class="lang-zh">观察窗口</span></span>
+        <div class="meta-value"><code>5 × CTRL.CL_TS</code></div>
+      </div>
+      <div class="meta-card">
+        <span class="meta-label"><span class="lang-en">Core quantity</span><span class="lang-zh">核心量</span></span>
+        <div class="meta-value"><code>u_nG</code> / <code>u_ng</code> / <code>u_0</code></div>
       </div>
       <div class="meta-card">
         <span class="meta-label"><span class="lang-en">Report format</span><span class="lang-zh">报告格式</span></span>
         <div class="meta-value">PDF / 4 required figures</div>
-      </div>
-      <div class="meta-card">
-        <span class="meta-label"><span class="lang-en">Parameters to touch</span><span class="lang-zh">重点参数</span></span>
-        <div class="meta-value"><code>DC_BUS_VOLTAGE</code>, <code>MACHINE_SIMULATIONs_PER_SAMPLING_PERIOD</code>, duty limits</div>
       </div>
     </div>
   </header>
@@ -221,123 +225,166 @@
       <ul class="nav-list">
         <li><a href="#background"><span class="lang-en">Background</span><span class="lang-zh">背景</span></a></li>
         <li><a href="#goal"><span class="lang-en">Project goal</span><span class="lang-zh">项目目标</span></a></li>
-        <li><a href="#setup"><span class="lang-en">Setup</span><span class="lang-zh">环境与入口</span></a></li>
-        <li><a href="#code-map"><span class="lang-en">Code map</span><span class="lang-zh">代码地图</span></a></li>
+        <li><a href="#setup"><span class="lang-en">Setup</span><span class="lang-zh">环境与设置</span></a></li>
+        <li><a href="#signals"><span class="lang-en">Signals to observe</span><span class="lang-zh">要观察的信号</span></a></li>
+        <li><a href="#theory"><span class="lang-en">Zero-sequence theory</span><span class="lang-zh">零序电压理论</span></a></li>
         <li><a href="#experiments"><span class="lang-en">Required experiments</span><span class="lang-zh">必做实验</span></a></li>
         <li><a href="#figures"><span class="lang-en">Four required figures</span><span class="lang-zh">4 张必做图</span></a></li>
         <li><a href="#questions"><span class="lang-en">Analysis questions</span><span class="lang-zh">分析问题</span></a></li>
         <li><a href="#report"><span class="lang-en">Report requirements</span><span class="lang-zh">报告要求</span></a></li>
       </ul>
       <div class="side-note">
-        <span class="lang-en">A good project report is not just “the waveforms look right.” It should explain where the voltage limit enters, why SVPWM improves usable amplitude, and how the code implements that logic.</span>
-        <span class="lang-zh">好的报告不只是“波形看起来对”。它必须解释：电压限制从哪一步进入、为什么 SVPWM 提高了可用幅值、以及代码到底怎样实现这套逻辑。</span>
+        <span class="lang-en">In this version, you do <strong>not</strong> need to build a separate SPWM branch first. The main task is waveform observation plus zero-sequence reconstruction from the existing SVPWM tutorial.</span>
+        <span class="lang-zh">这一版里你<strong>不需要</strong>先搭一个独立的 SPWM 分支。主任务是：基于已有 SVPWM tutorial 做波形观察和零序电压重构。</span>
       </div>
     </aside>
 
     <main class="main">
       <section class="section" id="background">
-        <div class="section-tag">Background / Theory Link</div>
-        <h2><span class="lang-en">What this project is really testing</span><span class="lang-zh">这个项目真正要测试什么</span></h2>
+        <div class="section-tag">Background / Why this matters</div>
+        <h2><span class="lang-en">Why look at only five sampling times?</span><span class="lang-zh">为什么只看 5 个 sampling time？</span></h2>
         <p>
-          <span class="lang-en">Lecture 5 says the inverter is the real actuator. Coding Project 5 asks you to prove that claim in the repository code. You should be able to point to the exact variables where the controller's voltage request enters, where the dc-bus normalization appears, where sector logic is used, and where duty saturation limits what the inverter can really deliver.</span>
-          <span class="lang-zh">Lecture 5 强调：逆变器才是真正的执行器。Coding Project 5 要求你在仓库代码里把这件事证明出来。你应该能指出：控制器电压请求从哪个变量进入，母线归一化出现在哪一步，扇区逻辑在哪里，最终占空比饱和又是如何限制真实输出的。</span>
+          <span class="lang-en">Lecture 5 explains SVPWM as an actuator-side realization problem. But if you plot only long-time waveforms, you mainly see the slow envelope. The PWM structure, duty-ratio changes, terminal-voltage switching, and the role of zero-sequence voltage are much clearer when you zoom into a very short window. This project therefore asks for a <strong>five-sampling-time microscope view</strong>.</span>
+          <span class="lang-zh">Lecture 5 把 SVPWM 解释成执行器侧的实现问题。但如果你只画长时间波形，主要看到的是慢变化包络。PWM 结构、占空比变化、端电压切换以及零序电压的作用，都要在很短的时间窗口内才看得清楚。因此这次作业要求你做一个<strong>5 个采样周期的显微镜视图</strong>。</span>
         </p>
         <div class="callout callout--warn">
-          <span class="callout-title"><span class="lang-en">Important scope</span><span class="lang-zh">范围提醒</span></span>
-          <span class="lang-en">Do not try to rebuild the whole FOC simulation from scratch. Your task is narrower and better defined: <strong>understand and validate the existing SVPWM path</strong>.</span>
-          <span class="lang-zh">不要试图从零重建整个 FOC 仿真。你的任务应该更聚焦：<strong>理解并验证现有的 SVPWM 路径</strong>。</span>
+          <span class="callout-title"><span class="lang-en">Core class message</span><span class="lang-zh">核心提示</span></span>
+          <span class="lang-en">This is a waveform-reading project. The point is not only to run the script, but to explain what each fast-switching waveform means physically.</span>
+          <span class="lang-zh">这次是一个“读波形”的作业。重点不只是把脚本跑起来，而是要解释每个快速切换波形对应的物理含义。</span>
         </div>
       </section>
 
       <section class="section" id="goal">
         <div class="section-tag">Goal / Deliverable</div>
-        <h2><span class="lang-en">Main project question</span><span class="lang-zh">项目主问题</span></h2>
+        <h2><span class="lang-en">Main deliverable</span><span class="lang-zh">核心交付物</span></h2>
         <div class="eq-block">
-          <p><span class="lang-en">Can you explain and verify the signal path</span><span class="lang-zh">你能否解释并验证下面这条信号链</span></p>
-          $$u_{dq}^* \rightarrow u_{\alpha\beta}^* \rightarrow \text{SVGEN\_DQ} \rightarrow T_a,T_b,T_c \rightarrow \text{inverter output},$$
-          <p><span class="lang-en">and then show how SPWM and SVPWM differ in dc-bus utilization?</span><span class="lang-zh">并进一步展示 SPWM 与 SVPWM 在母线利用率上的区别？</span></p>
+          <p><span class="lang-en">You should be able to say:</span><span class="lang-zh">你最后应该能明确说明：</span></p>
+          <ol>
+            <li><span class="lang-en">Which voltage and current signals are visible inside five sampling times.</span><span class="lang-zh">在 5 个 sampling time 内，到底能看到哪些关键电压/电流信号。</span></li>
+            <li><span class="lang-en">How the zero-sequence voltage is obtained from the theory formula involving the <code>max</code> and <code>min</code> of the three phase voltages.</span><span class="lang-zh">如何通过“三相相电压的 <code>max</code> / <code>min</code>”理论公式得到零序电压。</span></li>
+            <li><span class="lang-en">How the same quantity can also be reconstructed numerically from the simulated inverter voltages.</span><span class="lang-zh">如何从仿真的逆变器电压信号中，用数值方式重构出同一个量。</span></li>
+          </ol>
         </div>
         <div class="grid-2">
           <div class="card">
-            <h4><span class="lang-en">Minimum outcome</span><span class="lang-zh">最低完成标准</span></h4>
+            <h4><span class="lang-en">Minimum result</span><span class="lang-zh">最低完成标准</span></h4>
             <ul>
-              <li><span class="lang-en">Locate the existing SVPWM implementation in the code.</span><span class="lang-zh">定位仓库里的现有 SVPWM 实现。</span></li>
-              <li><span class="lang-en">Plot the key waveforms and duty ratios.</span><span class="lang-zh">画出关键波形和占空比。</span></li>
-              <li><span class="lang-en">Compare SPWM and SVPWM under the same dc bus.</span><span class="lang-zh">在相同母线下比较 SPWM 和 SVPWM。</span></li>
+              <li><span class="lang-en">Run the tutorial successfully.</span><span class="lang-zh">成功运行 tutorial。</span></li>
+              <li><span class="lang-en">Zoom into one five-sampling-time window.</span><span class="lang-zh">选取一个 5 个采样周期的放大窗口。</span></li>
+              <li><span class="lang-en">Plot and interpret the required signals.</span><span class="lang-zh">画出并解释要求的信号。</span></li>
             </ul>
           </div>
           <div class="card">
-            <h4><span class="lang-en">Strong report outcome</span><span class="lang-zh">更强的完成效果</span></h4>
+            <h4><span class="lang-en">Strong result</span><span class="lang-zh">更强的完成效果</span></h4>
             <ul>
-              <li><span class="lang-en">Explain why the current-loop output limit already depends on the assumed modulation law.</span><span class="lang-zh">解释为什么电流环的输出限幅已经依赖于调制方式假设。</span></li>
-              <li><span class="lang-en">Show where the inverter model changes the meaning of “voltage command.”</span><span class="lang-zh">展示逆变器模型如何改变“电压命令”的实际含义。</span></li>
-              <li><span class="lang-en">Use figures to argue, not only words.</span><span class="lang-zh">用图而不是只用文字来论证。</span></li>
+              <li><span class="lang-en">Compute both theoretical and numerical zero-sequence voltage.</span><span class="lang-zh">同时算出理论零序电压和数值零序电压。</span></li>
+              <li><span class="lang-en">Overlay them and explain any mismatch.</span><span class="lang-zh">把两者叠加比较，并解释偏差来源。</span></li>
+              <li><span class="lang-en">State your sign convention for <code>u_0</code>, <code>u_nG</code>, or <code>u_ng</code> clearly.</span><span class="lang-zh">明确说明你对 <code>u_0</code>、<code>u_nG</code> 或 <code>u_ng</code> 的定义与符号约定。</span></li>
             </ul>
           </div>
         </div>
       </section>
 
       <section class="section" id="setup">
-        <div class="section-tag">Setup / Entry Points</div>
-        <h2><span class="lang-en">Where to work</span><span class="lang-zh">从哪里开始</span></h2>
+        <div class="section-tag">Setup / Practical Notes</div>
+        <h2><span class="lang-en">How to run the tutorial for this assignment</span><span class="lang-zh">如何为本次作业运行 tutorial</span></h2>
         <div class="callout callout--ok">
-          <span class="callout-title"><span class="lang-en">Recommended workflow</span><span class="lang-zh">推荐工作流</span></span>
-          <span class="lang-en">Copy <code>simulation/tutorials_ep6_svpwm.py</code> to a study file such as <code>simulation/study_svpwm_project5.py</code>. Add instrumentation there instead of editing the original tutorial blindly.</span>
-          <span class="lang-zh">建议先复制 <code>simulation/tutorials_ep6_svpwm.py</code> 成一个学习用脚本，例如 <code>simulation/study_svpwm_project5.py</code>。优先在副本里加观测与对比逻辑，而不是直接盲改原 tutorial。</span>
+          <span class="callout-title"><span class="lang-en">Recommended setting</span><span class="lang-zh">推荐设置</span></span>
+          <span class="lang-en">To see switching details, set <code>MACHINE_SIMULATIONs_PER_SAMPLING_PERIOD</code> to a value much larger than 1, for example 50, 100, or 500. If it stays at 1, the fast PWM structure is too compressed or bypassed for this assignment.</span>
+          <span class="lang-zh">为了看清开关细节，建议把 <code>MACHINE_SIMULATIONs_PER_SAMPLING_PERIOD</code> 设成远大于 1 的值，例如 50、100 或 500。如果保持为 1，这次作业所需要的快速 PWM 结构会看不清，甚至被近似绕过。</span>
         </div>
         <pre><code># Suggested starting point
 cd C:\Users\lenovo\Codes\ACMSimPy
 python simulation\tutorials_ep6_svpwm.py
 
-# Then create your own study copy
+# Recommended next step
 copy simulation\tutorials_ep6_svpwm.py simulation\study_svpwm_project5.py</code></pre>
         <div class="checklist">
-          <div class="check"><span class="lang-en">Read the section where <code>CTRL.cmd_uab</code> is computed from <code>CTRL.cmd_udq</code>.</span><span class="lang-zh">先读清楚 <code>CTRL.cmd_uab</code> 如何由 <code>CTRL.cmd_udq</code> 计算得到。</span></div>
-          <div class="check"><span class="lang-en">Read <code>SVGEN_DQ</code> line by line.</span><span class="lang-zh">逐行读懂 <code>SVGEN_DQ</code>。</span></div>
-          <div class="check"><span class="lang-en">Find where the inverter model is bypassed and where it is enabled.</span><span class="lang-zh">找出逆变器模型被绕过和被启用的两种路径。</span></div>
+          <div class="check"><span class="lang-en">Pick a time window of length <code>5 * CTRL.CL_TS</code>.</span><span class="lang-zh">选取长度为 <code>5 * CTRL.CL_TS</code> 的观察窗口。</span></div>
+          <div class="check"><span class="lang-en">Choose the window after the initial transient, preferably where the waveform is already periodic.</span><span class="lang-zh">观察窗口尽量选在初始过渡结束之后，最好在波形已经进入周期状态的位置。</span></div>
+          <div class="check"><span class="lang-en">Add your own logging if the existing watch list is not enough.</span><span class="lang-zh">如果现有 watch list 不够用，就自己补充记录信号。</span></div>
         </div>
       </section>
 
-      <section class="section" id="code-map">
-        <div class="section-tag">Code Map / What to Inspect</div>
-        <h2><span class="lang-en">Repository variables and why they matter</span><span class="lang-zh">关键代码变量及其意义</span></h2>
+      <section class="section" id="signals">
+        <div class="section-tag">Signals / What to Observe</div>
+        <h2><span class="lang-en">Key voltage and current waveforms inside five sampling times</span><span class="lang-zh">5 个 sampling time 内必须观察的关键电压电流波形</span></h2>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th><span class="lang-en">Item</span><span class="lang-zh">项目</span></th>
-                <th><span class="lang-en">Variable / function</span><span class="lang-zh">变量 / 函数</span></th>
-                <th><span class="lang-en">Meaning</span><span class="lang-zh">含义</span></th>
+                <th><span class="lang-en">Signal group</span><span class="lang-zh">信号组</span></th>
+                <th><span class="lang-en">Recommended variables</span><span class="lang-zh">推荐变量</span></th>
+                <th><span class="lang-en">Why it matters</span><span class="lang-zh">为什么重要</span></th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td><span class="lang-en">Voltage command in $\alpha\beta$</span><span class="lang-zh">$\alpha\beta$ 电压命令</span></td>
-                <td><code>CTRL.cmd_uab[0]</code>, <code>CTRL.cmd_uab[1]</code></td>
-                <td><span class="lang-en">This is the control-side output before SVPWM converts it into duty ratios.</span><span class="lang-zh">这是控制器侧在进入 SVPWM 之前的输出。</span></td>
+                <td><span class="lang-en">Command voltages</span><span class="lang-zh">控制器电压命令</span></td>
+                <td><code>CTRL.cmd_uab[0]</code>, <code>CTRL.cmd_uab[1]</code>, optionally reconstructed phase commands</td>
+                <td><span class="lang-en">These are the control-side references before the inverter realizes them.</span><span class="lang-zh">这是进入逆变器之前的控制器参考电压。</span></td>
               </tr>
               <tr>
-                <td><span class="lang-en">SVPWM state container</span><span class="lang-zh">SVPWM 状态对象</span></td>
-                <td><code>SVgen_Object</code></td>
-                <td><span class="lang-en">Holds <code>Ualfa</code>, <code>Ubeta</code>, <code>Unot</code>, <code>Ta</code>, <code>Tb</code>, <code>Tc</code>, and duty limits.</span><span class="lang-zh">保存 <code>Ualfa</code>、<code>Ubeta</code>、<code>Unot</code>、<code>Ta</code>、<code>Tb</code>、<code>Tc</code> 以及占空比限制。</span></td>
+                <td><span class="lang-en">Terminal or phase potentials</span><span class="lang-zh">端点或相电位</span></td>
+                <td><code>svgen1.voltage_potential_at_terminal[0:3]</code></td>
+                <td><span class="lang-en">These are the most direct signals for reconstructing <code>u_nG</code> or <code>u_ng</code>.</span><span class="lang-zh">这是重构 <code>u_nG</code> 或 <code>u_ng</code> 最直接的信号。</span></td>
               </tr>
               <tr>
-                <td><span class="lang-en">SVPWM law</span><span class="lang-zh">SVPWM 规律</span></td>
-                <td><code>SVGEN_DQ(v, one_over_Vdc)</code></td>
-                <td><span class="lang-en">Normalizes by dc bus, determines sector, and constructs duty ratios.</span><span class="lang-zh">按母线电压归一化、判断扇区，并构造占空比。</span></td>
+                <td><span class="lang-en">Applied inverter voltages in $\alpha\beta$</span><span class="lang-zh">实际施加的 $\alpha\beta$ 电压</span></td>
+                <td><code>ACM.uab[0]</code>, <code>ACM.uab[1]</code></td>
+                <td><span class="lang-en">These show what the machine really receives after switching-level realization.</span><span class="lang-zh">这体现了开关级实现后电机真正接收到的电压。</span></td>
               </tr>
               <tr>
-                <td><span class="lang-en">Realistic inverter toggle</span><span class="lang-zh">真实逆变器开关</span></td>
-                <td><code>MACHINE_SIMULATIONs_PER_SAMPLING_PERIOD</code></td>
-                <td><span class="lang-en">Set to 1 for faster idealized behavior; set to a larger number to enable the switching-level inverter model.</span><span class="lang-zh">设为 1 时更接近理想直接施压；设大一些会启用更真实的开关级逆变器仿真。</span></td>
-              </tr>
-              <tr>
-                <td><span class="lang-en">Voltage limit assumption</span><span class="lang-zh">电压限幅假设</span></td>
-                <td><code>DC_BUS_VOLTAGE / 1.732</code></td>
-                <td><span class="lang-en">Shows that modulation assumptions already enter the current-loop output limit.</span><span class="lang-zh">说明调制方式的假设已经进入电流环输出限幅。</span></td>
+                <td><span class="lang-en">Phase or Clarke currents</span><span class="lang-zh">相电流或 Clarke 电流</span></td>
+                <td><code>ACM.ia</code>, <code>ACM.ib</code>, <code>ACM.ic</code> or <code>CTRL.iab[0:2]</code></td>
+                <td><span class="lang-en">These let you see how the current responds inside the short PWM window.</span><span class="lang-zh">这可以让你看到电流在短 PWM 窗口内的响应细节。</span></td>
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="callout callout--rose">
+          <span class="callout-title"><span class="lang-en">Important implementation note</span><span class="lang-zh">一个重要实现提醒</span></span>
+          <span class="lang-en">In this tutorial, some of the later <code>watch_data</code> entries are reused or commented in ways that can be confusing. So for this assignment, it is acceptable — and often better — to add your own explicit named logging for terminal voltages and reconstructed zero-sequence voltage.</span>
+          <span class="lang-zh">这个 tutorial 里，后几路 <code>watch_data</code> 的标签和实际用途有些复用，直接照名字读可能会混淆。因此这次作业中，允许你自己补充更明确的信号记录，尤其是端点电压和零序电压。</span>
+        </div>
+      </section>
+
+      <section class="section" id="theory">
+        <div class="section-tag">Theory / Zero-Sequence Voltage</div>
+        <h2><span class="lang-en">How to write the zero-sequence voltage expression</span><span class="lang-zh">如何写出零序电压表达式</span></h2>
+        <p>
+          <span class="lang-en">Let the three phase-voltage commands before zero-sequence injection be $u_a^*,u_b^*,u_c^*$. You may reconstruct them from the inverse Clarke relation, or directly from your own code variables.</span>
+          <span class="lang-zh">设零序注入之前的三相相电压参考为 $u_a^*,u_b^*,u_c^*$。你可以通过 inverse Clarke 关系把它们重构出来，也可以直接从你代码里已有的变量得到。</span>
+        </p>
+        <div class="eq-block">
+          <p><span class="lang-en">A convenient reconstruction is</span><span class="lang-zh">一种方便的重构方式是</span></p>
+          $$
+          u_a^* = u_\alpha^*,\qquad
+          u_b^* = -\frac{1}{2}u_\alpha^* + \frac{\sqrt{3}}{2}u_\beta^*,\qquad
+          u_c^* = -\frac{1}{2}u_\alpha^* - \frac{\sqrt{3}}{2}u_\beta^*.
+          $$
+        </div>
+        <div class="eq-block">
+          <p><span class="lang-en">The standard zero-sequence injection expression is</span><span class="lang-zh">标准零序注入表达式是</span></p>
+          $$
+          u_{0,\mathrm{th}} = -\frac{\max(u_a^*,u_b^*,u_c^*) + \min(u_a^*,u_b^*,u_c^*)}{2}.
+          $$
+          <p><span class="lang-en">Depending on your notation, you may report this as an injected common-mode voltage, or convert it into <code>u_nG</code> / <code>u_ng</code>. The sign depends on your definition, so you must state the convention explicitly.</span><span class="lang-zh">根据你的记号习惯，你可以把它写成注入的共模电压，也可以再转换成 <code>u_nG</code> / <code>u_ng</code>。但符号会依赖你的定义，所以必须先把参考节点和符号约定写清楚。</span></p>
+        </div>
+        <div class="eq-block">
+          <p><span class="lang-en">A numerical route from simulated terminal potentials is</span><span class="lang-zh">一种基于仿真端点电位的数值路线是</span></p>
+          $$
+          u_{nG,\mathrm{num}} = \frac{u_{aG}+u_{bG}+u_{cG}}{3},
+          \qquad
+          u_{an}=u_{aG}-u_{nG},\;
+          u_{bn}=u_{bG}-u_{nG},\;
+          u_{cn}=u_{cG}-u_{nG}.
+          $$
+        </div>
+        <div class="callout callout--task">
+          <span class="callout-title"><span class="lang-en">What is acceptable</span><span class="lang-zh">可接受的写法</span></span>
+          <span class="lang-en">It is acceptable if your report uses either <code>u_0</code>, <code>u_nG</code>, or <code>u_ng</code>, as long as you define the node names clearly and keep the sign convention consistent throughout the report.</span>
+          <span class="lang-zh">如果你的报告使用的是 <code>u_0</code>、<code>u_nG</code> 或 <code>u_ng</code> 中的任意一种，都是可以接受的；但你必须把节点含义写清楚，并在全文中保持符号约定一致。</span>
         </div>
       </section>
 
@@ -346,35 +393,35 @@ copy simulation\tutorials_ep6_svpwm.py simulation\study_svpwm_project5.py</code>
         <h2><span class="lang-en">Required experiments</span><span class="lang-zh">必做实验</span></h2>
         <div class="grid-2">
           <div class="card">
-            <h4><span class="lang-en">Experiment 1: Trace the signal path</span><span class="lang-zh">实验 1：追踪信号链</span></h4>
+            <h4><span class="lang-en">Experiment 1: Run and zoom</span><span class="lang-zh">实验 1：运行并放大</span></h4>
             <ol>
-              <li><span class="lang-en">Find where $u_{dq}^*$ becomes <code>CTRL.cmd_uab</code>.</span><span class="lang-zh">找出 $u_{dq}^*$ 变成 <code>CTRL.cmd_uab</code> 的位置。</span></li>
-              <li><span class="lang-en">Record <code>Ualfa</code>, <code>Ubeta</code>, <code>Ta</code>, <code>Tb</code>, <code>Tc</code>.</span><span class="lang-zh">记录 <code>Ualfa</code>、<code>Ubeta</code>、<code>Ta</code>、<code>Tb</code>、<code>Tc</code>。</span></li>
-              <li><span class="lang-en">Explain each variable physically.</span><span class="lang-zh">解释每个变量的物理意义。</span></li>
+              <li><span class="lang-en">Run <code>tutorials_ep6_svpwm.py</code> with switching-level inverter behavior enabled.</span><span class="lang-zh">在启用开关级逆变器行为的条件下运行 <code>tutorials_ep6_svpwm.py</code>。</span></li>
+              <li><span class="lang-en">Pick one short time interval of exactly five control sampling periods.</span><span class="lang-zh">选取一个长度恰好为 5 个控制采样周期的时间区间。</span></li>
+              <li><span class="lang-en">Use this same window for all required plots.</span><span class="lang-zh">后面所有必做图都尽量使用同一个窗口。</span></li>
             </ol>
           </div>
           <div class="card">
-            <h4><span class="lang-en">Experiment 2: Observe detailed inverter behavior</span><span class="lang-zh">实验 2：观察详细逆变器行为</span></h4>
+            <h4><span class="lang-en">Experiment 2: Voltage and current observation</span><span class="lang-zh">实验 2：电压与电流波形观察</span></h4>
             <ol>
-              <li><span class="lang-en">Run once with <code>MACHINE_SIMULATIONs_PER_SAMPLING_PERIOD = 1</code>.</span><span class="lang-zh">先用 <code>MACHINE_SIMULATIONs_PER_SAMPLING_PERIOD = 1</code> 跑一次。</span></li>
-              <li><span class="lang-en">Run again with a larger value such as 50, 100, or 500.</span><span class="lang-zh">再把它改成 50、100 或 500 再跑一次。</span></li>
-              <li><span class="lang-en">Compare what “voltage command” means in these two modes.</span><span class="lang-zh">比较这两种模式下“电压命令”的实际含义差别。</span></li>
+              <li><span class="lang-en">Plot the key voltage signals inside the five-sampling-time window.</span><span class="lang-zh">在 5 个采样周期窗口里画出关键电压信号。</span></li>
+              <li><span class="lang-en">Plot the key current signals in the same window.</span><span class="lang-zh">在同一个窗口里画出关键电流信号。</span></li>
+              <li><span class="lang-en">Comment on which signals switch rapidly and which ones look averaged.</span><span class="lang-zh">说明哪些信号快速切换，哪些信号更像平均量。</span></li>
             </ol>
           </div>
           <div class="card">
-            <h4><span class="lang-en">Experiment 3: Build a simple SPWM comparison</span><span class="lang-zh">实验 3：做一个简化 SPWM 对照</span></h4>
+            <h4><span class="lang-en">Experiment 3: Theoretical zero-sequence reconstruction</span><span class="lang-zh">实验 3：理论零序电压重构</span></h4>
             <ol>
-              <li><span class="lang-en">In your study copy, build a minimal SPWM-style phase-command normalization path.</span><span class="lang-zh">在你的副本里加一个最简 SPWM 风格的相电压归一路径。</span></li>
-              <li><span class="lang-en">Keep the same dc bus and the same reference trajectory.</span><span class="lang-zh">保证母线和参考轨迹与 SVPWM 情况一致。</span></li>
-              <li><span class="lang-en">Show which method saturates earlier.</span><span class="lang-zh">比较谁更早进入饱和。</span></li>
+              <li><span class="lang-en">Reconstruct the three phase-voltage commands.</span><span class="lang-zh">重构三相相电压参考。</span></li>
+              <li><span class="lang-en">Use the <code>max/min</code> formula to compute the theoretical zero-sequence voltage.</span><span class="lang-zh">用 <code>max/min</code> 公式计算理论零序电压。</span></li>
+              <li><span class="lang-en">Plot that quantity in the same five-sampling-time window.</span><span class="lang-zh">在同一个 5 个采样周期窗口内画出来。</span></li>
             </ol>
           </div>
           <div class="card">
-            <h4><span class="lang-en">Experiment 4: Sweep dc bus or command amplitude</span><span class="lang-zh">实验 4：扫母线电压或指令幅值</span></h4>
+            <h4><span class="lang-en">Experiment 4: Numerical zero-sequence reconstruction</span><span class="lang-zh">实验 4：数值零序电压重构</span></h4>
             <ol>
-              <li><span class="lang-en">Change <code>DC_BUS_VOLTAGE</code> or increase the voltage-reference amplitude.</span><span class="lang-zh">改变 <code>DC_BUS_VOLTAGE</code>，或逐步增大电压参考幅值。</span></li>
-              <li><span class="lang-en">Observe duty clipping and tracking degradation.</span><span class="lang-zh">观察占空比贴边和跟踪恶化。</span></li>
-              <li><span class="lang-en">Connect the result to the “constrained actuator” idea from Lecture 5.</span><span class="lang-zh">把结果和 Lecture 5 的“受限执行器”概念联系起来。</span></li>
+              <li><span class="lang-en">Use simulated terminal voltages or direct subtraction/averaging to compute <code>u_nG</code> or <code>u_ng</code>.</span><span class="lang-zh">利用仿真的端点电压，或者直接通过数值相减/求平均，计算 <code>u_nG</code> 或 <code>u_ng</code>。</span></li>
+              <li><span class="lang-en">Overlay the numerical result with the theoretical result.</span><span class="lang-zh">把数值结果和理论结果叠加比较。</span></li>
+              <li><span class="lang-en">Explain whether any difference is due to sign convention, implementation details, or logging choice.</span><span class="lang-zh">解释差异究竟来自符号约定、实现细节，还是记录方式。</span></li>
             </ol>
           </div>
         </div>
@@ -383,26 +430,26 @@ copy simulation\tutorials_ep6_svpwm.py simulation\study_svpwm_project5.py</code>
       <section class="section" id="figures">
         <div class="section-tag">Figures / Required in the PDF</div>
         <h2><span class="lang-en">Four required figures</span><span class="lang-zh">4 张必做图</span></h2>
-        <div class="grid-2">
+        <div class="q-grid">
           <div class="q-card">
             <div class="q-index">F1</div>
-            <p><strong><span class="lang-en">Reference-voltage figure</span><span class="lang-zh">参考电压图</span></strong></p>
-            <p><span class="lang-en">Plot <code>CTRL.cmd_uab[0]</code> and <code>CTRL.cmd_uab[1]</code>. If you reconstruct three phase references from them, plot those too and comment on their relative placement.</span><span class="lang-zh">画出 <code>CTRL.cmd_uab[0]</code> 和 <code>CTRL.cmd_uab[1]</code>。如果你从中重构出三相相电压参考，也请一并画出并评论它们的整体摆放。</span></p>
+            <p><strong><span class="lang-en">Voltage-waveform zoom</span><span class="lang-zh">电压波形放大图</span></strong></p>
+            <p><span class="lang-en">A five-sampling-time zoom showing the key voltage signals. At minimum, include controller voltage reference plus inverter-side voltage signals that are actually used to reconstruct the zero-sequence quantity.</span><span class="lang-zh">一个 5 个采样周期窗口下的电压波形放大图。至少要包含控制器电压参考，以及后面用来重构零序量的逆变器侧电压信号。</span></p>
           </div>
           <div class="q-card">
             <div class="q-index">F2</div>
-            <p><strong><span class="lang-en">Duty-ratio figure</span><span class="lang-zh">占空比图</span></strong></p>
-            <p><span class="lang-en">Plot <code>T_a</code>, <code>T_b</code>, and <code>T_c</code> from the existing <code>SVGEN_DQ</code> implementation. Mark or describe where sector changes occur.</span><span class="lang-zh">画出已有 <code>SVGEN_DQ</code> 生成的 <code>T_a</code>、<code>T_b</code>、<code>T_c</code>，并标注或说明扇区切换发生的位置。</span></p>
+            <p><strong><span class="lang-en">Current-waveform zoom</span><span class="lang-zh">电流波形放大图</span></strong></p>
+            <p><span class="lang-en">A five-sampling-time zoom showing the key current signals, such as $i_a,i_b,i_c$ or the Clarke currents. Your caption should state exactly which current coordinates you chose.</span><span class="lang-zh">一个 5 个采样周期窗口下的电流波形放大图，例如 $i_a,i_b,i_c$ 或 Clarke 电流。图注里要明确说明你选的是哪一组电流坐标。</span></p>
           </div>
           <div class="q-card">
             <div class="q-index">F3</div>
-            <p><strong><span class="lang-en">SPWM vs SVPWM comparison</span><span class="lang-zh">SPWM 与 SVPWM 对比图</span></strong></p>
-            <p><span class="lang-en">Under the same dc bus, compare the saturation onset or maximum usable voltage amplitude for your SPWM branch and the existing SVPWM branch.</span><span class="lang-zh">在相同母线电压下，比较你做的 SPWM 分支和已有 SVPWM 分支谁更早进入饱和，或者谁具有更大的可用电压幅值。</span></p>
+            <p><strong><span class="lang-en">Theoretical zero-sequence voltage</span><span class="lang-zh">理论零序电压图</span></strong></p>
+            <p><span class="lang-en">Plot the zero-sequence voltage obtained from the theoretical <code>max/min</code> expression. If you call it <code>u_0</code>, <code>u_nG</code>, or <code>u_ng</code>, define that choice explicitly in the caption.</span><span class="lang-zh">画出通过理论 <code>max/min</code> 表达式得到的零序电压。如果你把它记成 <code>u_0</code>、<code>u_nG</code> 或 <code>u_ng</code>，必须在图注中写清楚。</span></p>
           </div>
           <div class="q-card">
             <div class="q-index">F4</div>
-            <p><strong><span class="lang-en">Voltage-limit impact figure</span><span class="lang-zh">电压限制影响图</span></strong></p>
-            <p><span class="lang-en">Show how changing <code>DC_BUS_VOLTAGE</code> or enabling the detailed inverter model changes realized voltage, current tracking, or duty clipping.</span><span class="lang-zh">展示改变 <code>DC_BUS_VOLTAGE</code> 或启用详细逆变器模型后，实际电压、电流跟踪或占空比贴边是如何变化的。</span></p>
+            <p><strong><span class="lang-en">Numerical vs theoretical comparison</span><span class="lang-zh">数值与理论对比图</span></strong></p>
+            <p><span class="lang-en">Overlay the numerically reconstructed zero-sequence voltage with the theoretical one. If you prefer, add a second subplot for their difference.</span><span class="lang-zh">把数值重构的零序电压和理论零序电压叠加到同一张图里。若需要，也可以加第二个子图来画它们的误差。</span></p>
           </div>
         </div>
       </section>
@@ -413,33 +460,33 @@ copy simulation\tutorials_ep6_svpwm.py simulation\study_svpwm_project5.py</code>
         <div class="q-grid">
           <div class="q-card">
             <div class="q-index">Q1</div>
-            <p><span class="lang-en">In the repository code, where does the controller-side voltage reference stop being “ideal” and start becoming “inverter realizable”?</span><span class="lang-zh">在仓库代码里，控制器侧的理想电压参考是从哪一步开始变成“逆变器可实现电压”的？</span></p>
+            <p><span class="lang-en">Why is a five-sampling-time zoom more informative for SVPWM than a long-time full-run plot?</span><span class="lang-zh">为什么对于 SVPWM 来说，5 个采样周期的放大图比长时间全程图更有信息量？</span></p>
           </div>
           <div class="q-card">
             <div class="q-index">Q2</div>
-            <p><span class="lang-en">Why does adding a common zero-sequence term leave line voltages unchanged? Your answer should contain both algebra and physical interpretation.</span><span class="lang-zh">为什么加入一个共用零序项不会改变线电压？你的答案必须同时包含代数说明和物理解释。</span></p>
+            <p><span class="lang-en">Which of your observed voltage signals are control references, and which ones are already inverter-realized quantities?</span><span class="lang-zh">你观察到的电压信号里，哪些是控制器参考，哪些已经是逆变器实现后的量？</span></p>
           </div>
           <div class="q-card">
             <div class="q-index">Q3</div>
-            <p><span class="lang-en">What exactly causes SPWM to saturate earlier than SVPWM under the same dc bus?</span><span class="lang-zh">在相同母线下，SPWM 比 SVPWM 更早饱和的根本原因是什么？</span></p>
+            <p><span class="lang-en">Why does the theoretical zero-sequence voltage depend on the <code>max</code> and <code>min</code> of the three phase-voltage commands?</span><span class="lang-zh">为什么理论零序电压会和三相相电压参考的 <code>max</code> 与 <code>min</code> 有关？</span></p>
           </div>
           <div class="q-card">
             <div class="q-index">Q4</div>
-            <p><span class="lang-en">Why does the current-loop output limit in the code use something proportional to <code>DC_BUS_VOLTAGE / 1.732</code>?</span><span class="lang-zh">为什么代码里的电流环输出限幅要用与 <code>DC_BUS_VOLTAGE / 1.732</code> 成比例的量？</span></p>
+            <p><span class="lang-en">How did you numerically reconstruct <code>u_nG</code> or <code>u_ng</code>, and what sign convention did you use?</span><span class="lang-zh">你是怎样数值重构 <code>u_nG</code> 或 <code>u_ng</code> 的？你的符号约定是什么？</span></p>
           </div>
           <div class="q-card">
             <div class="q-index">Q5</div>
-            <p><span class="lang-en">What practical effect do duty-ratio clamps such as 0.96 and 0.04 have on the “ideal” modulation result?</span><span class="lang-zh">像 0.96 和 0.04 这样的占空比限制，会怎样改变“理想”调制结果？</span></p>
+            <p><span class="lang-en">If the theoretical and numerical curves are not identical, what are the most plausible reasons: sign convention, discretization, PWM realization, or logging mismatch?</span><span class="lang-zh">如果理论曲线和数值曲线不完全重合，最可能的原因是什么：符号约定、离散化、PWM 实现，还是记录信号不一致？</span></p>
           </div>
           <div class="q-card">
             <div class="q-index">Q6</div>
-            <p><span class="lang-en">When you enable detailed inverter simulation, what new gap appears between command and realization, and why is that gap educationally important?</span><span class="lang-zh">当你启用详细逆变器仿真时，“命令”和“实现”之间出现了什么新的差距？为什么这个差距在教学上很重要？</span></p>
+            <p><span class="lang-en">How do your figures help explain the statement “SVPWM uses zero-sequence freedom without changing the desired line voltages”?</span><span class="lang-zh">你的图是怎样帮助解释“SVPWM 利用零序自由度，但不改变目标线电压”这句话的？</span></p>
           </div>
         </div>
         <div class="callout callout--rose">
-          <span class="callout-title"><span class="lang-en">Strong reports do this</span><span class="lang-zh">好的报告会这样做</span></span>
-          <span class="lang-en">Do not only write “SVPWM uses the bus better.” Show exactly where the extra headroom appears in your comparison plots, and connect that observation to both the zero-sequence idea and the code-level normalization by <code>1/Vdc</code>.</span>
-          <span class="lang-zh">不要只写“SVPWM 更能利用母线”。要在图上明确指出多出来的余量体现在哪里，并把这个现象同时连接到零序注入思想和代码中的 <code>1/Vdc</code> 归一化。</span>
+          <span class="callout-title"><span class="lang-en">What strong reports do</span><span class="lang-zh">好的报告会这样做</span></span>
+          <span class="lang-en">They do not only show a formula. They also show how that formula becomes a measurable waveform in the tutorial.</span>
+          <span class="lang-zh">好的报告不只是把公式抄出来，而是要把公式和 tutorial 里真正可观测到的波形对应起来。</span>
         </div>
       </section>
 
@@ -450,22 +497,22 @@ copy simulation\tutorials_ep6_svpwm.py simulation\study_svpwm_project5.py</code>
           <div class="card">
             <h4><span class="lang-en">Recommended outline</span><span class="lang-zh">推荐提纲</span></h4>
             <ol>
-              <li><span class="lang-en">Theory summary: inverter as constrained actuator, SPWM limit, zero-sequence idea</span><span class="lang-zh">理论概述：逆变器是受限执行器，SPWM 上限，零序注入思想</span></li>
-              <li><span class="lang-en">Code map: how the repository implements the SVPWM path</span><span class="lang-zh">代码地图：仓库如何实现 SVPWM 路径</span></li>
-              <li><span class="lang-en">Figure F1–F4 with interpretation</span><span class="lang-zh">图 F1–F4 及其分析</span></li>
-              <li><span class="lang-en">Answers to Q1–Q6</span><span class="lang-zh">对 Q1–Q6 的回答</span></li>
-              <li><span class="lang-en">Conclusion: what the project taught you about realizable voltage and modulation choice</span><span class="lang-zh">结论：你从这个项目中对“可实现电压”和“调制方式选择”学到了什么</span></li>
+              <li><span class="lang-en">State the script, the sampling-time definition, and your observation window.</span><span class="lang-zh">说明所用脚本、采样周期定义和观察窗口。</span></li>
+              <li><span class="lang-en">List the voltage and current signals you observed.</span><span class="lang-zh">列出你观察的电压和电流信号。</span></li>
+              <li><span class="lang-en">Derive the theoretical zero-sequence expression.</span><span class="lang-zh">推导理论零序电压表达式。</span></li>
+              <li><span class="lang-en">Explain the numerical reconstruction method.</span><span class="lang-zh">解释数值重构方法。</span></li>
+              <li><span class="lang-en">Show F1–F4 and answer Q1–Q6.</span><span class="lang-zh">展示 F1–F4，并回答 Q1–Q6。</span></li>
             </ol>
           </div>
           <div class="card">
             <h4><span class="lang-en">Checklist before export</span><span class="lang-zh">导出 PDF 前检查</span></h4>
             <div class="checklist">
-              <div class="check"><span class="lang-en">All 4 required figures are present and captioned.</span><span class="lang-zh">4 张必做图齐全并配有图注。</span></div>
-              <div class="check"><span class="lang-en">Axes, units, legends, and parameter values are readable.</span><span class="lang-zh">坐标轴、单位、图例和参数值都清楚可读。</span></div>
-              <div class="check"><span class="lang-en">The code path from <code>cmd_uab</code> to <code>T_a,T_b,T_c</code> is explicitly explained.</span><span class="lang-zh">从 <code>cmd_uab</code> 到 <code>T_a,T_b,T_c</code> 的代码路径有明确说明。</span></div>
-              <div class="check"><span class="lang-en">The report contains a real SPWM-vs-SVPWM comparison, not only a verbal statement.</span><span class="lang-zh">报告里有真实的 SPWM 与 SVPWM 对照，而不是只有口头描述。</span></div>
-              <div class="check"><span class="lang-en">The impact of dc-bus limitation is connected to closed-loop behavior.</span><span class="lang-zh">母线限制的影响被明确联系到闭环表现。</span></div>
-              <div class="check"><span class="lang-en">The report explains what the detailed inverter model adds beyond an ideal voltage source assumption.</span><span class="lang-zh">报告解释了详细逆变器模型相比理想电压源假设多体现了什么。</span></div>
+              <div class="check"><span class="lang-en">All 4 required figures are present and use the same five-sampling-time window where appropriate.</span><span class="lang-zh">4 张必做图齐全，并尽量使用同一个 5 个采样周期窗口。</span></div>
+              <div class="check"><span class="lang-en">Your report clearly defines <code>u_0</code>, <code>u_nG</code>, or <code>u_ng</code>.</span><span class="lang-zh">报告里明确给出了 <code>u_0</code>、<code>u_nG</code> 或 <code>u_ng</code> 的定义。</span></div>
+              <div class="check"><span class="lang-en">The theoretical <code>max/min</code> formula is written correctly.</span><span class="lang-zh">理论 <code>max/min</code> 公式书写正确。</span></div>
+              <div class="check"><span class="lang-en">The numerical reconstruction route is explained clearly.</span><span class="lang-zh">数值重构路线解释清楚。</span></div>
+              <div class="check"><span class="lang-en">Any mismatch between theory and numerical curves is discussed rather than ignored.</span><span class="lang-zh">理论与数值曲线若有差异，报告里有解释，而不是直接忽略。</span></div>
+              <div class="check"><span class="lang-en">Axes, units, legends, and the exact time window are readable.</span><span class="lang-zh">坐标轴、单位、图例和具体时间窗口都清楚可读。</span></div>
             </div>
           </div>
         </div>
