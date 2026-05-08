@@ -168,7 +168,7 @@
   <header class="hero">
     <div class="eyebrow">EE275 / Motor Control</div>
     <h1>Course pages for <em>lecture</em>, homework, and coding projects</h1>
-    <p class="lead">This published landing page collects the deployed HTML pages for the motor-control course. Start from the current observer block, including its new homework bridge toward inverter and SVPWM, or jump directly into the earlier lecture and project archive below.</p>
+    <p class="lead">This published landing page collects the deployed HTML pages for the motor-control course. Start from the current inverter and SVPWM block, use Homework 3 as the bridge from observer ideas into modulation, or jump directly into the earlier lecture and project archive below.</p>
     <div class="pill-row">
       <span class="pill">lecture</span>
       <span class="pill">observer</span>
@@ -182,22 +182,22 @@
   <section class="section">
     <div class="section-tag">Latest</div>
     <h2>Current class content</h2>
-    <p>The current teaching block centers on observer-based sensorless control, plus a new homework bridge that leads students from observers toward inverter and SVPWM thinking.</p>
+    <p>The current teaching block centers on inverter modeling and SVPWM, with Homework 3 retained as the transition bridge from observer-based sensorless control into modulation and dc-bus utilization.</p>
     <div class="latest">
-      <a class="card" href="lecture4/">
-        <div class="card-label">Lecture 4</div>
-        <div class="card-title">Sensorless Control and Observer</div>
-        <div class="card-desc">Theory-focused page on prediction plus innovation, unified observer framing, typical observer families, and low-speed observability.</div>
+      <a class="card" href="lecture5/">
+        <div class="card-label">Lecture 5</div>
+        <div class="card-title">Inverter as the real actuator: from SPWM to SVPWM</div>
+        <div class="card-desc">Theory-focused page on constrained actuation, three-phase three-wire inverter logic, SPWM limits, zero-sequence injection, and SVPWM.</div>
       </a>
       <a class="card" href="homework3/">
         <div class="card-label">Homework 3</div>
         <div class="card-title">Observer to Inverter / SVPWM bridge</div>
         <div class="card-desc">A transition homework connecting sensorless observers, three-phase three-wire inverters, SPWM limits, and zero-sequence injection.</div>
       </a>
-      <a class="card" href="codingProject4/">
-        <div class="card-label">Coding Project 4</div>
-        <div class="card-title">Sensorless Speed and Load-Torque Observer</div>
-        <div class="card-desc">Practice-focused page covering speed estimation, disturbance reconstruction, bandwidth comparison, and low-speed tests.</div>
+      <a class="card" href="codingProject5/">
+        <div class="card-label">Coding Project 5</div>
+        <div class="card-title">Read and verify the existing SVPWM implementation</div>
+        <div class="card-desc">Practice-focused page on tracing the $u^*_{\alpha\beta}$ to duty-ratio path, comparing SPWM and SVPWM, and exposing dc-bus limits in simulation.</div>
       </a>
     </div>
   </section>
@@ -225,6 +225,11 @@
         <div class="card-label">Lecture 4</div>
         <div class="card-title">Sensorless Control and Observer</div>
         <div class="card-desc">Theory page for prediction plus innovation, observer families, unified modeling, and low-speed observability.</div>
+      </a>
+      <a class="card" href="lecture5/">
+        <div class="card-label">Lecture 5</div>
+        <div class="card-title">Inverter and SVPWM</div>
+        <div class="card-desc">Theory page on constrained actuation, dc-bus utilization, zero-sequence injection, and the bridge to the repository SVPWM code.</div>
       </a>
       <a class="card" href="homework1/">
         <div class="card-label">Homework 1</div>
@@ -282,6 +287,11 @@
         <div class="card-label">Project 4</div>
         <div class="card-title">Sensorless speed and load-torque observer</div>
         <div class="card-desc">New practice page for observer verification and low-speed analysis.</div>
+      </a>
+      <a class="card" href="codingProject5/">
+        <div class="card-label">Project 5</div>
+        <div class="card-title">SVPWM implementation study</div>
+        <div class="card-desc">Read the existing modulation code, compare SPWM and SVPWM, and show how voltage limits enter closed-loop behavior.</div>
       </a>
       <a class="card" href="https://github.com/Acous1/ACMSimPy">
         <div class="card-label">Repository</div>

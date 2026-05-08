@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Coding Project 5 - Reading and Verifying the Existing SVPWM Implementation</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+  onerror="this.onerror=null;this.href='vendor/katex/katex.min.css';">
+<script>
+(function(){
+  var CDN = "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/";
+  var LOCAL = "vendor/katex/";
+  var files = ["katex.min.js", "contrib/auto-render.min.js"];
+  var idx = 0, TIMEOUT = 3000;
+  function renderMath() {
+    if (window.renderMathInElement) {
+      renderMathInElement(document.body, {
+        delimiters: [
+          {left:"$$", right:"$$", display:true},
+          {left:"$", right:"$", display:false}
+        ]
+      });
+    }
+  }
+  function loadScript(src, ok, fail) {
+    var s = document.createElement("script");
+    var done = false;
+    var timer = setTimeout(function(){ if(!done){ done = true; s.onload = s.onerror = null; fail(); } }, TIMEOUT);
+    s.src = src;
+    s.onload = function(){ if(!done){ done = true; clearTimeout(timer); ok(); } };
+    s.onerror = function(){ if(!done){ done = true; clearTimeout(timer); fail(); } };
+    document.head.appendChild(s);
+  }
+  function loadChain(base, fallback) {
+    if (idx >= files.length) { renderMath(); return; }
+    loadScript(base + files[idx], function(){ idx++; loadChain(base, fallback); }, function(){ if (fallback) { idx = 0; loadChain(fallback, null); } });
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function(){ loadChain(CDN, LOCAL); });
+  } else {
+    loadChain(CDN, LOCAL);
+  }
+})();
+</script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0b1018;
+    --panel: rgba(17, 23, 37, 0.90);
+    --line: rgba(255,255,255,0.10);
+    --text: #eef4ff;
+    --soft: #bac6da;
+    --muted: #7e8ca3;
+    --gold: #efc46a;
+    --teal: #79dfd0;
+    --blue: #84a8ff;
+    --green: #9bdf93;
+    --rose: #efaaa2;
+    --shadow: 0 24px 80px rgba(0,0,0,0.34);
+    --font-display: "Palatino Linotype", Georgia, serif;
+    --font-body: Aptos, "Segoe UI", "PingFang SC", "Noto Sans SC", sans-serif;
+    --font-mono: "Cascadia Code", Consolas, monospace;
+  }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    min-height: 100vh;
+    font-family: var(--font-body);
+    color: var(--text);
+    background:
+      radial-gradient(circle at 14% 18%, rgba(132,168,255,0.17), transparent 29%),
+      radial-gradient(circle at 85% 8%, rgba(121,223,208,0.12), transparent 24%),
+      radial-gradient(circle at 50% 120%, rgba(239,196,106,0.10), transparent 34%),
+      linear-gradient(180deg, #070b12 0%, #0c111a 54%, #070b12 100%);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  body[data-lang="en"] .lang-zh { display: none !important; }
+  body[data-lang="zh"] .lang-en { display: none !important; }
+  .app { width: min(1140px, calc(100vw - 20px)); margin: 0 auto; padding: 14px 0 48px; }
+  .topbar { position: sticky; top: 8px; z-index: 30; display: flex; justify-content: flex-end; margin-bottom: 12px; }
+  .lang-switch { display: inline-flex; gap: 6px; padding: 6px; border: 1px solid var(--line); border-radius: 999px; background: rgba(11,15,24,0.84); backdrop-filter: blur(12px); box-shadow: var(--shadow); }
+  .lang-switch button { border: none; border-radius: 999px; min-width: 84px; padding: 9px 14px; font-size: 0.9rem; font-weight: 700; cursor: pointer; background: transparent; color: var(--soft); transition: 0.2s ease; }
+  .lang-switch button.active { background: linear-gradient(135deg, var(--gold), #ffe4a8); color: #1a1407; }
+  .lang-switch button:not(.active):hover { background: rgba(255,255,255,0.06); color: var(--text); }
+  .hero, .sidebar, .section { border: 1px solid var(--line); border-radius: 24px; background: var(--panel); backdrop-filter: blur(14px); box-shadow: var(--shadow); }
+  .hero { padding: 30px; margin-bottom: 14px; position: relative; overflow: hidden; }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: -40px auto auto -40px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(132,168,255,0.16), transparent 70%);
+    pointer-events: none;
+  }
+  .eyebrow, .section-tag, .side-title, .pill {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+  .eyebrow { display: inline-flex; align-items: center; gap: 10px; color: var(--gold); font-size: 0.72rem; margin-bottom: 14px; }
+  .eyebrow::before, .section-tag::before { content: ""; width: 32px; height: 1px; background: linear-gradient(90deg, currentColor, transparent); }
+  .hero h1 { font-family: var(--font-display); font-size: clamp(2.05rem, 4vw, 3.5rem); line-height: 1.06; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 14px; max-width: 920px; }
+  .hero h1 em { font-style: normal; color: var(--teal); }
+  .lead { max-width: 920px; color: var(--soft); line-height: 1.84; font-size: 1rem; }
+  .meta-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
+  .meta-card { border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,0.03); padding: 13px 14px; }
+  .meta-label { display: block; color: var(--muted); font-size: 0.68rem; margin-bottom: 6px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.16em; }
+  .meta-value { line-height: 1.58; font-size: 0.95rem; }
+  .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 14px; align-items: start; }
+  .layout > *, .main, .sidebar, .section, .grid-2, .grid-3, .q-grid, .card, .q-card, .callout, .eq-block, pre, .check, .table-wrap { min-width: 0; max-width: 100%; }
+  .sidebar { position: sticky; top: 72px; padding: 18px; }
+  .side-title { color: var(--gold); font-size: 0.75rem; margin-bottom: 10px; }
+  .nav-list { list-style: none; display: grid; gap: 8px; margin-bottom: 14px; }
+  .nav-list a { display: block; padding: 10px 12px; border-radius: 12px; color: var(--soft); text-decoration: none; border: 1px solid transparent; transition: 0.2s ease; }
+  .nav-list a:hover { color: var(--text); background: rgba(255,255,255,0.04); border-color: var(--line); transform: translateX(3px); }
+  .side-note { border-top: 1px solid var(--line); padding-top: 12px; color: var(--muted); font-size: 0.86rem; line-height: 1.75; }
+  .main { display: grid; gap: 14px; }
+  .section { padding: 24px; opacity: 0; transform: translateY(18px); transition: opacity 0.55s ease, transform 0.55s ease; }
+  .section.visible { opacity: 1; transform: translateY(0); }
+  .section-tag { display: inline-flex; align-items: center; gap: 10px; color: var(--teal); font-size: 0.7rem; margin-bottom: 12px; }
+  h2 { font-family: var(--font-display); font-size: 1.68rem; font-weight: 500; margin-bottom: 12px; }
+  h3 { font-size: 1.04rem; color: var(--gold); margin: 18px 0 10px; }
+  h4 { font-size: 1rem; margin-bottom: 8px; color: var(--text); }
+  p, li { color: var(--soft); line-height: 1.82; font-size: 0.97rem; }
+  strong { color: var(--text); }
+  em { color: var(--teal); }
+  ul, ol { padding-left: 1.2rem; margin: 10px 0 14px; }
+  li + li { margin-top: 6px; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .grid-2, .grid-3, .q-grid { display: grid; gap: 14px; margin-top: 16px; }
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .q-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card, .q-card, .callout, .eq-block, pre, .check, .table-wrap { border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,0.03); }
+  .card, .q-card, .table-wrap { padding: 18px; }
+  .callout, .eq-block, pre { padding: 16px 18px; margin: 16px 0; }
+  .callout--warn { background: rgba(239,196,106,0.08); border-color: rgba(239,196,106,0.24); }
+  .callout--ok { background: rgba(121,223,208,0.07); border-color: rgba(121,223,208,0.22); }
+  .callout--task { background: rgba(155,223,147,0.07); border-color: rgba(155,223,147,0.22); }
+  .callout--rose { background: rgba(239,170,162,0.07); border-color: rgba(239,170,162,0.22); }
+  .callout-title { display: block; color: var(--text); margin-bottom: 6px; font-weight: 700; }
+  .eq-block, pre { background: #101723; overflow-x: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x; }
+  .table-wrap { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; touch-action: pan-x; }
+  .katex-display { overflow-x: auto; overflow-y: hidden; padding-bottom: 2px; }
+  pre code, code { font-family: var(--font-mono); font-size: 0.9rem; }
+  code { color: var(--teal); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); padding: 0.1rem 0.35rem; border-radius: 8px; }
+  pre code { background: none; border: none; padding: 0; color: #d9e6ff; }
+  .pill { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; color: var(--soft); font-size: 0.72rem; padding: 4px 9px; margin-right: 6px; margin-bottom: 6px; }
+  .q-index { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(132,168,255,0.14); color: var(--blue); font-family: var(--font-mono); font-size: 0.82rem; margin-bottom: 10px; }
+  .checklist { display: grid; gap: 10px; margin-top: 12px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; }
+  .check::before { content: "•"; flex: none; font-weight: 700; color: var(--green); margin-top: 1px; }
+  table { width: 100%; border-collapse: collapse; min-width: 520px; }
+  th, td { padding: 13px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th { color: var(--text); background: rgba(255,255,255,0.05); font-size: 0.9rem; }
+  td { color: var(--soft); line-height: 1.72; font-size: 0.94rem; }
+  tr:last-child td { border-bottom: none; }
+  .footer-note { margin-top: 16px; color: var(--muted); font-size: 0.88rem; }
+  .katex { color: var(--text); }
+  @media (max-width: 980px) {
+    .meta-grid, .layout, .grid-3, .grid-2, .q-grid { grid-template-columns: 1fr; }
+    .sidebar, .topbar { position: static; }
+    .section { opacity: 1; transform: none; }
+  }
+  @media (max-width: 640px) {
+    .app { width: min(100vw - 14px, 1140px); padding-top: 10px; }
+    .hero, .sidebar, .section { padding: 20px; border-radius: 20px; }
+    .lang-switch { width: 100%; }
+    .lang-switch button { flex: 1; min-width: 0; }
+    h2 { font-size: 1.44rem; }
+    .lead, p, li, .card-desc { font-size: 0.95rem; }
+    .table-wrap { overflow-x: auto; }
+    table { min-width: 480px; }
+  }
+</style>
+</head>
+<body data-lang="en">
+<div class="app">
+  <div class="topbar">
+    <div class="lang-switch" aria-label="Language switch">
+      <button id="btn-en" class="active" type="button" onclick="setLang('en')">English</button>
+      <button id="btn-zh" type="button" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="eyebrow">Coding Project 5 / Reading and Verifying the Existing SVPWM Implementation</div>
+    <h1>
+      <span class="lang-en">Do not write a new modulator first. <em>Read, instrument, and verify</em> the existing SVPWM code.</span>
+      <span class="lang-zh">这次先不要从零重写调制器，而是去<em>读懂、加监测、做验证</em>已有的 SVPWM 代码。</span>
+    </h1>
+    <p class="lead">
+      <span class="lang-en">This project uses the repository's existing SVPWM implementation in <code>simulation/tutorials_ep6_svpwm.py</code>. Your job is to connect theory to implementation: identify how an $\alpha\beta$ voltage reference becomes duty ratios, compare SPWM and SVPWM voltage utilization, and show how dc-bus limits enter the closed-loop behavior.</span>
+      <span class="lang-zh">本次项目直接使用仓库里已有的 SVPWM 实现 <code>simulation/tutorials_ep6_svpwm.py</code>。你的任务是把理论和实现对起来：弄清楚 $\alpha\beta$ 电压参考如何变成占空比，比较 SPWM 与 SVPWM 的母线利用率，并展示母线限制如何进入闭环行为。</span>
+    </p>
+    <div class="meta-grid">
+      <div class="meta-card">
+        <span class="meta-label"><span class="lang-en">Core script</span><span class="lang-zh">核心脚本</span></span>
+        <div class="meta-value"><code>simulation/tutorials_ep6_svpwm.py</code></div>
+      </div>
+      <div class="meta-card">
+        <span class="meta-label"><span class="lang-en">Core functions</span><span class="lang-zh">核心函数</span></span>
+        <div class="meta-value"><code>SVGEN_DQ</code>, <code>SVgen_Object</code></div>
+      </div>
+      <div class="meta-card">
+        <span class="meta-label"><span class="lang-en">Report format</span><span class="lang-zh">报告格式</span></span>
+        <div class="meta-value">PDF / 4 required figures</div>
+      </div>
+      <div class="meta-card">
+        <span class="meta-label"><span class="lang-en">Parameters to touch</span><span class="lang-zh">重点参数</span></span>
+        <div class="meta-value"><code>DC_BUS_VOLTAGE</code>, <code>MACHINE_SIMULATIONs_PER_SAMPLING_PERIOD</code>, duty limits</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-title"><span class="lang-en">Contents</span><span class="lang-zh">目录</span></div>
+      <ul class="nav-list">
+        <li><a href="#background"><span class="lang-en">Background</span><span class="lang-zh">背景</span></a></li>
+        <li><a href="#goal"><span class="lang-en">Project goal</span><span class="lang-zh">项目目标</span></a></li>
+        <li><a href="#setup"><span class="lang-en">Setup</span><span class="lang-zh">环境与入口</span></a></li>
+        <li><a href="#code-map"><span class="lang-en">Code map</span><span class="lang-zh">代码地图</span></a></li>
+        <li><a href="#experiments"><span class="lang-en">Required experiments</span><span class="lang-zh">必做实验</span></a></li>
+        <li><a href="#figures"><span class="lang-en">Four required figures</span><span class="lang-zh">4 张必做图</span></a></li>
+        <li><a href="#questions"><span class="lang-en">Analysis questions</span><span class="lang-zh">分析问题</span></a></li>
+        <li><a href="#report"><span class="lang-en">Report requirements</span><span class="lang-zh">报告要求</span></a></li>
+      </ul>
+      <div class="side-note">
+        <span class="lang-en">A good project report is not just “the waveforms look right.” It should explain where the voltage limit enters, why SVPWM improves usable amplitude, and how the code implements that logic.</span>
+        <span class="lang-zh">好的报告不只是“波形看起来对”。它必须解释：电压限制从哪一步进入、为什么 SVPWM 提高了可用幅值、以及代码到底怎样实现这套逻辑。</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="section" id="background">
+        <div class="section-tag">Background / Theory Link</div>
+        <h2><span class="lang-en">What this project is really testing</span><span class="lang-zh">这个项目真正要测试什么</span></h2>
+        <p>
+          <span class="lang-en">Lecture 5 says the inverter is the real actuator. Coding Project 5 asks you to prove that claim in the repository code. You should be able to point to the exact variables where the controller's voltage request enters, where the dc-bus normalization appears, where sector logic is used, and where duty saturation limits what the inverter can really deliver.</span>
+          <span class="lang-zh">Lecture 5 强调：逆变器才是真正的执行器。Coding Project 5 要求你在仓库代码里把这件事证明出来。你应该能指出：控制器电压请求从哪个变量进入，母线归一化出现在哪一步，扇区逻辑在哪里，最终占空比饱和又是如何限制真实输出的。</span>
+        </p>
+        <div class="callout callout--warn">
+          <span class="callout-title"><span class="lang-en">Important scope</span><span class="lang-zh">范围提醒</span></span>
+          <span class="lang-en">Do not try to rebuild the whole FOC simulation from scratch. Your task is narrower and better defined: <strong>understand and validate the existing SVPWM path</strong>.</span>
+          <span class="lang-zh">不要试图从零重建整个 FOC 仿真。你的任务应该更聚焦：<strong>理解并验证现有的 SVPWM 路径</strong>。</span>
+        </div>
+      </section>
+
+      <section class="section" id="goal">
+        <div class="section-tag">Goal / Deliverable</div>
+        <h2><span class="lang-en">Main project question</span><span class="lang-zh">项目主问题</span></h2>
+        <div class="eq-block">
+          <p><span class="lang-en">Can you explain and verify the signal path</span><span class="lang-zh">你能否解释并验证下面这条信号链</span></p>
+          $$u_{dq}^* \rightarrow u_{\alpha\beta}^* \rightarrow \text{SVGEN\_DQ} \rightarrow T_a,T_b,T_c \rightarrow \text{inverter output},$$
+          <p><span class="lang-en">and then show how SPWM and SVPWM differ in dc-bus utilization?</span><span class="lang-zh">并进一步展示 SPWM 与 SVPWM 在母线利用率上的区别？</span></p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h4><span class="lang-en">Minimum outcome</span><span class="lang-zh">最低完成标准</span></h4>
+            <ul>
+              <li><span class="lang-en">Locate the existing SVPWM implementation in the code.</span><span class="lang-zh">定位仓库里的现有 SVPWM 实现。</span></li>
+              <li><span class="lang-en">Plot the key waveforms and duty ratios.</span><span class="lang-zh">画出关键波形和占空比。</span></li>
+              <li><span class="lang-en">Compare SPWM and SVPWM under the same dc bus.</span><span class="lang-zh">在相同母线下比较 SPWM 和 SVPWM。</span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4><span class="lang-en">Strong report outcome</span><span class="lang-zh">更强的完成效果</span></h4>
+            <ul>
+              <li><span class="lang-en">Explain why the current-loop output limit already depends on the assumed modulation law.</span><span class="lang-zh">解释为什么电流环的输出限幅已经依赖于调制方式假设。</span></li>
+              <li><span class="lang-en">Show where the inverter model changes the meaning of “voltage command.”</span><span class="lang-zh">展示逆变器模型如何改变“电压命令”的实际含义。</span></li>
+              <li><span class="lang-en">Use figures to argue, not only words.</span><span class="lang-zh">用图而不是只用文字来论证。</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="setup">
+        <div class="section-tag">Setup / Entry Points</div>
+        <h2><span class="lang-en">Where to work</span><span class="lang-zh">从哪里开始</span></h2>
+        <div class="callout callout--ok">
+          <span class="callout-title"><span class="lang-en">Recommended workflow</span><span class="lang-zh">推荐工作流</span></span>
+          <span class="lang-en">Copy <code>simulation/tutorials_ep6_svpwm.py</code> to a study file such as <code>simulation/study_svpwm_project5.py</code>. Add instrumentation there instead of editing the original tutorial blindly.</span>
+          <span class="lang-zh">建议先复制 <code>simulation/tutorials_ep6_svpwm.py</code> 成一个学习用脚本，例如 <code>simulation/study_svpwm_project5.py</code>。优先在副本里加观测与对比逻辑，而不是直接盲改原 tutorial。</span>
+        </div>
+        <pre><code># Suggested starting point
+cd C:\Users\lenovo\Codes\ACMSimPy
+python simulation\tutorials_ep6_svpwm.py
+
+# Then create your own study copy
+copy simulation\tutorials_ep6_svpwm.py simulation\study_svpwm_project5.py</code></pre>
+        <div class="checklist">
+          <div class="check"><span class="lang-en">Read the section where <code>CTRL.cmd_uab</code> is computed from <code>CTRL.cmd_udq</code>.</span><span class="lang-zh">先读清楚 <code>CTRL.cmd_uab</code> 如何由 <code>CTRL.cmd_udq</code> 计算得到。</span></div>
+          <div class="check"><span class="lang-en">Read <code>SVGEN_DQ</code> line by line.</span><span class="lang-zh">逐行读懂 <code>SVGEN_DQ</code>。</span></div>
+          <div class="check"><span class="lang-en">Find where the inverter model is bypassed and where it is enabled.</span><span class="lang-zh">找出逆变器模型被绕过和被启用的两种路径。</span></div>
+        </div>
+      </section>
+
+      <section class="section" id="code-map">
+        <div class="section-tag">Code Map / What to Inspect</div>
+        <h2><span class="lang-en">Repository variables and why they matter</span><span class="lang-zh">关键代码变量及其意义</span></h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th><span class="lang-en">Item</span><span class="lang-zh">项目</span></th>
+                <th><span class="lang-en">Variable / function</span><span class="lang-zh">变量 / 函数</span></th>
+                <th><span class="lang-en">Meaning</span><span class="lang-zh">含义</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="lang-en">Voltage command in $\alpha\beta$</span><span class="lang-zh">$\alpha\beta$ 电压命令</span></td>
+                <td><code>CTRL.cmd_uab[0]</code>, <code>CTRL.cmd_uab[1]</code></td>
+                <td><span class="lang-en">This is the control-side output before SVPWM converts it into duty ratios.</span><span class="lang-zh">这是控制器侧在进入 SVPWM 之前的输出。</span></td>
+              </tr>
+              <tr>
+                <td><span class="lang-en">SVPWM state container</span><span class="lang-zh">SVPWM 状态对象</span></td>
+                <td><code>SVgen_Object</code></td>
+                <td><span class="lang-en">Holds <code>Ualfa</code>, <code>Ubeta</code>, <code>Unot</code>, <code>Ta</code>, <code>Tb</code>, <code>Tc</code>, and duty limits.</span><span class="lang-zh">保存 <code>Ualfa</code>、<code>Ubeta</code>、<code>Unot</code>、<code>Ta</code>、<code>Tb</code>、<code>Tc</code> 以及占空比限制。</span></td>
+              </tr>
+              <tr>
+                <td><span class="lang-en">SVPWM law</span><span class="lang-zh">SVPWM 规律</span></td>
+                <td><code>SVGEN_DQ(v, one_over_Vdc)</code></td>
+                <td><span class="lang-en">Normalizes by dc bus, determines sector, and constructs duty ratios.</span><span class="lang-zh">按母线电压归一化、判断扇区，并构造占空比。</span></td>
+              </tr>
+              <tr>
+                <td><span class="lang-en">Realistic inverter toggle</span><span class="lang-zh">真实逆变器开关</span></td>
+                <td><code>MACHINE_SIMULATIONs_PER_SAMPLING_PERIOD</code></td>
+                <td><span class="lang-en">Set to 1 for faster idealized behavior; set to a larger number to enable the switching-level inverter model.</span><span class="lang-zh">设为 1 时更接近理想直接施压；设大一些会启用更真实的开关级逆变器仿真。</span></td>
+              </tr>
+              <tr>
+                <td><span class="lang-en">Voltage limit assumption</span><span class="lang-zh">电压限幅假设</span></td>
+                <td><code>DC_BUS_VOLTAGE / 1.732</code></td>
+                <td><span class="lang-en">Shows that modulation assumptions already enter the current-loop output limit.</span><span class="lang-zh">说明调制方式的假设已经进入电流环输出限幅。</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="experiments">
+        <div class="section-tag">Experiments / Required Work</div>
+        <h2><span class="lang-en">Required experiments</span><span class="lang-zh">必做实验</span></h2>
+        <div class="grid-2">
+          <div class="card">
+            <h4><span class="lang-en">Experiment 1: Trace the signal path</span><span class="lang-zh">实验 1：追踪信号链</span></h4>
+            <ol>
+              <li><span class="lang-en">Find where $u_{dq}^*$ becomes <code>CTRL.cmd_uab</code>.</span><span class="lang-zh">找出 $u_{dq}^*$ 变成 <code>CTRL.cmd_uab</code> 的位置。</span></li>
+              <li><span class="lang-en">Record <code>Ualfa</code>, <code>Ubeta</code>, <code>Ta</code>, <code>Tb</code>, <code>Tc</code>.</span><span class="lang-zh">记录 <code>Ualfa</code>、<code>Ubeta</code>、<code>Ta</code>、<code>Tb</code>、<code>Tc</code>。</span></li>
+              <li><span class="lang-en">Explain each variable physically.</span><span class="lang-zh">解释每个变量的物理意义。</span></li>
+            </ol>
+          </div>
+          <div class="card">
+            <h4><span class="lang-en">Experiment 2: Observe detailed inverter behavior</span><span class="lang-zh">实验 2：观察详细逆变器行为</span></h4>
+            <ol>
+              <li><span class="lang-en">Run once with <code>MACHINE_SIMULATIONs_PER_SAMPLING_PERIOD = 1</code>.</span><span class="lang-zh">先用 <code>MACHINE_SIMULATIONs_PER_SAMPLING_PERIOD = 1</code> 跑一次。</span></li>
+              <li><span class="lang-en">Run again with a larger value such as 50, 100, or 500.</span><span class="lang-zh">再把它改成 50、100 或 500 再跑一次。</span></li>
+              <li><span class="lang-en">Compare what “voltage command” means in these two modes.</span><span class="lang-zh">比较这两种模式下“电压命令”的实际含义差别。</span></li>
+            </ol>
+          </div>
+          <div class="card">
+            <h4><span class="lang-en">Experiment 3: Build a simple SPWM comparison</span><span class="lang-zh">实验 3：做一个简化 SPWM 对照</span></h4>
+            <ol>
+              <li><span class="lang-en">In your study copy, build a minimal SPWM-style phase-command normalization path.</span><span class="lang-zh">在你的副本里加一个最简 SPWM 风格的相电压归一路径。</span></li>
+              <li><span class="lang-en">Keep the same dc bus and the same reference trajectory.</span><span class="lang-zh">保证母线和参考轨迹与 SVPWM 情况一致。</span></li>
+              <li><span class="lang-en">Show which method saturates earlier.</span><span class="lang-zh">比较谁更早进入饱和。</span></li>
+            </ol>
+          </div>
+          <div class="card">
+            <h4><span class="lang-en">Experiment 4: Sweep dc bus or command amplitude</span><span class="lang-zh">实验 4：扫母线电压或指令幅值</span></h4>
+            <ol>
+              <li><span class="lang-en">Change <code>DC_BUS_VOLTAGE</code> or increase the voltage-reference amplitude.</span><span class="lang-zh">改变 <code>DC_BUS_VOLTAGE</code>，或逐步增大电压参考幅值。</span></li>
+              <li><span class="lang-en">Observe duty clipping and tracking degradation.</span><span class="lang-zh">观察占空比贴边和跟踪恶化。</span></li>
+              <li><span class="lang-en">Connect the result to the “constrained actuator” idea from Lecture 5.</span><span class="lang-zh">把结果和 Lecture 5 的“受限执行器”概念联系起来。</span></li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="figures">
+        <div class="section-tag">Figures / Required in the PDF</div>
+        <h2><span class="lang-en">Four required figures</span><span class="lang-zh">4 张必做图</span></h2>
+        <div class="grid-2">
+          <div class="q-card">
+            <div class="q-index">F1</div>
+            <p><strong><span class="lang-en">Reference-voltage figure</span><span class="lang-zh">参考电压图</span></strong></p>
+            <p><span class="lang-en">Plot <code>CTRL.cmd_uab[0]</code> and <code>CTRL.cmd_uab[1]</code>. If you reconstruct three phase references from them, plot those too and comment on their relative placement.</span><span class="lang-zh">画出 <code>CTRL.cmd_uab[0]</code> 和 <code>CTRL.cmd_uab[1]</code>。如果你从中重构出三相相电压参考，也请一并画出并评论它们的整体摆放。</span></p>
+          </div>
+          <div class="q-card">
+            <div class="q-index">F2</div>
+            <p><strong><span class="lang-en">Duty-ratio figure</span><span class="lang-zh">占空比图</span></strong></p>
+            <p><span class="lang-en">Plot <code>T_a</code>, <code>T_b</code>, and <code>T_c</code> from the existing <code>SVGEN_DQ</code> implementation. Mark or describe where sector changes occur.</span><span class="lang-zh">画出已有 <code>SVGEN_DQ</code> 生成的 <code>T_a</code>、<code>T_b</code>、<code>T_c</code>，并标注或说明扇区切换发生的位置。</span></p>
+          </div>
+          <div class="q-card">
+            <div class="q-index">F3</div>
+            <p><strong><span class="lang-en">SPWM vs SVPWM comparison</span><span class="lang-zh">SPWM 与 SVPWM 对比图</span></strong></p>
+            <p><span class="lang-en">Under the same dc bus, compare the saturation onset or maximum usable voltage amplitude for your SPWM branch and the existing SVPWM branch.</span><span class="lang-zh">在相同母线电压下，比较你做的 SPWM 分支和已有 SVPWM 分支谁更早进入饱和，或者谁具有更大的可用电压幅值。</span></p>
+          </div>
+          <div class="q-card">
+            <div class="q-index">F4</div>
+            <p><strong><span class="lang-en">Voltage-limit impact figure</span><span class="lang-zh">电压限制影响图</span></strong></p>
+            <p><span class="lang-en">Show how changing <code>DC_BUS_VOLTAGE</code> or enabling the detailed inverter model changes realized voltage, current tracking, or duty clipping.</span><span class="lang-zh">展示改变 <code>DC_BUS_VOLTAGE</code> 或启用详细逆变器模型后，实际电压、电流跟踪或占空比贴边是如何变化的。</span></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="questions">
+        <div class="section-tag">Analysis / Explain the Results</div>
+        <h2><span class="lang-en">Questions your report must answer</span><span class="lang-zh">报告必须回答的问题</span></h2>
+        <div class="q-grid">
+          <div class="q-card">
+            <div class="q-index">Q1</div>
+            <p><span class="lang-en">In the repository code, where does the controller-side voltage reference stop being “ideal” and start becoming “inverter realizable”?</span><span class="lang-zh">在仓库代码里，控制器侧的理想电压参考是从哪一步开始变成“逆变器可实现电压”的？</span></p>
+          </div>
+          <div class="q-card">
+            <div class="q-index">Q2</div>
+            <p><span class="lang-en">Why does adding a common zero-sequence term leave line voltages unchanged? Your answer should contain both algebra and physical interpretation.</span><span class="lang-zh">为什么加入一个共用零序项不会改变线电压？你的答案必须同时包含代数说明和物理解释。</span></p>
+          </div>
+          <div class="q-card">
+            <div class="q-index">Q3</div>
+            <p><span class="lang-en">What exactly causes SPWM to saturate earlier than SVPWM under the same dc bus?</span><span class="lang-zh">在相同母线下，SPWM 比 SVPWM 更早饱和的根本原因是什么？</span></p>
+          </div>
+          <div class="q-card">
+            <div class="q-index">Q4</div>
+            <p><span class="lang-en">Why does the current-loop output limit in the code use something proportional to <code>DC_BUS_VOLTAGE / 1.732</code>?</span><span class="lang-zh">为什么代码里的电流环输出限幅要用与 <code>DC_BUS_VOLTAGE / 1.732</code> 成比例的量？</span></p>
+          </div>
+          <div class="q-card">
+            <div class="q-index">Q5</div>
+            <p><span class="lang-en">What practical effect do duty-ratio clamps such as 0.96 and 0.04 have on the “ideal” modulation result?</span><span class="lang-zh">像 0.96 和 0.04 这样的占空比限制，会怎样改变“理想”调制结果？</span></p>
+          </div>
+          <div class="q-card">
+            <div class="q-index">Q6</div>
+            <p><span class="lang-en">When you enable detailed inverter simulation, what new gap appears between command and realization, and why is that gap educationally important?</span><span class="lang-zh">当你启用详细逆变器仿真时，“命令”和“实现”之间出现了什么新的差距？为什么这个差距在教学上很重要？</span></p>
+          </div>
+        </div>
+        <div class="callout callout--rose">
+          <span class="callout-title"><span class="lang-en">Strong reports do this</span><span class="lang-zh">好的报告会这样做</span></span>
+          <span class="lang-en">Do not only write “SVPWM uses the bus better.” Show exactly where the extra headroom appears in your comparison plots, and connect that observation to both the zero-sequence idea and the code-level normalization by <code>1/Vdc</code>.</span>
+          <span class="lang-zh">不要只写“SVPWM 更能利用母线”。要在图上明确指出多出来的余量体现在哪里，并把这个现象同时连接到零序注入思想和代码中的 <code>1/Vdc</code> 归一化。</span>
+        </div>
+      </section>
+
+      <section class="section" id="report">
+        <div class="section-tag">Report / PDF Only</div>
+        <h2><span class="lang-en">Suggested PDF structure</span><span class="lang-zh">建议的 PDF 结构</span></h2>
+        <div class="grid-2">
+          <div class="card">
+            <h4><span class="lang-en">Recommended outline</span><span class="lang-zh">推荐提纲</span></h4>
+            <ol>
+              <li><span class="lang-en">Theory summary: inverter as constrained actuator, SPWM limit, zero-sequence idea</span><span class="lang-zh">理论概述：逆变器是受限执行器，SPWM 上限，零序注入思想</span></li>
+              <li><span class="lang-en">Code map: how the repository implements the SVPWM path</span><span class="lang-zh">代码地图：仓库如何实现 SVPWM 路径</span></li>
+              <li><span class="lang-en">Figure F1–F4 with interpretation</span><span class="lang-zh">图 F1–F4 及其分析</span></li>
+              <li><span class="lang-en">Answers to Q1–Q6</span><span class="lang-zh">对 Q1–Q6 的回答</span></li>
+              <li><span class="lang-en">Conclusion: what the project taught you about realizable voltage and modulation choice</span><span class="lang-zh">结论：你从这个项目中对“可实现电压”和“调制方式选择”学到了什么</span></li>
+            </ol>
+          </div>
+          <div class="card">
+            <h4><span class="lang-en">Checklist before export</span><span class="lang-zh">导出 PDF 前检查</span></h4>
+            <div class="checklist">
+              <div class="check"><span class="lang-en">All 4 required figures are present and captioned.</span><span class="lang-zh">4 张必做图齐全并配有图注。</span></div>
+              <div class="check"><span class="lang-en">Axes, units, legends, and parameter values are readable.</span><span class="lang-zh">坐标轴、单位、图例和参数值都清楚可读。</span></div>
+              <div class="check"><span class="lang-en">The code path from <code>cmd_uab</code> to <code>T_a,T_b,T_c</code> is explicitly explained.</span><span class="lang-zh">从 <code>cmd_uab</code> 到 <code>T_a,T_b,T_c</code> 的代码路径有明确说明。</span></div>
+              <div class="check"><span class="lang-en">The report contains a real SPWM-vs-SVPWM comparison, not only a verbal statement.</span><span class="lang-zh">报告里有真实的 SPWM 与 SVPWM 对照，而不是只有口头描述。</span></div>
+              <div class="check"><span class="lang-en">The impact of dc-bus limitation is connected to closed-loop behavior.</span><span class="lang-zh">母线限制的影响被明确联系到闭环表现。</span></div>
+              <div class="check"><span class="lang-en">The report explains what the detailed inverter model adds beyond an ideal voltage source assumption.</span><span class="lang-zh">报告解释了详细逆变器模型相比理想电压源假设多体现了什么。</span></div>
+            </div>
+          </div>
+        </div>
+        <p class="footer-note"><span class="lang-en">Suggested filename: <code>codingProject5_name.pdf</code></span><span class="lang-zh">建议文件名：<code>codingProject5_姓名.pdf</code></span></p>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+function setLang(lang) {
+  document.body.setAttribute('data-lang', lang);
+  var btnEn = document.getElementById('btn-en');
+  var btnZh = document.getElementById('btn-zh');
+  btnEn.classList.toggle('active', lang === 'en');
+  btnZh.classList.toggle('active', lang === 'zh');
+  try { localStorage.setItem('ee275-lang', lang); } catch (e) {}
+}
+(function(){
+  var lang = 'en';
+  try {
+    var saved = localStorage.getItem('ee275-lang');
+    if (saved === 'en' || saved === 'zh') lang = saved;
+  } catch (e) {}
+  setLang(lang);
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.section').forEach(function(el){ io.observe(el); });
+})();
+</script>
+</body>
+</html>
