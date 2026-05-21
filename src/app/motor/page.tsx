@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import Link from 'next/link';
 
 function getMotorPages() {
   const dir = path.join(process.cwd(), 'public', 'motor-html');
@@ -30,15 +29,15 @@ export default function MotorIndex() {
       </p>
       <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {pages.map((page) => (
-          <Link
+          <a
             key={page.slug}
-            href={`/motor/${page.slug}/`}
+            href={`/motor-html/${page.slug}/`}
             className="group block rounded-xl border border-gray-200 dark:border-gray-700 p-6 transition-all hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-500"
           >
             <h2 className="text-lg font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               {page.title}
             </h2>
-          </Link>
+          </a>
         ))}
       </div>
     </div>

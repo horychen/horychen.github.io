@@ -7,7 +7,7 @@
     "build": "npm run build:gallery && next build",
     "export": "next export",
     "dev": "next --turbopack",
-    "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind && node scripts/html-to-dir.js && node scripts/dir-to-html.js",
+    "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind && node scripts/html-to-dir.js && node scripts/dir-to-html.js && node scripts/write-static-motor-pages.js",
     "start": "next start"
   },
   "dependencies": {
