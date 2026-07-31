@@ -1,6 +1,5 @@
-import React from "react";
-import { Button } from "@mui/material";
-import { withBasePath } from '../lib/utils';
+import Link from "next/link";
+import { withBasePath } from "../lib/utils";
 
 export default function Banner() {
   return (
@@ -18,16 +17,14 @@ export default function Banner() {
           <p className="mb-8 text-xl leading-relaxed">
             Our vision is that if we can build it, then others should be able to build it (check out <a href="https://github.com/horychen" className="underline text-white font-bold" target="_blank" rel="noopener">Github</a>).
           </p>
-          <button 
+          <Link
+            href={withBasePath("/courses")}
             className="bg-white text-blue-900 font-bold shadow-md rounded-md px-8 py-2 normal-case text-2xl 
               hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 hover:shadow-lg
-              active:scale-95" 
-            onClick={() => {
-              window.location.href = withBasePath("/courses");
-            }}
+              active:scale-95"
           >
             See Courses
-          </button>
+          </Link>
         </div>
         {/* 右侧图片 */}
         <div className="flex-1 flex justify-center items-center w-full h-full max-h-[340px] md:max-h-[400px] lg:max-h-[440px] xl:max-h-[480px]">
@@ -36,4 +33,4 @@ export default function Banner() {
       </div>
     </section>
   );
-} 
+}

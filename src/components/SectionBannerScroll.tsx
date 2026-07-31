@@ -1,69 +1,80 @@
-import React, { useEffect, useState, useRef } from "react";
-import { ParallaxProvider } from "react-scroll-parallax";
-import { withBasePath } from '../lib/utils';
+"use client";
 
-// const FIRST_IMAGE = "/media/slice-motor-24slots-prototype.jpg";
-const INTERVAL = 6000; // 6秒
-const FADE_DURATION = 800; // ms
+import { useEffect, useState } from "react";
+import headImageNames from "../../public/head.json";
+import { withBasePath } from "../lib/utils";
+
+const INTERVAL = 6000;
+const FADE_DURATION = 800;
+
+const toWebpName = (filename: string) =>
+  `${filename.slice(0, filename.lastIndexOf("."))}.webp`;
+
+const images = headImageNames.map((name) =>
+  withBasePath(`/media/albums/head-optimized/${toWebpName(name)}`),
+);
 
 export default function SectionBannerScroll() {
-  const [images, setImages] = useState<string[]>([]);
-  const [imgSrc, setImgSrc] = useState<string>("");
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const fadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
 
   useEffect(() => {
-    fetch(withBasePath("/head.json"))
-      .then(res => res.json())
-      .then((imgs) => {
-        setImages(imgs);
-        if (imgs.length > 0) {
-          const randomImg = withBasePath(`/media/albums/gallery/${imgs[Math.floor(Math.random() * imgs.length)]}`);
-          setImgSrc(randomImg);
-        }
-      });
+    const mediaQuery = window.matchMedia(
+      "(max-width: 767px), (prefers-reduced-motion: reduce)",
+    );
+    const updateAnimation = () => setShouldAnimate(!mediaQuery.matches);
+
+    updateAnimation();
+    mediaQuery.addEventListener("change", updateAnimation);
+    return () => mediaQuery.removeEventListener("change", updateAnimation);
   }, []);
 
   useEffect(() => {
-    if (images.length === 0) return;
-    timerRef.current = setInterval(() => {
-      setFade(false); // 先淡出
-      fadeTimeoutRef.current = setTimeout(() => {
-        // 切换图片
-        let next = imgSrc;
-        while (images.length > 1 && next === imgSrc) {
-          next = withBasePath(`/media/albums/gallery/${images[Math.floor(Math.random() * images.length)]}`);
-        }
-        setImgSrc(next);
-        setFade(true); // 再淡入
+    if (!shouldAnimate || images.length < 2) return;
+
+    let fadeTimeout: ReturnType<typeof setTimeout> | undefined;
+    const timer = setInterval(() => {
+      setFade(false);
+      fadeTimeout = setTimeout(() => {
+        setCurrentIndex((index) => (index + 1) % images.length);
+        setFade(true);
       }, FADE_DURATION);
     }, INTERVAL);
+
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (fadeTimeoutRef.current) clearTimeout(fadeTimeoutRef.current);
+      clearInterval(timer);
+      if (fadeTimeout) clearTimeout(fadeTimeout);
     };
-  }, [images, imgSrc]);
+  }, [images.length, shouldAnimate]);
+
+  useEffect(() => {
+    if (!shouldAnimate || images.length < 2) return;
+    const nextImage = new Image();
+    nextImage.src = images[(currentIndex + 1) % images.length];
+  }, [currentIndex, images, shouldAnimate]);
+
+  const image = images[currentIndex] ?? "";
 
   return (
-    <ParallaxProvider>
-      <section className="relative w-full overflow-hidden flex items-center justify-center h-[calc(100vh-64px)]">
-        {/* 单层背景图片，淡入淡出 */}
-        <div
-          className={`absolute inset-0 w-full h-full transition-opacity duration-700 pointer-events-none z-0 ${fade ? 'opacity-100' : 'opacity-0'}`}
-          style={{ backgroundImage: `url('${imgSrc}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}
-        />
-        {/* 标题+遮罩 */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="relative flex items-center justify-center">
-            {/* 遮罩紧贴标题后方，无背景，仅亚克力模糊和阴影 */}
-            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full rounded-lg backdrop-blur-md shadow z-0" style={{padding: '0 2rem'}} />
-            <h1 className="relative z-10 text-4xl md:text-6xl font-extrabold text-white drop-shadow-lg text-center select-none tracking-wide px-8 py-4">
-              motor and motion-control lab
-            </h1>
-          </div>
+    <section className="relative flex h-[calc(100svh-64px)] min-h-[520px] w-full items-center justify-center overflow-hidden">
+      <div
+        className={`pointer-events-none absolute inset-0 z-0 h-full w-full bg-scroll bg-cover bg-center transition-opacity duration-700 motion-reduce:transition-none md:bg-fixed ${
+          fade ? "opacity-100" : "opacity-0"
+        }`}
+        style={{
+          backgroundColor: "#111827",
+          backgroundImage: image ? `url('${image}')` : undefined,
+        }}
+      />
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
+        <div className="relative flex items-center justify-center">
+          <span className="absolute left-1/2 top-1/2 z-0 h-full w-full -translate-x-1/2 -translate-y-1/2 rounded-lg bg-black/25 shadow md:backdrop-blur-md" />
+          <h1 className="relative z-10 select-none px-6 py-4 text-center text-4xl font-extrabold tracking-normal text-white drop-shadow-lg md:px-8 md:text-6xl">
+            motor and motion-control lab
+          </h1>
         </div>
-      </section>
-    </ParallaxProvider>
+      </div>
+    </section>
   );
-} 
+}

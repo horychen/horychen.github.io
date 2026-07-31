@@ -6,6 +6,9 @@ node_modules/
 dist/
 .turbo/
 out/
+public/media/albums/gallery-thumbnails/
+public/media/albums/galleryfun-thumbnails/
+public/media/albums/head-optimized/
 
 .vercel/
 .idea/

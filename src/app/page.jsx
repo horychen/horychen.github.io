@@ -1,4 +1,3 @@
-"use client";
 import Banner from "../components/Banner";
 import SectionBannerScroll from "../components/SectionBannerScroll";
 import PIProfile from "../components/PIProfile";
@@ -7,7 +6,6 @@ import Courses from "../components/Courses";
 import Gallery from "../components/Gallery";
 import GalleryFun from "../components/GalleryFun";
 import Contact from "../components/Contact";
-import React from "react";
 
 export default function Home() {
   return (

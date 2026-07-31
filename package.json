@@ -3,9 +3,11 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build:gallery": "node scripts/generate-gallery-json.js && node scripts/generate-galleryfun-json.js",
+    "optimize:media": "node scripts/generate-optimized-media.mjs",
+    "build:gallery": "node scripts/generate-gallery-json.js && node scripts/generate-galleryfun-json.js && npm run optimize:media",
     "build": "npm run build:gallery && next build",
     "export": "next export",
+    "predev": "npm run build:gallery",
     "dev": "next --turbopack",
     "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind && node scripts/html-to-dir.js && node scripts/dir-to-html.js && node scripts/write-static-motor-pages.js",
     "start": "next start"
@@ -25,7 +27,6 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
-    "react-scroll-parallax": "^3.4.5",
     "rehype-highlight": "^7.0.2",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.3.1"
@@ -39,6 +40,7 @@
     "eslint": "^9.28.0",
     "eslint-config-next": "^15.3.3",
     "pagefind": "^1.3.0",
+    "sharp": "^0.34.2",
     "tailwindcss": "^4.1.10",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5.8.3"
