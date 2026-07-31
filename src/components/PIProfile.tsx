@@ -31,7 +31,12 @@ export default function PIProfile() {
             <div className="flex flex-col lg:flex-row w-full max-w-6xl gap-8 items-center lg:items-start">
                 {/* 左侧：头像+基本信息+社交 */}
                 <div className="flex flex-col items-center w-full lg:w-1/3">
-                    <Avatar src={withBasePath('/alumni/chenjh.jpg')} alt="PI" sx={{ width: 270, height: 270 }} />
+                    <Avatar
+                        src={withBasePath('/alumni/chenjh-540.webp')}
+                        alt="PI"
+                        slotProps={{ img: { loading: "lazy", decoding: "async" } }}
+                        sx={{ width: 270, height: 270 }}
+                    />
                     <div className="text-4xl font-normal mt-6">Chen, Jiahao 陈 嘉豪</div>
                     <div className="text-2xl font-normal mt-4 text-gray-500">Assistant Professor</div>
                     <div className="mt-4 text-xl font-medium">
