@@ -7,6 +7,7 @@ import 'katex/dist/katex.min.css';
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import 'nextra-theme-docs/style.css'
+import StaticMobileNav from '../components/StaticMobileNav'
 
 
 export const metadata = {
@@ -41,6 +42,7 @@ export default async function RootLayout({ children }) {
     <html lang="en" dir="ltr" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <Head faviconGlyph="✦" />
       <body>
+        <StaticMobileNav />
         <Layout
           navbar={navbar}
           footer={<Footer>{new Date().getFullYear()} © m&m lab.</Footer>}

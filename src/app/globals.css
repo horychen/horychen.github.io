@@ -8,6 +8,125 @@ html {
   scroll-behavior: smooth;
 }
 
+.static-mobile-navigation {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .nextra-hamburger {
+    display: none !important;
+  }
+
+  .static-mobile-navigation {
+    display: block;
+  }
+
+  .static-mobile-menu-trigger,
+  .static-mobile-menu-close {
+    align-items: center;
+    color: currentColor;
+    display: flex;
+    height: 32px;
+    justify-content: center;
+    position: fixed;
+    right: max(1.25rem, env(safe-area-inset-right));
+    top: calc(1rem + env(safe-area-inset-top));
+    width: 32px;
+  }
+
+  .static-mobile-menu-trigger {
+    z-index: 50;
+  }
+
+  .static-mobile-menu-icon,
+  .static-mobile-menu-icon::before,
+  .static-mobile-menu-icon::after {
+    background: currentColor;
+    border-radius: 1px;
+    content: '';
+    display: block;
+    height: 2px;
+    position: absolute;
+    width: 20px;
+  }
+
+  .static-mobile-menu-icon::before {
+    transform: translateY(-6px);
+  }
+
+  .static-mobile-menu-icon::after {
+    transform: translateY(6px);
+  }
+
+  .static-mobile-menu {
+    background: rgb(var(--nextra-bg));
+    display: flex;
+    flex-direction: column;
+    inset: 0;
+    opacity: 0;
+    overflow-y: auto;
+    padding: calc(4.5rem + env(safe-area-inset-top)) 1.5rem 2rem;
+    position: fixed;
+    transform: translate3d(0, -100%, 0);
+    transition: transform 180ms ease, opacity 180ms ease, visibility 180ms;
+    visibility: hidden;
+    z-index: 51;
+  }
+
+  .static-mobile-menu:target {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
+  }
+
+  .static-mobile-menu-close {
+    z-index: 52;
+  }
+
+  .static-mobile-menu-close-icon::before,
+  .static-mobile-menu-close-icon::after {
+    background: currentColor;
+    content: '';
+    height: 2px;
+    left: 6px;
+    position: absolute;
+    top: 15px;
+    width: 20px;
+  }
+
+  .static-mobile-menu-close-icon::before {
+    transform: rotate(45deg);
+  }
+
+  .static-mobile-menu-close-icon::after {
+    transform: rotate(-45deg);
+  }
+
+  .static-mobile-menu-heading {
+    font-size: 1.5rem;
+    font-weight: 650;
+    margin-bottom: 1rem;
+  }
+
+  .static-mobile-menu-links {
+    display: grid;
+  }
+
+  .static-mobile-menu-link {
+    border-bottom: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+    color: currentColor;
+    font-size: 1.05rem;
+    min-height: 52px;
+    padding: 0.9rem 0.25rem;
+    text-decoration: none;
+  }
+
+  .static-mobile-menu-link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+}
+
 /* :root {
   --background: #ffffff;
   --foreground: #171717;

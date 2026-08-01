@@ -30,9 +30,9 @@ export default function Contact() {
             </div>
             {/* 联系方式 */}
             <div className="flex flex-col gap-4 text-xl">
-              <div className="flex items-center gap-3">
-                <EmailIcon className="text-gray-600 dark:text-gray-400" />
-                <a href="mailto:chenjh2@shanghaitech.edu.cn" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">chenjh2@shanghaitech.edu.cn</a>
+              <div className="flex min-w-0 items-center gap-3">
+                <EmailIcon className="shrink-0 text-gray-600 dark:text-gray-400" />
+                <a href="mailto:chenjh2@shanghaitech.edu.cn" className="break-all text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">chenjh2@shanghaitech.edu.cn</a>
               </div>
               <div className="flex items-center gap-3">
                 <PhoneIcon className="text-gray-600 dark:text-gray-400" />
